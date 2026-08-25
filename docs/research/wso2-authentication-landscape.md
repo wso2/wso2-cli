@@ -139,6 +139,38 @@ Token behavior (shared platform docs, applicable to both Asgardeo and IS):
 - Expiry is lifetime-based; no idle-expiry mechanism was found in the public
   docs (**unknown from public sources** beyond the fixed validity period).
 
+### Session revocation
+
+**Measured 2026-08-25 against `https://api.asgardeo.io/t/kanushka/oauth2/token`**
+by `make smoke-logout`, whose two verdict lines this section records.
+
+- The discovery document advertises `revocation_endpoint`
+  (`/t/{org}/oauth2/revoke`) and `end_session_endpoint` (`/t/{org}/oidc/logout`).
+- **A public client may revoke: verdict `advertised and accepted`.** The shell
+  presents `client_id` in the body and no secret, and the endpoint accepted it.
+- **Revocation ends the session: verdict `refresh token no longer renews`.**
+  Presenting the revoked refresh token at the token endpoint afterwards was
+  refused, so the retraction is real rather than merely acknowledged. This is
+  worth stating separately because RFC 7009 requires a server to answer an
+  unknown token exactly as it answers a live one, so the revocation response
+  alone proves only that the deployment was told.
+
+**The advertised authentication methods do not predict this.**
+`revocation_endpoint_auth_methods_supported` lists `client_secret_basic` and
+`client_secret_post` and does not list `none`, which reads as a refusal of
+public clients at that endpoint. The deployment accepted one anyway. Anything
+inferred from that member about this endpoint is unsafe; the verdicts above are
+what was observed.
+
+The tenant returned the same refresh token on renewal rather than a
+replacement, consistent with rotation being opt-in as recorded above.
+
+Not measured: whether revocation cascades to already-issued access tokens, and
+what `end_session_endpoint` does to the browser single-sign-on session. The
+shell does not call the latter — see
+[ADR 0010](../adr/0010-best-effort-revocation-on-session-end.md), which puts
+RP-initiated logout out of scope for needing a browser round trip.
+
 ### PAT or equivalent; app-native authentication
 
 No personal-access-token or long-lived API-key feature for user automation was
