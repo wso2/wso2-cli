@@ -51,7 +51,20 @@ func getComponents(orgHandler string, orgId string, projectId string) ([]models.
 		return nil, fmt.Errorf(i18n.T("failed to fetch components: %w"), err)
 	}
 
-	return components, nil
+	// Keep only integrations, matching the Devant console's isDevantComponent
+	// stamp. The control plane returns every component in the project, so
+	// without this the listing also shows web apps, webhooks, test runners,
+	// proxies, prism mocks and byoc/buildpack services — none of which this
+	// product exposes. System components (cloud editors) are already excluded
+	// server-side, since GetAllComponents is called with includeSystemComps=false.
+	integrations := make([]models.Component, 0, len(components))
+	for _, c := range components {
+		if component.IsIntegrationComponent(c.DisplayType, c.ComponentSubType) {
+			integrations = append(integrations, c)
+		}
+	}
+
+	return integrations, nil
 }
 
 func printComponentList(orgId string, projectId string, components []models.Component) error {

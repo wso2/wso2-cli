@@ -10,7 +10,7 @@ import (
 
 // NOTE: The previous create/build/deploy E2E coverage here exercised a nodejs
 // `webApp` component. The Integration Platform has no web-app component type
-// (see IsIntegrationDisplayType in pkg/api/component/models.go), so those tests
+// (see IsIntegrationComponent in pkg/api/component/models.go), so those tests
 // were removed rather than ported. Re-adding E2E coverage means driving a
 // Ballerina or WSO2 MI integration instead.
 

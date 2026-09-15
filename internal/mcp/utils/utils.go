@@ -140,7 +140,7 @@ func GetTargetComponentByUUID(ctx context.Context, targetOrg api.Organization, t
 
 	var selectedComponent *models.Component
 	for _, component := range components {
-		if component.Id == componentUUID && pkgcomponent.IsIntegrationDisplayType(component.DisplayType) {
+		if component.Id == componentUUID && pkgcomponent.IsIntegrationComponent(component.DisplayType, component.ComponentSubType) {
 			selectedComponent = &component
 			break
 		}

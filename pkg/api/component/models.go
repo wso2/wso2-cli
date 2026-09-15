@@ -1,7 +1,5 @@
 package component
 
-import "slices"
-
 // These will be used when dealing with the platform API
 
 type ComponentCreateResponse struct {
@@ -112,6 +110,13 @@ const (
 	DisplayTypePostmanTestRunner     = "byocTestRunnerDockerfileLess"
 	DisplayTypeBallerinaEventHandler = "ballerinaEventHandler"
 	DisplayTypeGitProxy              = "gitProxy"
+	// Present in the console's DevantComponentDisplayTypeSet but never defined
+	// here, which is why File Integrations and MI/Ballerina webhooks were dropped
+	// by the old type-mapping filter.
+	DisplayTypeMiWebhook                = "miWebhook"
+	DisplayTypeBallerinaWebhook         = "ballerinaWebhook"
+	DisplayTypeBallerinaFileIntegration = "ballerinaFileIntegration"
+	DisplayTypeMiFileIntegration        = "miFileIntegration"
 )
 
 const (
@@ -422,16 +427,83 @@ func GetTypeForDisplayType(displayType string) string {
 	return ""
 }
 
-// IntegrationComponentTypes are the high-level component types (as returned
-// by GetTypeForDisplayType) exposed as "integrations" by the MCP server.
-// Webapps, webhooks, manual tasks, proxies, and test runners are not
-// integrations and are deliberately excluded.
-var IntegrationComponentTypes = []string{"service", "scheduled-task", "event-handler"}
+// Integration membership mirrors the Devant console, which is the source of
+// truth for what counts as an integration. See DevantComponentDisplayTypeSet in
+// workspaces/apps/choreo-console/src/types/projects.ts and the isDevantComponent
+// stamp in src/hooks/project.tsx.
+//
+// This is a literal set of displayTypes, deliberately NOT derived from
+// GetTypeForDisplayType. Deriving it was wrong in both directions: it admitted
+// prismMockService and the byoc/buildpack services (which map to "service") and
+// it dropped manualTrigger, miJob and the webhooks (which map to "manual-task"
+// and "web-hook"), along with the file integrations that had no displayType
+// constant at all.
+var integrationDisplayTypes = map[string]struct{}{
+	DisplayTypeRestApi:                  {},
+	DisplayTypeManualTrigger:            {},
+	DisplayTypeScheduledTask:            {},
+	DisplayTypeWebhook:                  {},
+	DisplayTypeMiRestApi:                {},
+	DisplayTypeMiEventHandler:           {},
+	DisplayTypeService:                  {}, // "ballerinaService"
+	DisplayTypeMiApiService:             {},
+	DisplayTypeMiCronjob:                {},
+	DisplayTypeMiJob:                    {},
+	DisplayTypeMiWebhook:                {},
+	DisplayTypeBallerinaEventHandler:    {},
+	DisplayTypeBallerinaWebhook:         {},
+	DisplayTypeBallerinaFileIntegration: {},
+	DisplayTypeMiFileIntegration:        {},
+	DisplayTypeByoiService:              {},
+}
 
-// IsIntegrationDisplayType reports whether a component's displayType maps to
-// one of IntegrationComponentTypes.
-func IsIntegrationDisplayType(displayType string) bool {
-	return slices.Contains(IntegrationComponentTypes, GetTypeForDisplayType(displayType))
+const (
+	// ComponentSubTypeMCP admits an MCP Server whose displayType is not in the
+	// set above. The console ORs this same value into isDevantComponent.
+	ComponentSubTypeMCP = "MCP"
+	// ComponentSubTypeAiAgent refines a service into an AI Agent. It affects the
+	// reported kind only — membership already comes from the service displayType.
+	ComponentSubTypeAiAgent = "aiAgent"
+)
+
+// IsIntegrationComponent reports whether a component is an integration.
+//
+// Both fields matter: the console resolves File Integration and AI Agent from
+// componentSubType, and admits MCP Servers by subtype alone, so a displayType-only
+// check silently misclassifies them.
+func IsIntegrationComponent(displayType, componentSubType string) bool {
+	if _, ok := integrationDisplayTypes[displayType]; ok {
+		return true
+	}
+	if _, ok := integrationDisplayTypes[componentSubType]; ok {
+		// ballerinaFileIntegration / miFileIntegration arrive in either field.
+		return true
+	}
+	return componentSubType == ComponentSubTypeMCP
+}
+
+// IntegrationKind returns the user-facing integration kind for a component,
+// applying the subtype refinements the console makes: a service carrying an
+// aiAgent subtype is an AI Agent, not a plain API.
+func IntegrationKind(displayType, componentSubType string) string {
+	switch componentSubType {
+	case ComponentSubTypeAiAgent:
+		return "AI Agent"
+	case ComponentSubTypeMCP:
+		return "MCP Server"
+	case DisplayTypeBallerinaFileIntegration, DisplayTypeMiFileIntegration:
+		return "File Integration"
+	}
+	switch displayType {
+	case DisplayTypeBallerinaFileIntegration, DisplayTypeMiFileIntegration:
+		return "File Integration"
+	case DisplayTypeScheduledTask, DisplayTypeMiCronjob, DisplayTypeManualTrigger, DisplayTypeMiJob:
+		return "Automation"
+	case DisplayTypeMiEventHandler, DisplayTypeBallerinaEventHandler,
+		DisplayTypeWebhook, DisplayTypeMiWebhook, DisplayTypeBallerinaWebhook:
+		return "Event Integration"
+	}
+	return "API"
 }
 
 type ComponentKindSource struct {

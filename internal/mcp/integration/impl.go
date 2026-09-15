@@ -54,7 +54,7 @@ func getIntegrations(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	integrations := make([]models.Component, 0, len(allComponents))
 	for _, c := range allComponents {
-		if pkgcomponent.IsIntegrationDisplayType(c.DisplayType) {
+		if pkgcomponent.IsIntegrationComponent(c.DisplayType, c.ComponentSubType) {
 			integrations = append(integrations, c)
 		}
 	}
@@ -411,7 +411,7 @@ func findExistingIntegration(existing []models.Component, name, repoOrg, repoNam
 
 	for i := range existing {
 		c := &existing[i]
-		if !pkgcomponent.IsIntegrationDisplayType(c.DisplayType) {
+		if !pkgcomponent.IsIntegrationComponent(c.DisplayType, c.ComponentSubType) {
 			continue
 		}
 
