@@ -42,13 +42,16 @@ npm install -g @pcnfernando-wso2/integration-platform-mcp
 
 Download the binary for your platform from the [GitHub releases page](https://github.com/wso2/integration-platform-tools/releases).
 
-| Platform | File |
-|----------|------|
-| macOS (Apple Silicon) | `wso2-integration-platform-VERSION-darwin-arm64.zip` |
-| macOS (Intel) | `wso2-integration-platform-VERSION-darwin-amd64.zip` |
-| Linux (x64) | `wso2-integration-platform-VERSION-linux-amd64.tar.gz` |
-| Linux (ARM64) | `wso2-integration-platform-VERSION-linux-arm64.tar.gz` |
-| Windows (x64) | `wso2-integration-platform-VERSION-windows-amd64.zip` |
+| Platform | Artifact | Contents |
+|----------|----------|----------|
+| Linux (x64) | `wso2-integration-platform-VERSION-linux-amd64.tar.gz` | CLI binary |
+| Linux (x64) | `wso2-integration-platform-VERSION-linux-amd64.mcpb` | Claude Connector |
+| macOS (Apple Silicon) | `wso2-integration-platform-VERSION-darwin-arm64.mcpb` | Claude Connector |
+| Windows (x64) | `wso2-integration-platform-VERSION-windows-amd64.mcpb` | Claude Connector |
+
+Only Linux x64 ships a standalone CLI archive today. macOS and Windows are
+released as Claude Connector bundles only — on those platforms build from source
+(see [Development](#development)) if you need the CLI itself.
 
 ---
 
@@ -62,7 +65,7 @@ wso2-integration-platform login
 wso2-integration-platform list projects
 
 # 3. List your integrations
-wso2-integration-platform list integrations
+wso2-integration-platform list components
 
 # 4. Describe a resource
 wso2-integration-platform describe <project|component>
@@ -315,8 +318,8 @@ Bi-weekly, every second Thursday. All changes merged to `dev` are included. Crit
 3. Publish the release
 
 The release workflow automatically:
-- Builds `wso2-integration-platform` binaries for all platforms
-- Packages `.mcpb` Claude Connector bundles for Linux and macOS
+- Builds the `wso2-integration-platform` CLI archive for Linux x64
+- Packages `.mcpb` Claude Connector bundles for Linux x64, macOS arm64 and Windows x64
 - Attaches all artifacts to the GitHub release
 - Publishes `@pcnfernando-wso2/integration-platform-mcp` to npm (stable releases only)
 
