@@ -113,6 +113,11 @@ Platform-specific manifests: `mcpb/manifest.json` (Linux), `mcpb/manifest-darwin
 - Each region has dev/stage/prod environments with distinct API endpoints
 - `GetCurrentRegion()` checks `WSO2IP_REGION` env var first, then keyring, then defaults to `"US"`
 - `GetRegionConfig()` checks `WSO2IP_ENV` env var for dev/stage override; always returns prod for end users
+- Non-prod (dev/stage) endpoints are **not compiled in**. `WSO2IP_ENV=dev|stage` also requires
+  `WSO2IP_ENV_CONFIG=<path.json>`, keyed by region then environment, whose fields mirror
+  `BuildEnvConfig`'s arguments (`internal/region/nonprod_config.go`). Requesting an
+  environment the file does not describe panics rather than falling back to prod — a silent
+  fall-through would point a developer's commands at the live platform.
 - Region selection lives in `internal/region/config.go` and `store.go`; token storage in `internal/auth/token-store.go`
 
 ### Authentication

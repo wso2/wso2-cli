@@ -269,6 +269,19 @@ The MCP server supports three authentication methods:
 
 ## Development
 
+### Non-production environments
+
+Production endpoints are built in. Dev and stage are internal infrastructure and
+are supplied at runtime instead:
+
+```bash
+export WSO2IP_ENV=stage
+export WSO2IP_ENV_CONFIG=/path/to/nonprod.json   # keyed by region, then environment
+```
+
+Requesting an environment the file does not describe is a fatal error rather
+than a silent fall back to production. End users set neither variable.
+
 `main` is the stable branch. `dev` is the development branch. All changes should target `dev`; `main` is updated at release time.
 
 ### Feature development

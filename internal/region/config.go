@@ -90,13 +90,17 @@ func GetRegionConfig() *config.EnvConfig {
 	region := GetCurrentRegion()
 	regionConfig := RegionConfigs[region]
 
-	// For developers: Allow env override for non-prod environments
-	if env := os.Getenv("WSO2IP_ENV"); env != "" {
+	// For developers: Allow env override for non-prod environments. These are
+	// supplied through WSO2IP_ENV_CONFIG rather than compiled in; see
+	// nonprod_config.go. Requesting one that is not configured is fatal on
+	// purpose -- quietly falling through to production would point a developer's
+	// commands at the live platform.
+	if env := os.Getenv(EnvVar); env != "" {
 		switch env {
 		case config.ENV_DEV:
-			return regionConfig.Dev
+			return mustNonProd(regionConfig.Dev, region, env)
 		case config.ENV_STAGE:
-			return regionConfig.Stage
+			return mustNonProd(regionConfig.Stage, region, env)
 		}
 	}
 
@@ -108,13 +112,13 @@ func GetRegionConfig() *config.EnvConfig {
 func GetConfigByRegion(regionStr string) *config.EnvConfig {
 	regionConfig := RegionConfigs[regionStr]
 
-	// For developers: Allow env override for non-prod environments
-	if env := os.Getenv("WSO2IP_ENV"); env != "" {
+	// See GetRegionConfig: unconfigured non-prod is fatal, not a fall-through.
+	if env := os.Getenv(EnvVar); env != "" {
 		switch env {
 		case config.ENV_DEV:
-			return regionConfig.Dev
+			return mustNonProd(regionConfig.Dev, regionStr, env)
 		case config.ENV_STAGE:
-			return regionConfig.Stage
+			return mustNonProd(regionConfig.Stage, regionStr, env)
 		}
 	}
 
