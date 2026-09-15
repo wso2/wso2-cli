@@ -39,7 +39,7 @@ jobs:
         with:
           env: prod
           user_name: e8085eae-9391-4d03-9302-672068c1fe50
-          password: ${{ secrets.CHOREO_PROD_TEST_USER_PASS }}
+          password: ${{ secrets.WSO2IP_PROD_TEST_USER_PASS }}
 
   create-build:
     runs-on: ubuntu-latest
@@ -58,7 +58,7 @@ jobs:
       - name: generate version
         id: gen_version
         env:
-          GITHUB_TOKEN: ${{ secrets.CHOREO_CLI_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WSO2IP_GITHUB_TOKEN }}
         run: |
           version=$(gh release list --json tagName,isLatest -q 'map(select(.isLatest == true)) | first | .tagName') \
           && echo "version=$version" >> $GITHUB_OUTPUT
@@ -72,7 +72,7 @@ jobs:
       - name: Create release - private
         id: create_release_private
         env:
-          GITHUB_TOKEN: ${{ secrets.CHOREO_CLI_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.WSO2IP_GITHUB_TOKEN }}
         run: |
             url=`gh api \
                   --method POST \
