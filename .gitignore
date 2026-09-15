@@ -77,5 +77,4 @@ dist/
 # never reached. The two configs below are shared and stay tracked — mcp.json is
 # the example README.md points at.
 .vscode/*
-!.vscode/launch.json
 !.vscode/mcp.json
