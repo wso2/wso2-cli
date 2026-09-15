@@ -57,8 +57,6 @@ temp/
 # `go build` drops the binary at the repo root.
 /wso2-integration-platform
 /wso2-integration-platform.exe
-/choreo
-/choreo.exe
 *.exe
 
 # Test and coverage output

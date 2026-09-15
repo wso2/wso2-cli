@@ -39,7 +39,7 @@ func TestResolveSubtype(t *testing.T) {
 	}
 }
 
-// Excluded Choreo component types (webApp, manualTask, webhook, proxy) and any
+// Excluded legacy component types (webApp, manualTask, webhook, proxy) and any
 // unrecognized or mis-cased value must be rejected: the MCP server can only
 // ever reach the six integration subtypes by omission, not by runtime guard,
 // so ResolveSubtype is the only gate standing between a caller and the

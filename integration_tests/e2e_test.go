@@ -6,7 +6,7 @@ import (
 
 func TestE2EMainFlow(t *testing.T) {
 	if TEST_USER_NAME == "" || TEST_USER_PASS == "" {
-		t.Fatal("CHOREO_CLI_TEST_USER_NAME and CHOREO_CLI_TEST_USER_PASS environment variables are required")
+		t.Fatal("WSO2IP_TEST_USER_NAME and WSO2IP_TEST_USER_PASS environment variables are required")
 	}
 
 	// Note: Non-interactive mode is enabled globally in TestMain (shared_test.go)
