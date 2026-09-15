@@ -1,0 +1,32 @@
+name: Generate version for the release
+description: "Generate version for the release"
+
+inputs:
+  type:
+    description: 'Type'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Patch version
+      if: ${{ inputs.type == 'patch' }}
+      shell: bash
+      run: |
+        version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/wso2/integration-platform-tools/releases/latest -q '.tag_name' | awk -F. '{$NF = $NF + 1;}1' | sed 's/ /./g') \
+        && echo "$version" >> version.txt
+
+    - name: Minor version
+      if: ${{ inputs.type == 'minor' }}
+      shell: bash
+      run: |
+        version=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /repos/wso2/integration-platform-tools/releases/latest -q '.tag_name' |cut -d '.' -f1-2 |  awk -F. '{$NF = $NF + 1;}1' | sed 's/ /./g' | sed 's|$|.0|') \
+        && echo "$version" >> version.txt
+
+    - name: Major version
+      if: ${{ inputs.type == 'major' }}
+      shell: bash
+      run: |
+        version=$(gh api -H Accept: application/vnd.github+json -H X-GitHub-Api-Version: 2022-11-28 /repos/wso2/integration-platform-tools/releases/latest -q '.tag_name' |cut -d '.' -f1-1 | awk -Fv '{ =  + 1;}1' | sed 's/ /v/g' | sed 's|$|.0.0|') \
+        && echo "$version" >> version.txt
+

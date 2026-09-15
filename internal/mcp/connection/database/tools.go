@@ -1,0 +1,31 @@
+package database
+
+import "github.com/mark3labs/mcp-go/mcp"
+
+var CreateDatabaseConnectionTool = mcp.NewTool("create_database_connection",
+	mcp.WithTitleAnnotation("Create Database Connection"),
+	mcp.WithDescription("Creates a connection from a specific integration to a managed database instance. This allows your integration to seamlessly consume data from the database. PRE-CONDITION: The target database must already be provisioned, Active (use get_database_server) AND published to the Marketplace (use publish_default_database if needed). Database and the integration does not need to be in the same region."),
+	mcp.WithReadOnlyHintAnnotation(false),
+	mcp.WithDestructiveHintAnnotation(true),
+	mcp.WithIdempotentHintAnnotation(false),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("project_uuid",
+		mcp.Required(),
+		mcp.Description("The UUID of the project in which the integration is created."),
+	),
+	mcp.WithString("integration_uuid",
+		mcp.Required(),
+		mcp.Description("The UUID of the integration that will consume the database connection."),
+	),
+	mcp.WithString("component_name",
+		mcp.Required(),
+		mcp.Description("The human-readable name of the integration that will consume the database connection."),
+	),
+	mcp.WithString("description",
+		mcp.Description("A brief description of the database connection."),
+	),
+	mcp.WithString("service_id",
+		mcp.Required(),
+		mcp.Description("The unique Service ID of the database in the resource registry, which needs to be consumed. This can be retrieved using list_marketplace_resources by specifying resource_type: 'database'."),
+	),
+)

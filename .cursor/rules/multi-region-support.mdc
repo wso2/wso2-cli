@@ -1,0 +1,45 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Multi-Region Support Implementation
+
+## Overview
+The Choreo CLI supports multiple deployment regions (US and EU) with region-specific configurations and token management.
+
+## Core Components
+
+### Region Management
+- [internal/region/config.go](mdc:internal/region/config.go): Core region configuration and management
+- [internal/cmd/region/cmd.go](mdc:internal/cmd/region/cmd.go): CLI command for region operations
+
+### Configuration Structure
+- [internal/config/types.go](mdc:internal/config/types.go): Common configuration types
+- [internal/region/eu_config.go](mdc:internal/region/eu_config.go): EU Related configs
+- [internal/region/us_config.go](mdc:internal/region/us_config.go): US Related configs
+
+## Key Features
+
+1. Region Selection
+- Default region: US
+- Region switching via `choreo region [region-name]`
+- Thread-safe region selection with mutex protection
+- Region persistence across sessions
+
+2. Environment Support
+- Each region (US/EU) has dev/stage/prod environments
+- Environment override support for developers
+- Production environment for end users
+
+3. Token Management
+- Region-specific token storage
+- Token validation per region
+- Automatic re-login prompt when switching regions
+
+## Usage Flow
+1. User logs in (defaults to US region)
+2. User can switch regions using `choreo region [US|EU]`
+3. System checks for valid token in new region
+4. If no valid token exists, prompts for login
+5. All subsequent operations use region-specific endpoints

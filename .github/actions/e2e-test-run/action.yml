@@ -1,0 +1,51 @@
+name: Run e2e tests
+description: "Run e2e tests for the WSO2 Integration Platform CLI"
+
+inputs:
+  env:
+    description: "The environment to use"
+    required: true
+  user_name:
+    description: "The user name to use"
+    required: true
+  password:
+    description: "The password to use"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Identify shell
+      id: shell_id
+      uses: ./.github/actions/get_shell
+
+    - name: Delete trace logs if exists
+      if: runner.os != 'Windows'
+      shell: ${{ steps.shell_id.outputs.shell }}
+      run: rm -f ./integration_tests/http-logger.log
+
+    - name: Delete trace logs if exists
+      if: runner.os == 'Windows'
+      shell: ${{ steps.shell_id.outputs.shell }}
+      run: |
+        $hasFile=Test-Path .\integration_tests\http-logger.log; 
+        if ($hasFile) { Remove-Item .\integration_tests\http-logger.log } else { echo "File not found" }
+
+    - name: Run e2e tests - ${{ inputs.env }} 
+      shell: ${{ steps.shell_id.outputs.shell }}
+      env:
+        WSO2IP_ENV: ${{ inputs.env }}
+        CHOREO_CLI_TEST_USER_NAME: ${{ inputs.user_name }} 
+        CHOREO_CLI_TEST_USER_PASS: ${{ inputs.password }}
+        RUN_OS: ${{ runner.os }}
+        TRACE_ENABLED: "true"
+        LOG_MODE: file
+      run: make run_integration_tests
+
+    - name: Upload trace logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: http-logger-${{ runner.os }}-${{ inputs.env }}.log
+        path: ./integration_tests/http-logger.log
+

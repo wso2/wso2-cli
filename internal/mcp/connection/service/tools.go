@@ -1,0 +1,31 @@
+package service
+
+import "github.com/mark3labs/mcp-go/mcp"
+
+var CreateConnectionTool = mcp.NewTool("create_connection",
+	mcp.WithTitleAnnotation("Create Connection"),
+	mcp.WithDescription("Establishes a service connection between two integrations or between an integration and a Marketplace service. This enables integrations to consume other services by injecting connection parameters (like service URLs, API keys, OAuth credentials) as environment variables at runtime. This tool returns JSON configuration data and a markdown guide to help you configure your integration and implement the connection logic in your source code."),
+	mcp.WithReadOnlyHintAnnotation(false),
+	mcp.WithDestructiveHintAnnotation(true),
+	mcp.WithIdempotentHintAnnotation(false),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("marketplace_service_id",
+		mcp.Required(),
+		mcp.Description("The unique ID of the service in the marketplace to connect to. This can be obtained from the list_marketplace_resources tool by specifying resource_type: 'service'."),
+	),
+	mcp.WithString("integration_uuid",
+		mcp.Required(),
+		mcp.Description("The UUID of the integration that will consume the service (the destination integration)."),
+	),
+	mcp.WithString("source_integration_type",
+		mcp.Required(),
+		mcp.Description("The type of the integration initiating the connection. Supported value: 'service' (API, AI Agent, or MCP Server)."),
+		mcp.Enum("service"),
+	),
+	mcp.WithString("name",
+		mcp.Description("A descriptive name for the connection. If not provided, a default name will be generated."),
+	),
+	mcp.WithString("description",
+		mcp.Description("A brief explanation of the connection's purpose."),
+	),
+)

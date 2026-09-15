@@ -1,0 +1,58 @@
+name: Sign and Notarize macOS builds
+description: "Sign and Notarize macOS builds for the WSO2 Integration Platform CLI"
+inputs:
+  os:
+    description: "The operating system to use"
+    required: true
+  arch:
+    description: "The architecture to use"
+    required: true
+  MACOS_CERTIFICATE:
+    description: "The certificate to use for code signing"
+    required: true
+  MACOS_CERTIFICATE_NAME:
+    description: "The certificate name to use for code signing"
+    required: true
+  MACOS_CERTIFICATE_PWD:
+    description: "The certificate password to use for code signing"
+    required: true
+  MACOS_NOTARIZATION_APPLE_ID:
+    description: "The Apple ID to use for notarization"
+    required: true
+  MACOS_NOTARIZATION_PWD:
+    description: "The password to use for notarization"
+    required: true
+  MACOS_NOTARIZATION_TEAM_ID:
+    description: "The team ID to use for notarization"
+    required: true
+  MACOS_CI_KEYCHAIN_PWD:
+    description: "The keychain password to use for code signing"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Codesign
+      shell: bash
+      run: |
+        echo ${{ inputs.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
+        security create-keychain -p "${{ inputs.MACOS_CI_KEYCHAIN_PWD }}" build.keychain 
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "${{ inputs.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+        security import certificate.p12 -k build.keychain -P "${{ inputs.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ inputs.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+        /usr/bin/codesign --force -s "${{ inputs.MACOS_CERTIFICATE_NAME }}" --options runtime ./bin/${{ inputs.os }}-${{ inputs.arch }}/wso2-integration-platform -v
+
+    - name: Notarize
+      shell: bash
+      run: |
+        echo "Create keychain profile"
+        xcrun notarytool store-credentials "notarytool-profile" \
+          --apple-id "${{ inputs.MACOS_NOTARIZATION_APPLE_ID }}" \
+          --team-id "${{ inputs.MACOS_NOTARIZATION_TEAM_ID }}" \
+          --password "${{ inputs.MACOS_NOTARIZATION_PWD }}"
+
+        zip wso2-integration-platform-${{ inputs.os }}-${{ inputs.arch }}.zip ./bin/${{ inputs.os }}-${{ inputs.arch }}/wso2-integration-platform
+
+        xcrun notarytool submit "wso2-integration-platform-${{ inputs.os }}-${{ inputs.arch }}.zip" --keychain-profile "notarytool-profile" --wait
+

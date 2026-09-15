@@ -1,0 +1,33 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Region Management
+
+The Choreo CLI supports multiple deployment regions (US and EU). Region management is handled by two main files:
+
+1. [internal/region/config.go](mdc:internal/region/config.go) - Core region configuration and management
+   - Defines available regions (US, EU)
+   - Manages current region selection
+   - Provides region-specific configurations
+   - Thread-safe region operations
+
+2. [internal/region/store.go](mdc:internal/region/store.go) - Region persistence
+   - Persists region selection using system keyring
+   - Uses same storage mechanism as other CLI stores
+   - Provides region storage operations (get, set, remove)
+
+## Key Features
+
+- Default region is US if no region is stored
+- Region selection persists across CLI sessions
+- Thread-safe operations using mutex locks
+- Environment-specific configurations (dev, stage, prod)
+- Consistent with other CLI storage patterns
+
+## Related Files
+
+The region functionality integrates with the auth system:
+- [internal/auth/auth.go](mdc:internal/auth/auth.go) - Uses region info for authentication
+- [internal/auth/token-store.go](mdc:internal/auth/token-store.go) - Region-specific token storage

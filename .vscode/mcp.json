@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "wso2-integration-platform": {
+      "type": "stdio",
+      "command": "wso2-integration-platform",
+      "args": ["start-mcp-server"]
+    }
+  }
+}

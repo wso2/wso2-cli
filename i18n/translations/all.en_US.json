@@ -1,0 +1,1326 @@
+[
+   {
+      "id": "\n\t\t\t\t\t\tEndpoint: %s\n\t\t\t\t\t\t\tPort: %d\n\t\t\t\t\t\t\tStatus: %s\n\t\t\t\t\t\t\tType: %s\n\t\t\t\t\t\t\tContext: %s\n\t\t\t\t\t\t\tVisibility: %s\n\t\t\t\t\t\t\tProject URL: %s\n\t\t\t\t\t\t\t%s\n\t\t\t\t\t",
+      "translation": "\n\t\t\t\t\t\tEndpoint: %s\n\t\t\t\t\t\t\tPort: %d\n\t\t\t\t\t\t\tStatus: %s\n\t\t\t\t\t\t\tType: %s\n\t\t\t\t\t\t\tContext: %s\n\t\t\t\t\t\t\tVisibility: %s\n\t\t\t\t\t\t\tProject URL: %s\n\t\t\t\t\t\t\t%s\n\t\t\t\t\t"
+   },
+   {
+      "id": "\n\t\t\t\t\tDeployed URL: %s\n\t\t\t\t",
+      "translation": "\n\t\t\t\t\tDeployed URL: %s\n\t\t\t\t"
+   },
+   {
+      "id": "\n\t\t\t\tInvalid log type\n\t\t\t\tLog type must be one of %s\n\t\t\t",
+      "translation": "\n\t\t\t\tInvalid log type\n\t\t\t\tLog type must be one of %s\n\t\t\t"
+   },
+   {
+      "id": "\n\t\t\t\n\t\t\tTo create a new component within your newly created project :\n\t\t\t\t%s\t\n\t\t",
+      "translation": "\n\t\t\t\n\t\t\tTo create a new component within your newly created project :\n\t\t\t\t%s\t\n\t\t"
+   },
+   {
+      "id": "\n\t\t\t\n\t\tTo add a new config or secret:\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\t\t\n\t\tTo add a new config or secret:\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\t\t\n\t\tTo view details of a particular config :\n\t\t\t%s\n\t\t\n\t\tTo add a new config or secret :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\t\t\n\t\tTo view details of a particular config :\n\t\t\t%s\n\t\t\n\t\tTo add a new config or secret :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\t\n\t\tTo deploy this component :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\t\n\t\tTo deploy this component :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\t\t%s\n\n\t\t\tAvailable commands:\n\t\t\t%s\n\t\t\t%s\n\t\t\t%s\n\n\t\t\tFlags:\n\t\t\t\t-h, --help      help for wso2-integration-platform\n\t\t\t\t-v, --version   version for wso2-integration-platform\n\n\t\t\tUse \"wso2-integration-platform [command] --help\" for more information about a command.\n\n\n\t\t\tExamples:\n\t\t\t%s\n\t\t",
+      "translation": "\n\t\t\t%s\n\n\t\t\tAvailable commands:\n\t\t\t%s\n\t\t\t%s\n\t\t\t%s\n\n\t\t\tFlags:\n\t\t\t\t-h, --help      help for wso2-integration-platform\n\t\t\t\t-v, --version   version for wso2-integration-platform\n\n\t\t\tUse \"wso2-integration-platform [command] --help\" for more information about a command.\n\n\n\t\t\tExamples:\n\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\t\t\tListing components in the project:\n\n\t\t\t%s\n\t\t",
+      "translation": "\n\t\t\tListing components in the project:\n\n\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\t\t\tNotice: Secret values are only visible once. \n\t\t",
+      "translation": "\n\t\t\tNotice: Secret values are only visible once. \n\t\t"
+   },
+   {
+      "id": "\n\t\t\tProject details:\n\t\t\t\n\t\t\t%s\n\t\t",
+      "translation": "\n\t\t\tProject details:\n\t\t\t\n\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\t\t\tUpdate available: %s -\u003e %s\n\n\t\t\tTo update, run:\n\t\t\t\t%s\n\t\t",
+      "translation": "\n\t\t\tUpdate available: %s -\u003e %s\n\n\t\t\tTo update, run:\n\t\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\t\t\n\t\t\tShowing projects in organization %s.\n\n\t\t",
+      "translation": "\n\t\t\n\t\t\tShowing projects in organization %s.\n\n\t\t"
+   },
+   {
+      "id": "\n\t\t\n\t\tTo change the active organization :\n\t\t\t%s\t\n\t",
+      "translation": "\n\t\t\n\t\tTo change the active organization :\n\t\t\t%s\t\n\t"
+   },
+   {
+      "id": "\n\t\tList all organizations you are a member of on the WSO2 Integration Platform. \n\n\t\tTo select an organization:\n\t\t\t%s\n\t",
+      "translation": "\n\t\tList all organizations you are a member of on the WSO2 Integration Platform. \n\n\t\tTo select an organization:\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\tTo change the current organization :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\tTo change the current organization :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\tTo create a node.js service component in your default project :\n\t\t\t%s\n\n\t\tTo create a react.js webapp component in your default project :\n\t\t\t%s\n\t",
+      "translation": "\n\t\tTo create a node.js service component in your default project :\n\t\t\t%s\n\n\t\tTo create a react.js webapp component in your default project :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\tTo describe a project in the current organization:\n\t\t\t%s\n\t",
+      "translation": "\n\t\tTo describe a project in the current organization:\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\tTo list existing projects or components :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo create a new project :\n\t\t\t%s\n\n\t\tTo add a component from your locally cloned repository :\n\t\t\t%s\n\n\t\tTo build \u0026 deploy a component :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo change the current organization :\n\t\t\t%s\n\t",
+      "translation": "\n\t\tTo list existing projects or components :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo create a new project :\n\t\t\t%s\n\n\t\tTo add a component from your locally cloned repository :\n\t\t\t%s\n\n\t\tTo build \u0026 deploy a component :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo change the current organization :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\tTo trigger a deployment of a specific component to the development environment:\n\t\t\t%s\n\t",
+      "translation": "\n\t\tTo trigger a deployment of a specific component to the development environment:\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo create a connection for a service :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo create a connection for a service :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo create a mono-repository project :\n\t\t\t%s\n\n\t\tTo create a multi-repository project :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo create a mono-repository project :\n\t\t\t%s\n\n\t\tTo create a multi-repository project :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo create a new config-map containing environment variables within your component :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your component :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo create a new config-map containing environment variables within your component :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your component :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo get the test key of a particular component in the development environment :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo get the test key of a particular component in the development environment :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo link a component directory :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\n\t\tTo link a component directory :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo list connections within a integration platform project :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo list connections within a integration platform project :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo list projects of an organization :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo list projects of an organization :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo list the components within a project :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo list the components within a project :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo list the configs within a integration :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo list the configs within a integration :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo print the latest gateway logs from the development environment of a service component :\n\t\t\t%s\n\n\t\tTo print and watch for application logs from the production environment of a project :\n\t\t\t%s\n\n\t\tTo print build logs of a particular component :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo print the latest gateway logs from the development environment of a service component :\n\t\t\t%s\n\n\t\tTo print and watch for application logs from the production environment of a project :\n\t\t\t%s\n\n\t\tTo print build logs of a particular component :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo view details of a particular component :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\n\t\tTo view details of a particular component :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo view details of a particular config :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo view details of a particular config :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\t\n\t\tTo view details of a particular connection :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo view details of a particular connection :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\tMonitoring:\n        logs    %s\n\t",
+      "translation": "\n\tMonitoring:\n        logs    %s\n\t"
+   },
+   {
+      "id": "\n\tOrganization and authentication:\n        login         %s\n        logout        %s\n        change-org    %s\n        set-context   %s\n\t",
+      "translation": "\n\tOrganization and authentication:\n        login         %s\n        logout        %s\n        change-org    %s\n        set-context   %s\n\t"
+   },
+   {
+      "id": "\n\tResource management:\n        create    %s\n        delete    %s\n        describe  %s\n        list      %s\n\t",
+      "translation": "\n\tResource management:\n        create    %s\n        delete    %s\n        describe  %s\n        list      %s\n\t"
+   },
+   {
+      "id": "\n\n\t\t\t\t\t%s\n\t\t\t\t\tServiceURL: %s\n\t\t\t\t",
+      "translation": "\n\n\t\t\t\t\t%s\n\t\t\t\t\tServiceURL: %s\n\t\t\t\t"
+   },
+   {
+      "id": "\n\n\t\t\t\t\t%s\n\t\t\t\t\tServiceURL: %s\n\t\t\t\t\tConsumerKey: %s\n\t\t\t\t\tConsumerSecret: %s\n\t\t\t\t\tTokenURL: %s\n\t\t\t\t",
+      "translation": "\n\n\t\t\t\t\t%s\n\t\t\t\t\tServiceURL: %s\n\t\t\t\t\tConsumerKey: %s\n\t\t\t\t\tConsumerSecret: %s\n\t\t\t\t\tTokenURL: %s\n\t\t\t\t"
+   },
+   {
+      "id": "\n\n\t\t\t\t%s\n\t\t\t\tDeployment status: %s\n\t\t\t\tLast deployed: %s ago\n\n\t\t\t\tCommit details:\n\t\t\t\t\tCommitted: %s ago\n\t\t\t\t\tCommit message: %s\n\t\t\t\t\tCreated by: %s\n\n\t\t\t",
+      "translation": "\n\n\t\t\t\t%s\n\t\t\t\tDeployment status: %s\n\t\t\t\tLast deployed: %s ago\n\n\t\t\t\tCommit details:\n\t\t\t\t\tCommitted: %s ago\n\t\t\t\t\tCommit message: %s\n\t\t\t\t\tCreated by: %s\n\n\t\t\t"
+   },
+   {
+      "id": "\n\n\t\t\t\t%s\n\t\t\t\tService URL not found.\n\t\t\t",
+      "translation": "\n\n\t\t\t\t%s\n\t\t\t\tService URL not found.\n\t\t\t"
+   },
+   {
+      "id": "\n\n\t\t\t\t%s: Not Deployed\n\t\t\t",
+      "translation": "\n\n\t\t\t\t%s: Not Deployed\n\t\t\t"
+   },
+   {
+      "id": "\n\n\t\t\t%s WSO2 Integration Platform is unable to access the given repository\n\n\t\t\tPlease make sure that you have installed the WSO2 Integration Platform GitHub App to your repository.\n\t\t\tIf you are a free-tier user, only public repositories are supported.\n\n\t\t\tTo proceed, please install the WSO2 Integration Platform GitHub App using the following link:\n\t\t\t\t%s\n\t\t\n\t\t\tThen try again.\n\n\t\t",
+      "translation": "\n\n\t\t\t%s WSO2 Integration Platform is unable to access the given repository\n\n\t\t\tPlease make sure that you have installed the WSO2 Integration Platform GitHub App to your repository.\n\t\t\tIf you are a free-tier user, only public repositories are supported.\n\n\t\t\tTo proceed, please install the WSO2 Integration Platform GitHub App using the following link:\n\t\t\t\t%s\n\t\t\n\t\t\tThen try again.\n\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tBuild details:\n\t\t\t\n\t\t\t%s\n\n\t\t\tCommit details:\n\t\t\tCommit hash: %s\n\t\t\tCommit message: %s\n\t\t\t\n\t\t",
+      "translation": "\n\n\t\t\tBuild details:\n\t\t\t\n\t\t\t%s\n\n\t\t\tCommit details:\n\t\t\tCommit hash: %s\n\t\t\tCommit message: %s\n\t\t\t\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tComponent details:\n\t\t\t\n\t\t\tID:              %s\n\t\t\tName:            %s\n\t\t\tHandle:          %s\n\t\t\tType:            %s\n\t\t\tBuildpack:       %s\n\t\t\tVersion:         %s\n\t\t\tOrganization:    %s\n\t\t\tProject:         %s\n\n\t\t\tRepository Details:\n\t\t\tRepository: %s\n\t\t\tBranch: %s\n\t\t",
+      "translation": "\n\n\t\t\tComponent details:\n\t\t\t\n\t\t\tID:              %s\n\t\t\tName:            %s\n\t\t\tHandle:          %s\n\t\t\tType:            %s\n\t\t\tBuildpack:       %s\n\t\t\tVersion:         %s\n\t\t\tOrganization:    %s\n\t\t\tProject:         %s\n\n\t\t\tRepository Details:\n\t\t\tRepository: %s\n\t\t\tBranch: %s\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tConfig details:\n\t\t\t\n\t\t\tVersion:        %s\n\t\t\tID:             %s\n\t\t\tName:           %s\n\t\t\tType:         \t%s\n\t\t\tMount path:     %s\n\t\t\tCreated:     \t%s\n\t\t\tLast updated:   %s\n\n\t\t\t%s:\n\t\t\t%s\n\n\t\t",
+      "translation": "\n\n\t\t\tConfig details:\n\t\t\t\n\t\t\tVersion:        %s\n\t\t\tID:             %s\n\t\t\tName:           %s\n\t\t\tType:         \t%s\n\t\t\tMount path:     %s\n\t\t\tCreated:     \t%s\n\t\t\tLast updated:   %s\n\n\t\t\t%s:\n\t\t\t%s\n\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tConnection details:\n\t\t\t\n\t\t\tName: %s\n\t\t\tConnecting to: %s\n\t\t\tConnection schema: %s\n\t\t\t%s\n\t\t",
+      "translation": "\n\n\t\t\tConnection details:\n\t\t\t\n\t\t\tName: %s\n\t\t\tConnecting to: %s\n\t\t\tConnection schema: %s\n\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tNo projects found in organization %s.\n\t\t\t\n\t\t\tTo create a new project on the WSO2 Integration Platform :\n\t\t\t\t%s\t\n\t\t",
+      "translation": "\n\n\t\t\tNo projects found in organization %s.\n\t\t\t\n\t\t\tTo create a new project on the WSO2 Integration Platform :\n\t\t\t\t%s\t\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tRefer to the instructions provided in the following link to learn how to use these configurations :\n\t\t\t\thttps://wso2.com/integration-platform/docs/develop-components/sharing-and-reusing-services/\n\t\t",
+      "translation": "\n\n\t\t\tRefer to the instructions provided in the following link to learn how to use these configurations :\n\t\t\t\thttps://wso2.com/integration-platform/docs/develop-components/sharing-and-reusing-services/\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tSuccessfully created connection %s\n\t\t\t\n\t\t\tConnecting to: %s\n\t\t\tConnection schema: %s\n\t\t\t%s\n\t\t",
+      "translation": "\n\n\t\t\tSuccessfully created connection %s\n\t\t\t\n\t\t\tConnecting to: %s\n\t\t\tConnection schema: %s\n\t\t\t%s\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tTo create a new connection :\n\t\t\t\t%s\n\n\t\t",
+      "translation": "\n\n\t\t\tTo create a new connection :\n\t\t\t\t%s\n\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tTo view details of a particular connection :\n\t\t\t\t%s\n\n\t\t",
+      "translation": "\n\n\t\t\tTo view details of a particular connection :\n\t\t\t\t%s\n\n\t\t"
+   },
+   {
+      "id": "\n\n\t\t\tTo view details of the created component :\n\t\t\t\t%s\n\n\t\t\tTo build the component on the WSO2 Integration Platform :\n\t\t\t\t%s\n\n\t\t",
+      "translation": "\n\n\t\t\tTo view details of the created component :\n\t\t\t\t%s\n\n\t\t\tTo build the component on the WSO2 Integration Platform :\n\t\t\t\t%s\n\n\t\t"
+   },
+   {
+      "id": "\n\n\t\tInclude the following header when calling the deployed endpoint :\n\t\t\n\t\t\tApi-Key: %s\n\t\t\n\t\tApi key is valid for %d seconds\n\t",
+      "translation": "\n\n\t\tInclude the following header when calling the deployed endpoint :\n\t\t\n\t\t\tApi-Key: %s\n\t\t\n\t\tApi key is valid for %d seconds\n\t"
+   },
+   {
+      "id": "\n\n\t\tTo delete a config :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\n\t\tTo delete a config :\n\t\t\t%s\n\t\t\t\n\t"
+   },
+   {
+      "id": "\n\n\t\tTo list all the connections available within your project :\n\t\t\t%s\n\n\t",
+      "translation": "\n\n\t\tTo list all the connections available within your project :\n\t\t\t%s\n\n\t"
+   },
+   {
+      "id": "\n\n\t\tTo list the projects of active organizations :\n\t\t\t%s\n\t",
+      "translation": "\n\n\t\tTo list the projects of active organizations :\n\t\t\t%s\n\t"
+   },
+   {
+      "id": "\nComponent '%s' has been successfully created!\n",
+      "translation": "\nComponent '%s' has been successfully created!\n"
+   },
+   {
+      "id": "\nConfig '%s' has been successfully created!\n",
+      "translation": "\nConfig '%s' has been successfully created!\n"
+   },
+   {
+      "id": "\nConfig '%s' has been successfully deleted!\n",
+      "translation": "\nConfig '%s' has been successfully deleted!\n"
+   },
+   {
+      "id": "\nCopy the following link and open it in your browser:\n\n%s\n",
+      "translation": "\nCopy the following link and open it in your browser:\n\n%s\n"
+   },
+   {
+      "id": "\nEndpoint configurations created at %s\n",
+      "translation": "\nEndpoint configurations created at %s\n"
+   },
+   {
+      "id": "\nFor more info on configuring service endpoints:\n%s",
+      "translation": "\nFor more info on configuring service endpoints:\n%s"
+   },
+   {
+      "id": "\nFor more information on configuring service endpoints:\n%s",
+      "translation": "\nFor more information on configuring service endpoints:\n%s"
+   },
+   {
+      "id": "\nProject '%s' has been successfully created!\n",
+      "translation": "\nProject '%s' has been successfully created!\n"
+   },
+   {
+      "id": "\nShowing organizations of user '%s'\n\n",
+      "translation": "\nShowing organizations of user '%s'\n\n"
+   },
+   {
+      "id": " Authenticating with WSO2 Integration Platform...",
+      "translation": " Authenticating with WSO2 Integration Platform..."
+   },
+   {
+      "id": " Checking if repository is accessible...",
+      "translation": " Checking if repository is accessible..."
+   },
+   {
+      "id": " Creating component on the WSO2 Integration Platform...",
+      "translation": " Creating component on the WSO2 Integration Platform..."
+   },
+   {
+      "id": " Creating config map...",
+      "translation": " Creating config map..."
+   },
+   {
+      "id": " Creating config mount...",
+      "translation": " Creating config mount..."
+   },
+   {
+      "id": " Creating connection...",
+      "translation": " Creating connection..."
+   },
+   {
+      "id": " Creating new project on the WSO2 Integration Platform...",
+      "translation": " Creating new project on the WSO2 Integration Platform..."
+   },
+   {
+      "id": " Deleting config mount...",
+      "translation": " Deleting config mount..."
+   },
+   {
+      "id": " Fetching %s logs for component %s within %s environment",
+      "translation": " Fetching %s logs for component %s within %s environment"
+   },
+   {
+      "id": " Fetching Organizations...",
+      "translation": " Fetching Organizations..."
+   },
+   {
+      "id": " Fetching additional component details...",
+      "translation": " Fetching additional component details..."
+   },
+   {
+      "id": " Fetching branches...",
+      "translation": " Fetching branches..."
+   },
+   {
+      "id": " Fetching build-packs...",
+      "translation": " Fetching build-packs..."
+   },
+   {
+      "id": " Fetching commit history...",
+      "translation": " Fetching commit history..."
+   },
+   {
+      "id": " Fetching component MI build logs...",
+      "translation": " Fetching component MI build logs..."
+   },
+   {
+      "id": " Fetching component build logs...",
+      "translation": " Fetching component build logs..."
+   },
+   {
+      "id": " Fetching component information...",
+      "translation": " Fetching component information..."
+   },
+   {
+      "id": " Fetching component status for the selected deployment track...",
+      "translation": " Fetching component status for the selected deployment track..."
+   },
+   {
+      "id": " Fetching config mounts...",
+      "translation": " Fetching config mounts..."
+   },
+   {
+      "id": " Fetching config-map data...",
+      "translation": " Fetching config-map data..."
+   },
+   {
+      "id": " Fetching config-maps...",
+      "translation": " Fetching config-maps..."
+   },
+   {
+      "id": " Fetching connection item...",
+      "translation": " Fetching connection item..."
+   },
+   {
+      "id": " Fetching connections...",
+      "translation": " Fetching connections..."
+   },
+   {
+      "id": " Fetching data plane information...",
+      "translation": " Fetching data plane information..."
+   },
+   {
+      "id": " Fetching deployment status for the %s environment",
+      "translation": " Fetching deployment status for the %s environment"
+   },
+   {
+      "id": " Fetching endpoints",
+      "translation": " Fetching endpoints"
+   },
+   {
+      "id": " Fetching endpoints...",
+      "translation": " Fetching endpoints..."
+   },
+   {
+      "id": " Fetching environments...",
+      "translation": " Fetching environments..."
+   },
+   {
+      "id": " Fetching organization information...",
+      "translation": " Fetching organization information..."
+   },
+   {
+      "id": " Fetching organizations...",
+      "translation": " Fetching organizations..."
+   },
+   {
+      "id": " Fetching project level logs for the %s environment",
+      "translation": " Fetching project level logs for the %s environment"
+   },
+   {
+      "id": " Fetching projects...",
+      "translation": " Fetching projects..."
+   },
+   {
+      "id": " Fetching release containers...",
+      "translation": " Fetching release containers..."
+   },
+   {
+      "id": " Fetching secret config data...",
+      "translation": " Fetching secret config data..."
+   },
+   {
+      "id": " Fetching secrets...",
+      "translation": " Fetching secrets..."
+   },
+   {
+      "id": " Fetching services from marketplace...",
+      "translation": " Fetching services from marketplace..."
+   },
+   {
+      "id": " Generating API key",
+      "translation": " Generating API key"
+   },
+   {
+      "id": " Generating endpoints...",
+      "translation": " Generating endpoints..."
+   },
+   {
+      "id": " Setting active organization...",
+      "translation": " Setting active organization..."
+   },
+   {
+      "id": " Triggering component deployment...",
+      "translation": " Triggering component deployment..."
+   },
+   {
+      "id": " Validating Organization access...",
+      "translation": " Validating Organization access..."
+   },
+   {
+      "id": " Validating user...",
+      "translation": " Validating user..."
+   },
+   {
+      "id": " Verifying user...",
+      "translation": " Verifying user..."
+   },
+   {
+      "id": " Waiting for you to complete the GitHub auth process...",
+      "translation": " Waiting for you to complete the GitHub auth process..."
+   },
+   {
+      "id": " Waiting for you to complete the login process...",
+      "translation": " Waiting for you to complete the login process..."
+   },
+   {
+      "id": " error prompting for anotherVar",
+      "translation": " error prompting for anotherVar"
+   },
+   {
+      "id": " error prompting for env name",
+      "translation": " error prompting for env name"
+   },
+   {
+      "id": " error prompting for env value",
+      "translation": " error prompting for env value"
+   },
+   {
+      "id": " failed to get a valid config content",
+      "translation": " failed to get a valid config content"
+   },
+   {
+      "id": " failed to get a valid config mount path",
+      "translation": " failed to get a valid config mount path"
+   },
+   {
+      "id": " failed to get a valid config name",
+      "translation": " failed to get a valid config name"
+   },
+   {
+      "id": " failed to get a valid connection name",
+      "translation": " failed to get a valid connection name"
+   },
+   {
+      "id": " failed to get a valid project name",
+      "translation": " failed to get a valid project name"
+   },
+   {
+      "id": " failed to get projects",
+      "translation": " failed to get projects"
+   },
+   {
+      "id": " failed to select the build",
+      "translation": " failed to select the build"
+   },
+   {
+      "id": " failed to select the config",
+      "translation": " failed to select the config"
+   },
+   {
+      "id": " failed to select the connection",
+      "translation": " failed to select the connection"
+   },
+   {
+      "id": " failed to select the project",
+      "translation": " failed to select the project"
+   },
+   {
+      "id": " failed to select the service",
+      "translation": " failed to select the service"
+   },
+   {
+      "id": " invalid config selection",
+      "translation": " invalid config selection"
+   },
+   {
+      "id": " invalid connection selection",
+      "translation": " invalid connection selection"
+   },
+   {
+      "id": " invalid deployment track",
+      "translation": " invalid deployment track"
+   },
+   {
+      "id": " invalid project selection",
+      "translation": " invalid project selection"
+   },
+   {
+      "id": " invalid service selection",
+      "translation": " invalid service selection"
+   },
+   {
+      "id": " organization with handle %s not found",
+      "translation": " organization with handle %s not found"
+   },
+   {
+      "id": "%s Failed to select environment\n",
+      "translation": "%s Failed to select environment\n"
+   },
+   {
+      "id": "%s Failed to select project type\n",
+      "translation": "%s Failed to select project type\n"
+   },
+   {
+      "id": "%s Invalid project type\n",
+      "translation": "%s Invalid project type\n"
+   },
+   {
+      "id": "%s No components found\n",
+      "translation": "%s No components found\n"
+   },
+   {
+      "id": "%s No config-maps or secrets found\n",
+      "translation": "%s No config-maps or secrets found\n"
+   },
+   {
+      "id": "%s No connections found\n",
+      "translation": "%s No connections found\n"
+   },
+   {
+      "id": "%s Successfully set organization '%s' as the active organization. \n",
+      "translation": "%s Successfully set organization '%s' as the active organization. \n"
+   },
+   {
+      "id": "Associate a directory with a integration by creating a .wso2/link.yaml file within the component directory",
+      "translation": "Associate a directory with a integration by creating a .wso2/link.yaml file within the component directory"
+   },
+   {
+      "id": "Authenticate with your WSO2 Integration Platform account to start working on your projects.",
+      "translation": "Authenticate with your WSO2 Integration Platform account to start working on your projects."
+   },
+   {
+      "id": "BUILD PACK",
+      "translation": "BUILD PACK"
+   },
+   {
+      "id": "Branch: ",
+      "translation": "Branch: "
+   },
+   {
+      "id": "Build ID of the build",
+      "translation": "Build ID of the build"
+   },
+   {
+      "id": "CLI tool for the WSO2 Integration Platform",
+      "translation": "CLI tool for the WSO2 Integration Platform"
+   },
+   {
+      "id": "CONNECTION TO",
+      "translation": "CONNECTION TO"
+   },
+   {
+      "id": "CREATED",
+      "translation": "CREATED"
+   },
+   {
+      "id": "CREATED DATE",
+      "translation": "CREATED DATE"
+   },
+   {
+      "id": "Cannot generate API-keys for critical environments",
+      "translation": "Cannot generate API-keys for critical environments"
+   },
+   {
+      "id": "Checking access to organization...",
+      "translation": "Checking access to organization..."
+   },
+   {
+      "id": "Choose an org:",
+      "translation": "Choose an org:"
+   },
+   {
+      "id": "Component initialization is in progress. Please run the command in a while...\n",
+      "translation": "Component initialization is in progress. Please run the command in a while...\n"
+   },
+   {
+      "id": "Config content:",
+      "translation": "Config content:"
+   },
+   {
+      "id": "Config mount path:",
+      "translation": "Config mount path:"
+   },
+   {
+      "id": "Config name:",
+      "translation": "Config name:"
+   },
+   {
+      "id": "Config type:",
+      "translation": "Config type:"
+   },
+   {
+      "id": "Configure source repository:",
+      "translation": "Configure source repository:"
+   },
+   {
+      "id": "Connection name:",
+      "translation": "Connection name:"
+   },
+   {
+      "id": "Context already registered in context.yaml",
+      "translation": "Context already registered in context.yaml"
+   },
+   {
+      "id": "Context was set successfully",
+      "translation": "Context was set successfully"
+   },
+   {
+      "id": "Create a new config-map or secret for a integration",
+      "translation": "Create a new config-map or secret for a integration"
+   },
+   {
+      "id": "Create a new connection for a WSO2 Integration Platform service",
+      "translation": "Create a new connection for a WSO2 Integration Platform service"
+   },
+   {
+      "id": "Create a new project on the WSO2 Integration Platform.",
+      "translation": "Create a new project on the WSO2 Integration Platform."
+   },
+   {
+      "id": "DESCRIPTION",
+      "translation": "DESCRIPTION"
+   },
+   {
+      "id": "Delete a config or secret within your integration",
+      "translation": "Delete a config or secret within your integration"
+   },
+   {
+      "id": "Deployment track:",
+      "translation": "Deployment track:"
+   },
+   {
+      "id": "Describe a project",
+      "translation": "Describe a project"
+   },
+   {
+      "id": "Describe build details",
+      "translation": "Describe build details"
+   },
+   {
+      "id": "Description",
+      "translation": "Description"
+   },
+   {
+      "id": "Detected components in the project. Deleting components prior to project deletion.",
+      "translation": "Detected components in the project. Deleting components prior to project deletion."
+   },
+   {
+      "id": "Detected multiple registered contexts",
+      "translation": "Detected multiple registered contexts"
+   },
+   {
+      "id": "Detected the following Git remote URL. Do you want to proceed with it?\n%s",
+      "translation": "Detected the following Git remote URL. Do you want to proceed with it?\n%s"
+   },
+   {
+      "id": "Directory:",
+      "translation": "Directory:"
+   },
+   {
+      "id": "Display a list of resources (projects, components, configs, etc.) on the WSO2 Integration Platform",
+      "translation": "Display a list of resources (projects, components, configs, etc.) on the WSO2 Integration Platform"
+   },
+   {
+      "id": "Do you want to add another environment variable?",
+      "translation": "Do you want to add another environment variable?"
+   },
+   {
+      "id": "Endpoint configurations not found",
+      "translation": "Endpoint configurations not found"
+   },
+   {
+      "id": "Endpoint: ",
+      "translation": "Endpoint: "
+   },
+   {
+      "id": "Env variable name:",
+      "translation": "Env variable name:"
+   },
+   {
+      "id": "Env variable value:",
+      "translation": "Env variable value:"
+   },
+   {
+      "id": "Environment: ",
+      "translation": "Environment: "
+   },
+   {
+      "id": "Error getting deployment builds: %w",
+      "translation": "Error getting deployment builds: %w"
+   },
+   {
+      "id": "Error resolving component: %w",
+      "translation": "Error resolving component: %w"
+   },
+   {
+      "id": "Error resolving deployment track: %w",
+      "translation": "Error resolving deployment track: %w"
+   },
+   {
+      "id": "Error resolving organization: %w",
+      "translation": "Error resolving organization: %w"
+   },
+   {
+      "id": "Error resolving project components: %w",
+      "translation": "Error resolving project components: %w"
+   },
+   {
+      "id": "Error resolving project: %w",
+      "translation": "Error resolving project: %w"
+   },
+   {
+      "id": "Failed to select endpoint",
+      "translation": "Failed to select endpoint"
+   },
+   {
+      "id": "Fetching directory structure...",
+      "translation": "Fetching directory structure..."
+   },
+   {
+      "id": "Fetching project components...",
+      "translation": "Fetching project components..."
+   },
+   {
+      "id": "Get a link to open in browser manually",
+      "translation": "Get a link to open in browser manually"
+   },
+   {
+      "id": "Get detailed information about a resource on the WSO2 Integration Platform.",
+      "translation": "Get detailed information about a resource on the WSO2 Integration Platform."
+   },
+   {
+      "id": "Get detailed information, including build, deployment, and endpoint details for a component in your integration platform project.",
+      "translation": "Get detailed information, including build, deployment, and endpoint details for a component in your integration platform project."
+   },
+   {
+      "id": "Get information about a specific config-map or secret of a integration",
+      "translation": "Get information about a specific config-map or secret of a integration"
+   },
+   {
+      "id": "Get information about a specific connection within a integration platform project",
+      "translation": "Get information about a specific connection within a integration platform project"
+   },
+   {
+      "id": "Get the test key for a publicly deployed service.",
+      "translation": "Get the test key for a publicly deployed service."
+   },
+   {
+      "id": "Get the test key needed to invoke a publicly deployed service on the WSO2 Integration Platform.",
+      "translation": "Get the test key needed to invoke a publicly deployed service on the WSO2 Integration Platform."
+   },
+   {
+      "id": "How would you like to open the GitHub auth link?",
+      "translation": "How would you like to open the GitHub auth link?"
+   },
+   {
+      "id": "How would you like to sign in?",
+      "translation": "How would you like to sign in?"
+   },
+   {
+      "id": "Invalid flag for endpoint name",
+      "translation": "Invalid flag for endpoint name"
+   },
+   {
+      "id": "LAST UPDATED",
+      "translation": "LAST UPDATED"
+   },
+   {
+      "id": "Last Updated",
+      "translation": "Last Updated"
+   },
+   {
+      "id": "List all projects within an organization.",
+      "translation": "List all projects within an organization."
+   },
+   {
+      "id": "List components in your integration platform project",
+      "translation": "List components in your integration platform project"
+   },
+   {
+      "id": "List config-maps and secrets within a integration",
+      "translation": "List config-maps and secrets within a integration"
+   },
+   {
+      "id": "List connections within a integration platform project",
+      "translation": "List connections within a integration platform project"
+   },
+   {
+      "id": "Log type:",
+      "translation": "Log type:"
+   },
+   {
+      "id": "MOUNT DETAILS",
+      "translation": "MOUNT DETAILS"
+   },
+   {
+      "id": "More information about configuring endpoints can be found at:\n%s",
+      "translation": "More information about configuring endpoints can be found at:\n%s"
+   },
+   {
+      "id": "Mount Type:",
+      "translation": "Mount Type:"
+   },
+   {
+      "id": "NAME",
+      "translation": "NAME"
+   },
+   {
+      "id": "Name",
+      "translation": "Name"
+   },
+   {
+      "id": "Name:",
+      "translation": "Name:"
+   },
+   {
+      "id": "No builds found for the component %s of %s project",
+      "translation": "No builds found for the component %s of %s project"
+   },
+   {
+      "id": "No components found in the project",
+      "translation": "No components found in the project"
+   },
+   {
+      "id": "No description",
+      "translation": "No description"
+   },
+   {
+      "id": "No public endpoints available for selected environment",
+      "translation": "No public endpoints available for selected environment"
+   },
+   {
+      "id": "No recent logs found",
+      "translation": "No recent logs found"
+   },
+   {
+      "id": "Open link using default browser",
+      "translation": "Open link using default browser"
+   },
+   {
+      "id": "Organization URL: %s",
+      "translation": "Organization URL: %s"
+   },
+   {
+      "id": "Organizations of the Git repository",
+      "translation": "Organizations of the Git repository"
+   },
+   {
+      "id": "Please authorize the WSO2 Integration Platform to access your github repositories",
+      "translation": "Please authorize the WSO2 Integration Platform to access your github repositories"
+   },
+   {
+      "id": "Please make sure that you have a valid component-config.yaml file within .wso2 folder of the component directory and that it is commited to the repo.",
+      "translation": "Please make sure that you have a valid component-config.yaml file within .wso2 folder of the component directory and that it is commited to the repo."
+   },
+   {
+      "id": "Print logs for a component, project, or build on the WSO2 Integration Platform.",
+      "translation": "Print logs for a component, project, or build on the WSO2 Integration Platform."
+   },
+   {
+      "id": "Project Type: ",
+      "translation": "Project Type: "
+   },
+   {
+      "id": "Project name:",
+      "translation": "Project name:"
+   },
+   {
+      "id": "Public URL: %s",
+      "translation": "Public URL: %s"
+   },
+   {
+      "id": "Remote repository URL:",
+      "translation": "Remote repository URL:"
+   },
+   {
+      "id": "Resolved Org: %s(%s)",
+      "translation": "Resolved Org: %s(%s)"
+   },
+   {
+      "id": "Resolved Project: %s(%s)",
+      "translation": "Resolved Project: %s(%s)"
+   },
+   {
+      "id": "Schedule expression for the cron job (scheduled tasks only)",
+      "translation": "Schedule expression for the cron job (scheduled tasks only)"
+   },
+   {
+      "id": "Schedule timezone for the cron job (scheduled tasks only)",
+      "translation": "Schedule timezone for the cron job (scheduled tasks only)"
+   },
+   {
+      "id": "Select a directory to create the component",
+      "translation": "Select a directory to create the component"
+   },
+   {
+      "id": "Select remote repository URL:",
+      "translation": "Select remote repository URL:"
+   },
+   {
+      "id": "Select the context you wish to use",
+      "translation": "Select the context you wish to use"
+   },
+   {
+      "id": "Selected organization '%s'\n\n",
+      "translation": "Selected organization '%s'\n\n"
+   },
+   {
+      "id": "Successfully authenticated with WSO2 Integration Platform",
+      "translation": "Successfully authenticated with WSO2 Integration Platform"
+   },
+   {
+      "id": "Switch the active organization for your local context",
+      "translation": "Switch the active organization for your local context"
+   },
+   {
+      "id": "TYPE",
+      "translation": "TYPE"
+   },
+   {
+      "id": "The path where the file will be mounted within the container",
+      "translation": "The path where the file will be mounted within the container"
+   },
+   {
+      "id": "This command allows you to create a resource on the WSO2 Integration Platform.",
+      "translation": "This command allows you to create a resource on the WSO2 Integration Platform."
+   },
+   {
+      "id": "This command allows you to delete a component in the Project",
+      "translation": "This command allows you to delete a component in the Project"
+   },
+   {
+      "id": "This command allows you to delete a project on the WSO2 Integration Platform.",
+      "translation": "This command allows you to delete a project on the WSO2 Integration Platform."
+   },
+   {
+      "id": "This command allows you to describe a project on the WSO2 Integration Platform.",
+      "translation": "This command allows you to describe a project on the WSO2 Integration Platform."
+   },
+   {
+      "id": "This command allows you to edit a resource definition on the WSO2 Integration Platform",
+      "translation": "This command allows you to edit a resource definition on the WSO2 Integration Platform"
+   },
+   {
+      "id": "This command allows you to list all builds of a component on the WSO2 Integration Platform.",
+      "translation": "This command allows you to list all builds of a component on the WSO2 Integration Platform."
+   },
+   {
+      "id": "Trigger a build for a component",
+      "translation": "Trigger a build for a component"
+   },
+   {
+      "id": "Trigger a build for a component in a selected deployment track within your integration platform project.",
+      "translation": "Trigger a build for a component in a selected deployment track within your integration platform project."
+   },
+   {
+      "id": "Trigger a deployment for a component in a selected environment within your integration platform project.",
+      "translation": "Trigger a deployment for a component in a selected environment within your integration platform project."
+   },
+   {
+      "id": "Type",
+      "translation": "Type"
+   },
+   {
+      "id": "Using the latest commit: %s %s\n",
+      "translation": "Using the latest commit: %s %s\n"
+   },
+   {
+      "id": "View details such as the build status",
+      "translation": "View details such as the build status"
+   },
+   {
+      "id": "Watching for new logs...",
+      "translation": "Watching for new logs..."
+   },
+   {
+      "id": "Welcome to Integration Platform CLI, the command-line interface for https://console.devant.dev",
+      "translation": "Welcome to Integration Platform CLI, the command-line interface for https://console.devant.dev"
+   },
+   {
+      "id": "Welcome, %s!\n\n",
+      "translation": "Welcome, %s!\n\n"
+   },
+   {
+      "id": "application logs is not applicable for proxy type components",
+      "translation": "application logs is not applicable for proxy type components"
+   },
+   {
+      "id": "component name, ID, or handle",
+      "translation": "component name, ID, or handle"
+   },
+   {
+      "id": "create a component",
+      "translation": "create a component"
+   },
+   {
+      "id": "create a new resource",
+      "translation": "create a new resource"
+   },
+   {
+      "id": "create a project",
+      "translation": "create a project"
+   },
+   {
+      "id": "create config",
+      "translation": "create config"
+   },
+   {
+      "id": "create connection",
+      "translation": "create connection"
+   },
+   {
+      "id": "delete a component",
+      "translation": "delete a component"
+   },
+   {
+      "id": "delete a project",
+      "translation": "delete a project"
+   },
+   {
+      "id": "delete config or secret",
+      "translation": "delete config or secret"
+   },
+   {
+      "id": "describe a integration",
+      "translation": "describe a integration"
+   },
+   {
+      "id": "describe a config",
+      "translation": "describe a config"
+   },
+   {
+      "id": "describe a connection",
+      "translation": "describe a connection"
+   },
+   {
+      "id": "edit a resource declaration",
+      "translation": "edit a resource declaration"
+   },
+   {
+      "id": "failed to delete config mount",
+      "translation": "failed to delete config mount"
+   },
+   {
+      "id": "failed to fetch build logs: %w",
+      "translation": "failed to fetch build logs: %w"
+   },
+   {
+      "id": "failed to fetch cloud data plane information: %w",
+      "translation": "failed to fetch cloud data plane information: %w"
+   },
+   {
+      "id": "failed to fetch components: %w",
+      "translation": "failed to fetch components: %w"
+   },
+   {
+      "id": "failed to fetch config mount list: %w",
+      "translation": "failed to fetch config mount list: %w"
+   },
+   {
+      "id": "failed to fetch config-map data",
+      "translation": "failed to fetch config-map data"
+   },
+   {
+      "id": "failed to fetch config-map list: %w",
+      "translation": "failed to fetch config-map list: %w"
+   },
+   {
+      "id": "failed to fetch data plane information: %w",
+      "translation": "failed to fetch data plane information: %w"
+   },
+   {
+      "id": "failed to fetch deployment status details: %w",
+      "translation": "failed to fetch deployment status details: %w"
+   },
+   {
+      "id": "failed to fetch release container list: %w",
+      "translation": "failed to fetch release container list: %w"
+   },
+   {
+      "id": "failed to fetch secret data",
+      "translation": "failed to fetch secret data"
+   },
+   {
+      "id": "failed to fetch secret list: %w",
+      "translation": "failed to fetch secret list: %w"
+   },
+   {
+      "id": "failed to fetch user: %w",
+      "translation": "failed to fetch user: %w"
+   },
+   {
+      "id": "failed to find dev env",
+      "translation": "failed to find dev env"
+   },
+   {
+      "id": "failed to find sub directory path",
+      "translation": "failed to find sub directory path"
+   },
+   {
+      "id": "failed to follow component logs: %w",
+      "translation": "failed to follow component logs: %w"
+   },
+   {
+      "id": "failed to follow project logs: %w",
+      "translation": "failed to follow project logs: %w"
+   },
+   {
+      "id": "failed to get active organization: %w",
+      "translation": "failed to get active organization: %w"
+   },
+   {
+      "id": "failed to get api key: %w",
+      "translation": "failed to get api key: %w"
+   },
+   {
+      "id": "failed to get component endpoints: %w",
+      "translation": "failed to get component endpoints: %w"
+   },
+   {
+      "id": "failed to get component logs: %w",
+      "translation": "failed to get component logs: %w"
+   },
+   {
+      "id": "failed to get environment",
+      "translation": "failed to get environment"
+   },
+   {
+      "id": "failed to get organizations: %w",
+      "translation": "failed to get organizations: %w"
+   },
+   {
+      "id": "failed to get project env details: %w",
+      "translation": "failed to get project env details: %w"
+   },
+   {
+      "id": "failed to get project logs: %w",
+      "translation": "failed to get project logs: %w"
+   },
+   {
+      "id": "failed to get projects: %w",
+      "translation": "failed to get projects: %w"
+   },
+   {
+      "id": "failed to set active organization: %w",
+      "translation": "failed to set active organization: %w"
+   },
+   {
+      "id": "filter logs against a search query",
+      "translation": "filter logs against a search query"
+   },
+   {
+      "id": "gateway logs is only applicable for service, webhook and proxy type components",
+      "translation": "gateway logs is only applicable for service, webhook and proxy type components"
+   },
+   {
+      "id": "get detailed information about a resource",
+      "translation": "get detailed information about a resource"
+   },
+   {
+      "id": "git repository branch",
+      "translation": "git repository branch"
+   },
+   {
+      "id": "invalid Git repository",
+      "translation": "invalid Git repository"
+   },
+   {
+      "id": "invalid build-id selection",
+      "translation": "invalid build-id selection"
+   },
+   {
+      "id": "invalid build-pack selection",
+      "translation": "invalid build-pack selection"
+   },
+   {
+      "id": "invalid organization index",
+      "translation": "invalid organization index"
+   },
+   {
+      "id": "invalid project type",
+      "translation": "invalid project type"
+   },
+   {
+      "id": "limit the number of logs",
+      "translation": "limit the number of logs"
+   },
+   {
+      "id": "link directory to a component",
+      "translation": "link directory to a component"
+   },
+   {
+      "id": "list all builds of a component",
+      "translation": "list all builds of a component"
+   },
+   {
+      "id": "list available Resources",
+      "translation": "list available Resources"
+   },
+   {
+      "id": "list components",
+      "translation": "list components"
+   },
+   {
+      "id": "list configs",
+      "translation": "list configs"
+   },
+   {
+      "id": "list connections",
+      "translation": "list connections"
+   },
+   {
+      "id": "list of env variables (eg: --env-vars=\"key1=val1,key2=val2\")",
+      "translation": "list of env variables (eg: --env-vars=\"key1=val1,key2=val2\")"
+   },
+   {
+      "id": "list organizations",
+      "translation": "list organizations"
+   },
+   {
+      "id": "list projects",
+      "translation": "list projects"
+   },
+   {
+      "id": "login to the WSO2 Integration Platform",
+      "translation": "login to the WSO2 Integration Platform"
+   },
+   {
+      "id": "name of the deployment track (e.g., main)",
+      "translation": "name of the deployment track (e.g., main)"
+   },
+   {
+      "id": "name of the environment (development, production, etc.)",
+      "translation": "name of the environment (development, production, etc.)"
+   },
+   {
+      "id": "name or handle of the organization to select",
+      "translation": "name or handle of the organization to select"
+   },
+   {
+      "id": "need to provide at least on pair of env variable name and value",
+      "translation": "need to provide at least on pair of env variable name and value"
+   },
+   {
+      "id": "no matching ApiVersion found",
+      "translation": "no matching ApiVersion found"
+   },
+   {
+      "id": "no matching AppEnvVersion found",
+      "translation": "no matching AppEnvVersion found"
+   },
+   {
+      "id": "organization name, ID, or handle",
+      "translation": "organization name, ID, or handle"
+   },
+   {
+      "id": "organization with handle %s not found",
+      "translation": "organization with handle %s not found"
+   },
+   {
+      "id": "print logs",
+      "translation": "print logs"
+   },
+   {
+      "id": "project ID, name, or handle",
+      "translation": "project ID, name, or handle"
+   },
+   {
+      "id": "set context for Integration Platform CLI to be used within the repository",
+      "translation": "set context for Integration Platform CLI to be used within the repository"
+   },
+   {
+      "id": "switch the active organization",
+      "translation": "switch the active organization"
+   },
+   {
+      "id": "trigger a deployment for a component",
+      "translation": "trigger a deployment for a component"
+   },
+   {
+      "id": "type of the logs (%s)",
+      "translation": "type of the logs (%s)"
+   },
+   {
+      "id": "unable to determine the build context",
+      "translation": "unable to determine the build context"
+   },
+   {
+      "id": "unknown error",
+      "translation": "unknown error"
+   },
+   {
+      "id": "watch for additional logs output.",
+      "translation": "watch for additional logs output."
+   },
+   {
+      "id": "you do not have access to organization %s",
+      "translation": "you do not have access to organization %s"
+   }
+]

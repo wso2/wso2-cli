@@ -1,0 +1,115 @@
+name: Release CLI
+
+on:
+  release:
+    types: [published]
+
+# contents: write is required to upload release assets via GITHUB_TOKEN.
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: Run unit tests
+        run: make test
+
+  build-and-upload:
+    runs-on: ubuntu-latest
+    needs: [verify]
+    strategy:
+      matrix:
+        include:
+          # Linux — CLI binary + mcpb
+          - os: linux
+            arch: amd64
+            upload_cli: true
+          # macOS — mcpb only
+          - os: darwin
+            arch: arm64
+            upload_cli: false
+          # Windows — mcpb only
+          - os: windows
+            arch: amd64
+            upload_cli: false
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: Build wso2-integration-platform
+        run: make compile_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ github.event.release.tag_name }}
+
+      # CLI binary archive — Linux only
+      - name: Archive CLI binary
+        if: matrix.upload_cli
+        run: make dist_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }}
+
+      - name: Upload CLI Release Asset
+        if: matrix.upload_cli
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            "./bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.tar.gz#wso2-integration-platform-${{ github.event.release.tag_name }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz" \
+            --repo ${{ github.repository }} --clobber
+
+      # mcpb — all platforms
+      - name: Create .mcpb bundle
+        run: make bundle_mcpb OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ github.event.release.tag_name }}
+
+      - name: Upload .mcpb Release Asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.event.release.tag_name }} \
+            "./bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.mcpb#wso2-integration-platform-${{ github.event.release.tag_name }}-${{ matrix.os }}-${{ matrix.arch }}.mcpb" \
+            --repo ${{ github.repository }} --clobber
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wso2-ip-builds-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            **/*.tar.gz
+            **/*.mcpb
+
+  publish-npm:
+    runs-on: ubuntu-latest
+    needs: [build-and-upload]
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Set package version
+        run: |
+          cd scripts/mcp-npm-package
+          VERSION="${{ github.event.release.tag_name }}"
+          npm version "${VERSION#v}" --no-git-tag-version --allow-same-version
+
+      - name: Publish to npm
+        run: |
+          cd scripts/mcp-npm-package
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            npm publish --access public --tag beta
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

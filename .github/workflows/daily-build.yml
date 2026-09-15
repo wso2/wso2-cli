@@ -1,0 +1,89 @@
+name: Daily Build
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+# gh calls here authenticate with a separate PAT, so the workflow's own
+# GITHUB_TOKEN needs read only.
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version_gen.outputs.version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Has Changes
+        id: has_changes
+        run: |
+          test=$(git show --format="%cr  %ci" $(git branch --show-current) --since='24 hours ago') \
+          && [[ -z "$test" ]] \
+          && echo "No changes in the last 24 hours" && exit 1 || echo "Changes found in the last 24 hours"
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: Run unit tests
+        run: make test
+
+      - name: Run e2e tests - PROD
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: prod
+          user_name: e8085eae-9391-4d03-9302-672068c1fe50
+          password: ${{ secrets.CHOREO_PROD_TEST_USER_PASS }}
+
+  create-build:
+    runs-on: ubuntu-latest
+    needs: verify
+    outputs:
+      version: ${{ steps.gen_pre_release_version.outputs.version }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+      
+      - name: generate version
+        id: gen_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHOREO_CLI_GITHUB_TOKEN }}
+        run: |
+          version=$(gh release list --json tagName,isLatest -q 'map(select(.isLatest == true)) | first | .tagName') \
+          && echo "version=$version" >> $GITHUB_OUTPUT
+      
+  create-release:
+    runs-on: ubuntu-latest
+    needs: create-build
+    outputs:
+      private_upload_url: ${{ steps.create_release_private.outputs.upload_url }}
+    steps:
+      - name: Create release - private
+        id: create_release_private
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHOREO_CLI_GITHUB_TOKEN }}
+        run: |
+            url=`gh api \
+                  --method POST \
+                  -H "Accept: application/vnd.github+json" \
+                  -H "X-GitHub-Api-Version: 2022-11-28" \
+                  /repos/wso2/integration-platform-tools/releases \
+                  -f tag_name="${{ needs.create-build.outputs.version }}" \
+                 -f target_commitish='dev' \
+                 -f name="${{ needs.create-build.outputs.version }}" \
+                 -F draft=false \
+                 -F prerelease=true \
+                 -F generate_release_notes=false -q .upload_url` \
+            && echo "upload_url=$url" >> "$GITHUB_OUTPUT"
+

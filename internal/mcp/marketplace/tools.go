@@ -1,0 +1,36 @@
+package marketplace
+
+import "github.com/mark3labs/mcp-go/mcp"
+
+var ListMarketplaceResourcesTool = mcp.NewTool("list_marketplace_resources",
+	mcp.WithTitleAnnotation("List Marketplace Resources"),
+	mcp.WithDescription("Lists available platform services, third-party integrations and databases from the Marketplace. Use the resource_type parameter to specify what you want to list. For resource_type: 'platform-service', a query is mandatory to filter services. You can also paginate results using limit and offset, and filter by networkVisibilityFilter. For resource_type: 'database', no additional query parameters are required, and all available databases will be listed. For resource_type: 'third-party', after finding the resource, recall with the resource_id to get implementation details."),
+	mcp.WithReadOnlyHintAnnotation(true),
+	mcp.WithDestructiveHintAnnotation(false),
+	mcp.WithIdempotentHintAnnotation(false),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("resource_type",
+		mcp.Required(),
+		mcp.Description("Which type of resources to list. platform-service: User APIs hosted on the platform; database: platform-hosted databases; third-party: Third party integrations like openai, stripe, etc."),
+		mcp.Enum(
+			"platform-service",
+			"third-party",
+			"database",
+		),
+	),
+	mcp.WithString("resource_id",
+		mcp.Description("The ID of the resource to get the integration details for. Only applicable if resource_type is 'third-party'."),
+	),
+	mcp.WithString("query",
+		mcp.Description("The search query to filter services. This is mandatory if resource_type is 'platform-service'."),
+	),
+	mcp.WithString("limit",
+		mcp.Description("The maximum number of results to return per page. Defaults to '8'. Only applicable if resource_type is 'platform-service'."),
+	),
+	mcp.WithString("offset",
+		mcp.Description("The offset for pagination, indicating the starting point of results. Defaults to '0'. Only applicable if resource_type is 'platform-service'."),
+	),
+	mcp.WithString("networkVisibilityFilter",
+		mcp.Description("Filters services based on network visibility. Valid values: 'public,org,project' (default), 'public', 'org', 'project'. Only applicable if resource_type is 'platform-service'."),
+	),
+)

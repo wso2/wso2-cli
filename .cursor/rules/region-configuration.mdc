@@ -1,0 +1,56 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Region Configuration Guide
+
+## Configuration Structure
+
+### Base Configuration
+The base configuration for regions is defined in [internal/config/types.go](mdc:internal/config/types.go):
+- `ChoreoEnvConfig`: Base configuration type for all environments
+- Environment-specific settings (URLs, client IDs, etc.)
+
+### Region-Specific Configurations
+
+1. US Region (Default)
+- Configuration in [internal/region/us_config.go](mdc:internal/region/us_config.go)
+- Default production endpoints
+- Development and staging environments for internal use
+
+2. EU Region
+- Configuration in [internal/region/eu_config.go](mdc:internal/region/eu_config.go)
+- EU-specific endpoints and services
+- Separate authentication endpoints
+
+## Environment Management
+
+### Environment Types
+Each region supports three environments:
+1. Production (prod) - Default for end users
+2. Development (dev) - For internal development
+3. Staging (stage) - For testing and validation
+
+### Environment Selection
+- End users: Always use production environment
+- Developers: Can override using CHOREO_ENV environment variable
+- Environment selection is region-aware
+
+## Implementation Details
+
+### Thread Safety
+- Region selection uses mutex locks
+- Concurrent access protection for configuration
+- Safe region switching during operations
+
+### Configuration Initialization
+- US region initialized by default
+- EU region configurations loaded on demand
+- Environment configs initialized at startup
+
+### Best Practices
+1. Always use region-aware configuration getters
+2. Check token validity when switching regions
+3. Use environment variables only for development
+4. Handle region-specific endpoints appropriately

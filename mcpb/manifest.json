@@ -1,0 +1,18 @@
+{
+  "manifest_version": "0.2",
+  "name": "wso2-integration-platform",
+  "version": "1.0.0",
+  "description": "WSO2 Integration Platform MCP connector - create and manage Automations, APIs, AI Agents, MCP Servers, Event Integrations, and File Integrations.",
+  "author": {
+    "name": "WSO2"
+  },
+  "server": {
+    "type": "binary",
+    "entry_point": "server/wso2-integration-platform",
+    "mcp_config": {
+      "command": "${__dirname}/server/wso2-integration-platform",
+      "args": ["start-mcp-server"],
+      "env": {}
+    }
+  }
+}

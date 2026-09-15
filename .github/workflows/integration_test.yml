@@ -1,0 +1,86 @@
+name: Integration Test Run
+
+on:
+  workflow_dispatch: # Manually trigger the workflow
+  schedule:
+    # - cron: '30 18 * * *' # 00:00 in LK time
+    - cron: '30 03 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  integration-test-ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: e2e Test run - PROD
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: prod
+          user_name: e8085eae-9391-4d03-9302-672068c1fe50
+          password: ${{ secrets.CHOREO_PROD_TEST_USER_PASS }}
+
+      - name: e2e Test run - DEV
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: dev
+          user_name: bda17a6c-f50d-49b9-b48a-83913b09d3d9
+          password: ${{ secrets.CHOREO_DEV_TEST_USER_PASS }}
+
+  integration-test-macos:
+    needs: integration-test-ubuntu
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: e2e Test run - PROD
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: prod
+          user_name: e8085eae-9391-4d03-9302-672068c1fe50
+          password: ${{ secrets.CHOREO_PROD_TEST_USER_PASS }}
+
+      - name: e2e Test run - DEV
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: dev
+          user_name: bda17a6c-f50d-49b9-b48a-83913b09d3d9
+          password: ${{ secrets.CHOREO_DEV_TEST_USER_PASS }}
+
+  integration-test-windows:
+    needs: integration-test-macos
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Setup Action
+        uses: ./.github/actions/setup
+
+      - name: e2e Test run - PROD
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: prod
+          user_name: e8085eae-9391-4d03-9302-672068c1fe50
+          password: ${{ secrets.CHOREO_PROD_TEST_USER_PASS }}
+
+      - name: e2e Test run - DEV
+        uses: ./.github/actions/e2e-test-run
+        with:
+          env: dev
+          user_name: bda17a6c-f50d-49b9-b48a-83913b09d3d9
+          password: ${{ secrets.CHOREO_DEV_TEST_USER_PASS }}
+

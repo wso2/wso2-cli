@@ -1,0 +1,923 @@
+openapi: 3.0.1
+info:
+  title: Api
+  version: 0.1.0
+servers:
+- url: "{server}:{port}/api"
+  variables:
+    server:
+      default: ""
+    port:
+      default: config:servicePort
+paths:
+  /core/v1alpha1/projectName/{projectName}/componentName/{componentName}/component-config:
+    get:
+      operationId: getCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameComponentConfig
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputComponentConfig'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameComponentConfig
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputComponentConfig'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projects/{projectName}/components/{componentName}/component-configs:
+    get:
+      operationId: getCoreV1alpha1ProjectsProjectnameComponentsComponentnameComponentConfigs
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputComponentConfig'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectsProjectnameComponentsComponentnameComponentConfigs
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputComponentConfig'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projectName/{projectName}/componentName/{componentName}/deploymentTrackName/{deploymentTrack}/build:
+    get:
+      operationId: getCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameDeploymenttracknameDeploymenttrackBuild
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputBuildKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameDeploymenttracknameDeploymenttrackBuild
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputBuildKind'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projects/{projectName}/components/{componentName}/deploymentTracks/{deploymentTrack}/builds:
+    get:
+      operationId: getCoreV1alpha1ProjectsProjectnameComponentsComponentnameDeploymenttracksDeploymenttrackBuilds
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputBuildKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectsProjectnameComponentsComponentnameDeploymenttracksDeploymenttrackBuilds
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputBuildKind'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuildTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projectName/{projectName}/componentName/{componentName}/deploymentTrackName/{deploymentTrack}/deploy:
+    get:
+      operationId: getCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameDeploymenttracknameDeploymenttrackDeploy
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputDeploymentKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectnameProjectnameComponentnameComponentnameDeploymenttracknameDeploymenttrackDeploy
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputDeploymentKind'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projects/{projectName}/components/{componentName}/deploymentTracks/{deploymentTrack}/deployments:
+    get:
+      operationId: getCoreV1alpha1ProjectsProjectnameComponentsComponentnameDeploymenttracksDeploymenttrackDeployments
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputDeploymentKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectsProjectnameComponentsComponentnameDeploymenttracksDeploymenttrackDeployments
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: deploymentTrack
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputDeploymentKind'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeploymentTrigger'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projects/{projectName}/components/{componentName}:
+    get:
+      operationId: getCoreV1alpha1ProjectsProjectnameComponentsComponentname
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: componentName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutputComponentKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /core/v1alpha1/projects/{projectName}/components:
+    get:
+      operationId: getCoreV1alpha1ProjectsProjectnameComponents
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutputComponentKind'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: postCoreV1alpha1ProjectsProjectnameComponents
+      parameters:
+      - name: projectName
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputComponentKind'
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateByocComponentResponse'
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    SpecBuild:
+      required:
+      - branch
+      - revision
+      type: object
+      properties:
+        branch:
+          type: string
+        revision:
+          type: string
+    ComponentSource:
+      type: object
+      properties:
+        bitbucket:
+          $ref: '#/components/schemas/GitProvider'
+        github:
+          $ref: '#/components/schemas/GitProvider'
+      description: Record to store component source details
+    DeploymentTrigger:
+      required:
+      - deployDeploymentTrack
+      type: object
+      properties:
+        deployDeploymentTrack:
+          type: string
+      description: Record to capture the deployment trigger details.
+    DeploymentKindSpec:
+      required:
+      - buildRef
+      type: object
+      properties:
+        buildRef:
+          type: string
+      description: Record to store deployment kind spec details
+    OutputComponentConfig:
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      type: object
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/MetaData'
+        spec:
+          $ref: '#/components/schemas/Spec'
+      description: Data Collected from Component_Config.yaml is stored in this record.
+    BuildMetaData:
+      required:
+      - componentName
+      - name
+      - projectName
+      type: object
+      properties:
+        name:
+          type: string
+        componentName:
+          type: string
+        projectName:
+          type: string
+      description: Record to store build kind metadata details
+    ComponentBuild:
+      type: object
+      properties:
+        docker:
+          $ref: '#/components/schemas/DockerBuild'
+        ballerina:
+          $ref: '#/components/schemas/BallerinaBuild'
+        webapp:
+          $ref: '#/components/schemas/WebAppBuild'
+        buildpack:
+          $ref: '#/components/schemas/BuildpackBuild'
+      description: Record to store component build details
+    GitProvider:
+      required:
+      - branch
+      - path
+      - repository
+      type: object
+      properties:
+        repository:
+          type: string
+        branch:
+          type: string
+        path:
+          type: string
+          nullable: true
+      description: Record to store git provider details for both github and bitbucket
+    Endpoints:
+      required:
+      - name
+      - port
+      - type
+      type: object
+      properties:
+        name:
+          type: string
+        port:
+          type: integer
+          format: int64
+        type:
+          type: string
+        visibility:
+          type: string
+        context:
+          type: string
+        schemaFilePath:
+          type: string
+      description: This has the details about the endpoints.
+    ValueFrom:
+      required:
+      - configGroupRef
+      type: object
+      properties:
+        configGroupRef:
+          $ref: '#/components/schemas/ConfigGroupRef'
+      description: Record to store mapping details
+    BuildpackBuild:
+      required:
+      - language
+      - version
+      type: object
+      properties:
+        language:
+          type: string
+        version:
+          type: string
+      description: Record to store buildpack build details
+    MetaData:
+      required:
+      - name
+      - projectName
+      type: object
+      properties:
+        name:
+          type: string
+        projectName:
+          type: string
+      description: Record to store component config metdata details
+    ConfigGroupRef:
+      required:
+      - key
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        key:
+          type: string
+      description: Record to store config group details
+    BuildTrigger:
+      required:
+      - message
+      - success
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+      description: Respone of triggering build.
+    Dependencies:
+      required:
+      - serviceReferences
+      type: object
+      properties:
+        serviceReferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceReferences'
+      description: Record to store outbound details.
+    Files:
+      required:
+      - path
+      type: object
+      properties:
+        path:
+          type: string
+        value:
+          type: string
+        valueFrom:
+          $ref: '#/components/schemas/ValueFrom'
+      description: Record to store file details
+    BuildKindSpec:
+      required:
+      - revision
+      type: object
+      properties:
+        revision:
+          type: string
+      description: Record to store build kind spec details.
+    ComponentMetaData:
+      required:
+      - name
+      - projectName
+      type: object
+      properties:
+        name:
+          type: string
+        projectName:
+          type: string
+      description: Record to store component metadata details
+    OutputBuildKind:
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      type: object
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/BuildMetaData'
+        spec:
+          $ref: '#/components/schemas/BuildKindSpec'
+      description: Data Collected from Build.yaml is stored in this record.
+    WebAppBuild:
+      required:
+      - buildCommand
+      - nodeVersion
+      - outputDir
+      - type
+      type: object
+      properties:
+        buildCommand:
+          type: string
+        nodeVersion:
+          type: string
+        outputDir:
+          type: string
+        type:
+          type: string
+      description: Record to store webapp build details
+    ConfigurationRecords:
+      required:
+      - from
+      - to
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+      description: Record to store configuration mapping details.
+    ServiceReferences:
+      required:
+      - connectionConfig
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        connectionConfig:
+          type: string
+        env:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigurationRecords'
+      description: Service references.
+    BallerinaBuild:
+      type: object
+      properties:
+        sampleTemplate:
+          type: string
+        enableCellDiagram:
+          type: boolean
+      description: Record to store ballerina build details
+    DockerBuild:
+      required:
+      - dockerContextPath
+      - dockerFilePath
+      type: object
+      properties:
+        dockerFilePath:
+          type: string
+        dockerContextPath:
+          type: string
+      description: Record to store docker build details
+    Environments:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        value:
+          type: string
+        valueFrom:
+          $ref: '#/components/schemas/ValueFrom'
+      description: Record to store environment details.
+    ComponentKindSpec:
+      required:
+      - build
+      - source
+      - type
+      type: object
+      properties:
+        type:
+          type: string
+        source:
+          $ref: '#/components/schemas/ComponentSource'
+        build:
+          $ref: '#/components/schemas/ComponentBuild'
+      description: Record to store component kind spec details
+    ProxyBasedEndpoints:
+      type: object
+      properties:
+        visibility:
+          type: string
+        invokeUrl:
+          type: string
+      description: Record to store Proxy Based inbound details.
+    ErrorPayload:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Reason phrase
+        path:
+          type: string
+          description: Request path
+        method:
+          type: string
+          description: Method type of the request
+        message:
+          type: string
+          description: Error message
+        timestamp:
+          type: string
+          description: Timestamp of the error
+        status:
+          type: integer
+          description: Relevant HTTP status code
+          format: int32
+    OutputComponentKind:
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      type: object
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/ComponentMetaData'
+        spec:
+          $ref: '#/components/schemas/ComponentKindSpec'
+      description: Record to store component kind details
+    DeploymentMetaData:
+      required:
+      - componentName
+      - deploymentTrackId
+      - environment
+      - name
+      - projectName
+      type: object
+      properties:
+        name:
+          type: string
+        deploymentTrackId:
+          type: string
+        environment:
+          type: string
+        componentName:
+          type: string
+        projectName:
+          type: string
+      description: Record to store deployment metadata details
+    CreateByocComponentResponse:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+    Configs:
+      type: object
+      properties:
+        env:
+          type: array
+          items:
+            $ref: '#/components/schemas/Environments'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/Files'
+      description: Record to store configuration details.
+    OutputDeploymentKind:
+      required:
+      - apiVersion
+      - kind
+      - metadata
+      - spec
+      type: object
+      properties:
+        apiVersion:
+          type: string
+        kind:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/DeploymentMetaData'
+        spec:
+          $ref: '#/components/schemas/DeploymentKindSpec'
+      description: Data Collected from Deployment.yaml is stored in this record.
+    Spec:
+      type: object
+      properties:
+        build:
+          $ref: '#/components/schemas/SpecBuild'
+        apiVersion:
+          type: string
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Endpoints'
+        proxyBasedEndpoints:
+          $ref: '#/components/schemas/ProxyBasedEndpoints'
+        dependencies:
+          $ref: '#/components/schemas/Dependencies'
+        configurations:
+          $ref: '#/components/schemas/Configs'
+      description: This contains the specification in the component_config.yaml.

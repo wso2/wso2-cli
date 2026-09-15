@@ -1,0 +1,35 @@
+{
+  "name": "@pcnfernando-wso2/integration-platform-mcp",
+  "version": "1.0.0",
+  "description": "WSO2 Integration Platform MCP Server - create and manage Automations, APIs, AI Agents, MCP Servers, Event Integrations, and File Integrations.",
+  "bin": {
+    "wso2-integration-platform": "./run.js"
+  },
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "files": [
+    "install.js",
+    "run.js",
+    "bin/"
+  ],
+  "keywords": [
+    "mcp",
+    "wso2",
+    "integration-platform",
+    "choreo",
+    "claude"
+  ],
+  "author": {
+    "name": "WSO2",
+    "url": "https://wso2.com"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wso2/integration-platform-tools"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}

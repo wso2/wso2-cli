@@ -1,0 +1,58 @@
+package project
+
+import "github.com/mark3labs/mcp-go/mcp"
+
+var GetProjectsTool = mcp.NewTool("get_projects",
+	mcp.WithTitleAnnotation("Get Projects"),
+	mcp.WithDescription("Retrieves a list of all projects within the active organization. If a project_uuid is provided, it will return a list containing only that specific project's details. This tool provides high-level details about each project."),
+	mcp.WithReadOnlyHintAnnotation(true),
+	mcp.WithDestructiveHintAnnotation(false),
+	mcp.WithIdempotentHintAnnotation(false),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("project_uuid",
+		mcp.Description("The UUID of a specific project to retrieve details for."),
+	),
+)
+
+var GetProjectEnvironmentsTool = mcp.NewTool("get_project_environments",
+	mcp.WithTitleAnnotation("Get Project Environments"),
+	mcp.WithDescription("Get a list of environments for a specific project from the active organization or a specific organization if provided"),
+	mcp.WithReadOnlyHintAnnotation(true),
+	mcp.WithDestructiveHintAnnotation(false),
+	mcp.WithIdempotentHintAnnotation(true),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("project_uuid",
+		mcp.Required(),
+		mcp.Description("The UUID of the project to get environments from"),
+	),
+)
+
+var CreateProjectTool = mcp.NewTool("create_project",
+	mcp.WithTitleAnnotation("Create Project"),
+	mcp.WithDescription("Creates a new project within your active organization. Projects serve as organizational containers for your components and environments. PRE-CONDITION: get_projects tool must be called first."),
+	mcp.WithReadOnlyHintAnnotation(false),
+	mcp.WithDestructiveHintAnnotation(true),
+	mcp.WithIdempotentHintAnnotation(false),
+	mcp.WithOpenWorldHintAnnotation(true),
+	mcp.WithString("project_name",
+		mcp.Required(),
+		mcp.Description("The desired name for the new project."),
+	),
+	// TODO: Uncomment after fixing the mono-repo project creation
+	// mcp.WithString("repo_url",
+	// 	mcp.Description("The Git repository URL to associate with the project. This is used for mono-repo projects or to provide a project-level README via a Git repo. Defaults to an empty string."),
+	// ),
+	mcp.WithString("branch",
+		mcp.Description("The main branch of the project's repository. Defaults to 'main'."),
+	),
+	mcp.WithString("region",
+		mcp.Description("Region of the project to create. Optional and defaults to 'US'. Valid values are 'US', 'EU'"),
+		mcp.Enum("US", "EU"),
+	),
+	mcp.WithString("version",
+		mcp.Description("The version of the project. Defaults to '1.0.0'"),
+	),
+	mcp.WithString("description",
+		mcp.Description("A brief description of the project's purpose. Defaults to an empty string."),
+	),
+)

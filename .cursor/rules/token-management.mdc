@@ -1,0 +1,66 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Token Management for Multi-Region Support
+
+## Overview
+Token management in the Choreo CLI handles authentication across multiple regions with region-specific token storage and validation.
+
+## Implementation Files
+
+### Core Token Management
+- [internal/auth/token-store.go](mdc:internal/auth/token-store.go): Region-specific token handling
+- Token storage and validation functions
+- Region-aware token operations
+
+## Key Features
+
+### Token Storage
+1. Region-Specific Storage
+- Tokens stored with region prefix
+- Format: `{region}-{orgId}`
+- Separate storage per region and organization
+
+2. Token Validation
+- Check token existence
+- Validate token expiration
+- Region-specific validation rules
+
+### Token Operations
+
+1. Token Retrieval
+```go
+// Get region-specific token
+token, err := tokenStore.GetToken(fmt.Sprintf("%s-%s", region, orgId))
+```
+
+2. Token Validation
+```go
+// Check if token is valid for region
+HasValidToken(region string, orgId string) bool
+```
+
+3. Token Cleanup
+```go
+// Clear region-specific token
+ClearTokenForRegion(region string, orgId string)
+```
+
+## Usage Flow
+
+1. Region Switch
+- Check token validity for new region
+- Prompt for login if no valid token
+- Clear old region token if needed
+
+2. Authentication
+- Store token with region prefix
+- Validate region-specific token
+- Handle token expiration
+
+3. Token Cleanup
+- Clear tokens on logout
+- Remove region-specific tokens
+- Handle organization changes

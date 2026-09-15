@@ -1,0 +1,34 @@
+
+@startuml
+actor User as User
+participant "Choreo CLI" as CLI
+participant "Choreo Console" as Console
+participant FIDP as FIDP
+participant Asgardeo
+participant "Choreo User Mgt API" as UserAPI
+participant "Choreo STS" as STS
+
+User -> CLI : Open Choreo CLI
+CLI -> Console : Open browser, present sign-in page
+User -> Console : Choose FIDP
+Console -> FIDP : Redirect to FIDP login page
+FIDP -> Console : User successfully logs in
+Console -> CLI : Redirect to localhost webpage
+CLI -> CLI : Receive authCode
+CLI -> Asgardeo : Exchange authCode for access token
+Asgardeo -> CLI : Return access token
+CLI -> UserAPI : Validate User
+UserAPI --> CLI : Return list of Organizations
+CLI -> STS : Exchange access token for STS token
+STS --> CLI : Return STS token
+
+...
+
+User -> CLI : Perform action
+CLI -> CLI : Check if token is expired
+CLI -> STS : Exchange current refresh token for a new access token
+STS --> CLI : Return a new access token (this token doesn't have proper claims)
+CLI -> STS : Re-exchange the new access token for a token with proper claims
+STS --> CLI : Return token
+
+@enduml

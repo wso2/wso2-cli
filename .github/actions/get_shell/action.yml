@@ -1,0 +1,20 @@
+name: Set default shell based on OS
+description: "Set default shell based on OS"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set default shell
+      if: ${{ runner.os == 'Windows' }}
+      shell: pwsh
+      run: echo "shell=pwsh" >> $GITHUB_OUTPUT
+
+    - name: Set default shell
+      if: ${{ runner.os == 'Ubuntu' }}
+      shell: bash
+      run: echo "shell=bash" >> $GITHUB_OUTPUT
+
+    - name: Set default shell
+      if: ${{ runner.os == 'macOS' }}
+      shell: bash
+      run: echo "shell=bash" >> $GITHUB_OUTPUT
