@@ -12,8 +12,6 @@ import (
 )
 
 const BASE_PROJECT_NAME = "ip-cli-e2e-test"
-const USER_EMAIL = "REDACTED"
-const STAGE_USER_EMAIL = "REDACTED"
 
 // NOTE: TEST_COMPONENT_NAME, DEPLOYMENT_TRACK, BUILD_PACK_TYPE, SUB_PATH and the
 // REPO_* sample-repo URLs were removed with the nodejs webApp E2E tests. Any
@@ -21,11 +19,18 @@ const STAGE_USER_EMAIL = "REDACTED"
 // Ballerina or WSO2 MI integration.
 
 var (
-	TEST_USER_NAME  = ""
-	TEST_USER_PASS  = ""
-	RUN_OS          = ""
-	ENV             = ""
-	TestProjectName = ""
+	TEST_USER_NAME = ""
+	TEST_USER_PASS = ""
+	// Expected account identities for the post-login assertion. Supplied by the
+	// environment rather than hardcoded: these name real test accounts, and this
+	// repository is public, so committing them would publish a list of valid
+	// logins to spray against. Both default to the login name when unset, which
+	// is the same account in every configuration CI runs.
+	USER_EMAIL       = ""
+	STAGE_USER_EMAIL = ""
+	RUN_OS           = ""
+	ENV              = ""
+	TestProjectName  = ""
 )
 
 func TestMain(m *testing.M) {
@@ -34,6 +39,15 @@ func TestMain(m *testing.M) {
 	TEST_USER_PASS = os.Getenv("CHOREO_CLI_TEST_USER_PASS")
 	RUN_OS = os.Getenv("RUN_OS")
 	ENV = os.Getenv("WSO2IP_ENV")
+
+	USER_EMAIL = os.Getenv("CHOREO_CLI_TEST_USER_EMAIL")
+	if USER_EMAIL == "" {
+		USER_EMAIL = TEST_USER_NAME
+	}
+	STAGE_USER_EMAIL = os.Getenv("CHOREO_CLI_TEST_STAGE_USER_EMAIL")
+	if STAGE_USER_EMAIL == "" {
+		STAGE_USER_EMAIL = TEST_USER_NAME
+	}
 
 	// Enable non-interactive mode for all integration tests
 	config.NonInteractive = true
