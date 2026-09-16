@@ -327,7 +327,7 @@ func genComponentConfigFile(params *CreateComponentParams, repoPath string, file
 					utils.CS.Yellow(
 						fmt.Sprintf(
 							i18n.T("More information about configuring connections can be found at:\n%s"),
-							"https://wso2.com/choreo/docs/develop-components/configure-endpoints/#apply-advanced-component-connection-configurations",
+							"https://wso2.com/integration-platform/docs/connectors/overview",
 						),
 					),
 				)
@@ -337,7 +337,7 @@ func genComponentConfigFile(params *CreateComponentParams, repoPath string, file
 				utils.IO.Out,
 				utils.CS.Yellowf(
 					i18n.T("\nFor more information on configuring inbound & outbound connections:\n%s"),
-					"https://wso2.com/choreo/docs/develop-components/configure-endpoints/#apply-advanced-component-connection-configurations",
+					"https://wso2.com/integration-platform/docs/connectors/overview",
 				),
 			)
 		}
