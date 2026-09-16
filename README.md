@@ -8,6 +8,7 @@ A CLI and MCP Server for [WSO2 Integration Platform](https://wso2.com/integratio
 
 - [Installation](#installation)
 - [Getting Started](#getting-started)
+- [Commands](#commands)
 - [MCP Server](#mcp-server)
   - [Option 1 — Claude Connectors (.mcpb)](#option-1--claude-connectors-mcpb)
   - [Option 2 — Claude Code & MCP agents (npm)](#option-2--claude-code--mcp-agents-npm)
@@ -70,6 +71,45 @@ wso2-integration-platform list components
 # 4. Describe a resource
 wso2-integration-platform describe <project|component>
 ```
+
+---
+
+## Commands
+
+Resource operations follow a `<verb> <resource>` shape. Run `--help` on any of
+them for flags.
+
+| Resource | create | list | describe | delete | suspend / resume | logs |
+|----------|:------:|:----:|:--------:|:------:|:----------------:|:----:|
+| project | ✓ | ✓ | ✓ | ✓ | | |
+| component | ✓ | ✓ | ✓ | ✓ | | |
+| build | ✓ | ✓ | ✓ | | | ✓ |
+| deployment | ✓ | | ✓ | | ✓ | |
+| execution | ✓ | ✓ | ✓ | | | ✓ |
+| config | ✓ | ✓ | ✓ | ✓ | | |
+| connection | ✓ | ✓ | ✓ | | | |
+| test-key | ✓ | | | | | |
+| organization | | ✓ | | | | |
+
+`list components` shows integrations only — automations, APIs, AI agents, MCP
+servers, event and file integrations. Other component types that may exist in
+the same project are filtered out.
+
+Logs come from four sources: `logs application`, `logs build`, `logs executions`
+and `logs gateway`.
+
+### Session and configuration
+
+| Command | Purpose |
+|---------|---------|
+| `login` / `logout` | Authenticate against the platform |
+| `change-org` | Switch the active organization |
+| `region` | Set or view the region (US, EU) |
+| `set-context` | Bind a repository directory to a project |
+| `connect` | Connect a local component to its deployed dependencies |
+| `env` | List the environment variables the CLI recognizes |
+
+The MCP server runs as `start-mcp-server`; see [MCP Server](#mcp-server).
 
 ---
 
