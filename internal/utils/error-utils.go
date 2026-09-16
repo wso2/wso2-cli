@@ -122,7 +122,7 @@ func HandleErr(err error) {
 					CS.Yellow(i18n.T("Please make sure that you have a valid component.yaml file within .wso2 folder of the component directory and that it is commited to the repo.")),
 					CS.Yellowf(
 						i18n.T("\nFor more info on configuring service endpoints:\n%s"),
-						"https://wso2.com/integration-platform/docs/develop/integration-artifacts",
+						"https://wso2.com/integration-platform/docs/manage/cloud/configurations/endpoint-configurations",
 					),
 				),
 			)
@@ -132,7 +132,7 @@ func HandleErr(err error) {
 				IO.Out,
 				heredoc.Docf(i18n.T(`
                     No Git credentials are configured for the Organization.
-                    For information on configuring credentials: https://wso2.com/integration-platform/docs/deploy-operate/cicd/github-actions
+                    For information on configuring credentials: https://wso2.com/integration-platform/docs/manage/cloud/cicd/connect-git-repository
                 `)),
 			)
 		} else {

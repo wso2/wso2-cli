@@ -106,7 +106,7 @@ func GetConnectionConfigString(connectionItem connections.Connection, envs []pro
 		configs += heredoc.Docf(i18n.T(`
 
 			Refer to the instructions provided in the following link to learn how to use these configurations :
-				https://wso2.com/integration-platform/docs/connectors/overview
+				https://wso2.com/integration-platform/docs/develop/integration-artifacts/supporting/connections
 		`))
 	}
 
