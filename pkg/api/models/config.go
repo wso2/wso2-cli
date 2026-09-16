@@ -48,11 +48,11 @@ configurations:
       # +required value source
       # Allowed value sources: connectionRef, configForm
       valueFrom:
-        # +required Choreo connection value source
+        # +required Platform connection value source
         connectionRef:
-          # +required Choreo connection name to refer the value from
+          # +required Platform connection name to refer the value from
           name: hr-connection
-          # +required Choreo connection configuration key to refer the value from
+          # +required Platform connection configuration key to refer the value from
           key: ServiceURL
     - name: DB_USER
       # +required value source
