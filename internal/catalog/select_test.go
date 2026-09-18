@@ -249,6 +249,65 @@ func TestSelectRefusesAnIncompatibleShell(t *testing.T) {
 	}
 }
 
+// TestSelectRefusesMultipleIncompatibleShellRangesPinsWording pins that when
+// multiple speakable versions exist with distinct unsatisfying shell ranges,
+// the refusal deduplicates the ranges and lists them joined by "or".
+func TestSelectRefusesMultipleIncompatibleShellRangesPinsWording(t *testing.T) {
+	shellVer, err := semver.Parse("0.0.1")
+	if err != nil {
+		t.Fatalf("Parse returned %v", err)
+	}
+	file := NamespaceFile{
+		Namespace: "reference",
+		Versions: []Version{
+			{
+				Version: "0.3.0",
+				Channel: ChannelStable,
+				Compatibility: modules.Compatibility{
+					Shell:            ">=0.2.0 <2.0.0",
+					ProtocolVersions: []int{1},
+				},
+			},
+			{
+				Version: "0.2.0",
+				Channel: ChannelStable,
+				Compatibility: modules.Compatibility{
+					Shell:            ">=0.2.0 <2.0.0",
+					ProtocolVersions: []int{1},
+				},
+			},
+			{
+				Version: "0.1.0",
+				Channel: ChannelStable,
+				Compatibility: modules.Compatibility{
+					Shell:            ">=0.1.0 <0.2.0",
+					ProtocolVersions: []int{1},
+				},
+			},
+		},
+	}
+	shell := modules.ShellIdentity{
+		Version:          shellVer,
+		ProtocolVersions: []int{1},
+	}
+
+	_, err = Select(file, Policy{}, shell)
+	var typed problem.Problem
+	if !errors.As(err, &typed) {
+		t.Fatalf("want a typed problem, got %v", err)
+	}
+	if typed.Code != "modules.incompatible_shell" {
+		t.Errorf("code = %q, want modules.incompatible_shell", typed.Code)
+	}
+	expectedMsg := `no published version of the "reference" module supports this shell; the published versions require a WSO2 CLI shell matching >=0.2.0 <2.0.0 or >=0.1.0 <0.2.0, and this shell is 0.0.1`
+	if typed.Message != expectedMsg {
+		t.Errorf("message = %q, want %q", typed.Message, expectedMsg)
+	}
+	if !strings.Contains(typed.Recovery, "Update the WSO2 CLI so the shell version is supported.") {
+		t.Errorf("recovery = %q, want recovery naming shell version support", typed.Recovery)
+	}
+}
+
 // TestSelectDistinguishesIncompatibleShellFromProtocol pins that the shell
 // refusal and protocol refusal are distinguishable by code and recovery.
 func TestSelectDistinguishesIncompatibleShellFromProtocol(t *testing.T) {
