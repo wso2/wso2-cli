@@ -98,6 +98,8 @@ type catalogOptions struct {
 	platforms []modules.Platform
 	// protocols overrides, by tag, the protocol versions that release declares.
 	protocols map[string][]int
+	// shellRanges overrides, by tag, the shell compatibility range that release declares.
+	shellRanges map[string]string
 	// carriesNoModule marks tags whose archive is a well-formed tarball that
 	// carries no module executable. Its digest is the digest the catalog
 	// publishes, so it reproduces the failure that happens after the download
@@ -242,9 +244,13 @@ func (c *catalogHarness) input(tags []string) catalog.Input {
 		if !overridden {
 			protocols = []int{testProtocolVersionNumber}
 		}
+		shellRange, overriddenRange := c.options.shellRanges[tag]
+		if !overriddenRange {
+			shellRange = ">=0.1.0 <2.0.0"
+		}
 		published[tag] = catalog.Release{
 			Compatibility: modules.Compatibility{
-				Shell:            ">=0.1.0 <2.0.0",
+				Shell:            shellRange,
 				ProtocolVersions: protocols,
 			},
 			Capabilities: capabilities[namespace],
