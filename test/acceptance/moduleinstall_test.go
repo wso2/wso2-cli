@@ -198,7 +198,7 @@ func TestAShellOutsideDeclaredRangeIsRefusedNamingTheRangeAndShellVersion(t *tes
 	if !strings.Contains(stderr, "0.0.1") {
 		t.Errorf("the refusal does not name the shell version:\n%s", stderr)
 	}
-	if !strings.Contains(stderr, "Update the WSO2 CLI so the shell version is supported.") {
+	if !strings.Contains(stderr, "Update the module or the WSO2 CLI so the shell version is supported.") {
 		t.Errorf("the refusal does not carry the shell update recovery:\n%s", stderr)
 	}
 	requireCleanStore(t, stateRoot, catalogNamespace)
@@ -228,9 +228,9 @@ func TestOlderShellInstallsNewestVersionMatchingItsShellRange(t *testing.T) {
 
 // A module whose version number is far ahead of or behind the shell's installs
 // normally. The shell never compares a module's version against its own: the
-// gate is the protocol versions intersected with the platform, and nothing
-// else, so a product free to use its own version scheme cannot produce a
-// spurious incompatibility.
+// gate is the protocol versions intersected with the shell range and the
+// platform, and nothing else, so a product free to use its own version scheme
+// cannot produce a spurious incompatibility.
 func TestAModuleVersionFarFromTheShellsInstallsNormally(t *testing.T) {
 	shell := buildShell(t)
 	origin := newCatalogOrigin(t, hostPlatformOptions(), catalogAncientStable, catalogAddedStable)

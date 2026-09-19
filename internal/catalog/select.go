@@ -77,23 +77,24 @@ func Select(file NamespaceFile, policy Policy, shell modules.ShellIdentity) (Sel
 	}
 
 	compatible := make([]Version, 0, len(speakable))
+	ranges := make([]string, 0, len(speakable))
 	for _, version := range speakable {
-		if version.Compatibility.Shell == "" || shell.Version == (semver.Version{}) {
-			compatible = append(compatible, version)
-			continue
-		}
 		supported, err := semver.ParseRange(version.Compatibility.Shell)
 		if err != nil {
 			return Selection{}, problem.New(problem.CategoryModuleTrust, "catalog.malformed_version",
 				fmt.Sprintf("the module catalog publishes an unreadable shell compatibility range %q", version.Compatibility.Shell)).
 				WithRecovery("Report this to the module catalog's maintainers.")
 		}
+		spec := supported.String()
+		if !slices.Contains(ranges, spec) {
+			ranges = append(ranges, spec)
+		}
 		if supported.Contains(shell.Version) {
 			compatible = append(compatible, version)
 		}
 	}
 	if len(compatible) == 0 {
-		return Selection{}, incompatibleShell(file.Namespace, speakable, shell)
+		return Selection{}, incompatibleShell(file.Namespace, ranges, shell)
 	}
 
 	for _, version := range compatible {
@@ -243,35 +244,26 @@ func incompatibleProtocol(namespace string, permitted []Version, shell modules.S
 // incompatibleShell states the refusal in terms of the declared shell range and
 // this shell's version, so a user reads a compatibility problem before anything
 // is downloaded or written.
-func incompatibleShell(namespace string, speakable []Version, shell modules.ShellIdentity) problem.Problem {
-	ranges := make([]string, 0, len(speakable))
-	for _, version := range speakable {
-		r, err := semver.ParseRange(version.Compatibility.Shell)
-		if err != nil {
-			continue
-		}
-		spec := r.String()
-		if !slices.Contains(ranges, spec) {
-			ranges = append(ranges, spec)
-		}
+func incompatibleShell(namespace string, ranges []string, shell modules.ShellIdentity) problem.Problem {
+	quoted := make([]string, len(ranges))
+	for i, r := range ranges {
+		quoted[i] = fmt.Sprintf("%q", r)
 	}
 	var message string
-	if len(ranges) <= 1 {
-		targetRange := ""
-		if len(ranges) == 1 {
-			targetRange = ranges[0]
-		} else if len(speakable) > 0 {
-			targetRange = speakable[0].Compatibility.Shell
+	if len(quoted) <= 1 {
+		targetRange := `""`
+		if len(quoted) == 1 {
+			targetRange = quoted[0]
 		}
-		message = fmt.Sprintf("the %q module requires a WSO2 CLI shell matching %q, and this shell is %s",
+		message = fmt.Sprintf("the %q module requires a WSO2 CLI shell matching %s, and this shell is %s",
 			namespace, targetRange, shell.Version)
 	} else {
 		message = fmt.Sprintf("no published version of the %q module supports this shell; "+
 			"the published versions require a WSO2 CLI shell matching %s, and this shell is %s",
-			namespace, strings.Join(ranges, " or "), shell.Version)
+			namespace, strings.Join(quoted, " or "), shell.Version)
 	}
 	return problem.New(problem.CategoryModuleTrust, "modules.incompatible_shell", message).
-		WithRecovery("Update the WSO2 CLI so the shell version is supported.")
+		WithRecovery("Update the module or the WSO2 CLI so the shell version is supported.")
 }
 
 func formatProtocols(versions map[int]bool) string {

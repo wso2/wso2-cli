@@ -163,10 +163,7 @@ func (i Installer) statuses(index catalog.Index, installed []modules.Installed) 
 		if err != nil {
 			return nil, err
 		}
-		incompatible := false
-		if entry.Receipt.Compatibility.Shell != "" && i.Shell.Version != (semver.Version{}) {
-			incompatible = entry.Receipt.CheckCompatibility(i.Shell) != nil
-		}
+		incompatible := entry.Receipt.CheckCompatibility(i.Shell) != nil
 		status := Status{
 			Namespace:     entry.Namespace,
 			Installed:     entry.Version,

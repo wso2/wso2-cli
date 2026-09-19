@@ -125,18 +125,22 @@ func TestSelectPicksTheNewestSpeakableVersionForThePlatform(t *testing.T) {
 			{
 				Version:       "2.0.0",
 				Channel:       ChannelStable,
-				Compatibility: modules.Compatibility{ProtocolVersions: []int{99}}, // this shell cannot speak it
+				Compatibility: modules.Compatibility{Shell: ">=0.1.0 <2.0.0", ProtocolVersions: []int{99}}, // this shell cannot speak it
 				Artifacts:     []VersionArtifact{{Platform: platform, URL: "https://example/2.0.0", Size: 1}},
 			},
 			{
 				Version:       "1.0.0",
 				Channel:       ChannelStable,
-				Compatibility: modules.Compatibility{ProtocolVersions: []int{1}},
+				Compatibility: modules.Compatibility{Shell: ">=0.1.0 <2.0.0", ProtocolVersions: []int{1}},
 				Artifacts:     []VersionArtifact{{Platform: platform, URL: "https://example/1.0.0", Size: 1}},
 			},
 		},
 	}
-	shell := modules.ShellIdentity{ProtocolVersions: []int{1}, Platform: platform}
+	shell := modules.ShellIdentity{
+		Version:          semver.Version{Minor: 1},
+		ProtocolVersions: []int{1},
+		Platform:         platform,
+	}
 
 	selection, err := Select(file, Policy{}, shell)
 	if err != nil {
@@ -157,7 +161,10 @@ func TestSelectRefusesWhenNoSpeakableVersionPublishesThisPlatform(t *testing.T) 
 		Versions: []Version{{
 			Version:       "1.0.0",
 			Channel:       ChannelStable,
-			Compatibility: modules.Compatibility{ProtocolVersions: []int{1}},
+			Compatibility: modules.Compatibility{
+				Shell:            ">=0.1.0 <2.0.0",
+				ProtocolVersions: []int{1},
+			},
 			Artifacts: []VersionArtifact{{
 				Platform: modules.Platform{OS: "windows", Arch: "amd64"},
 				URL:      "https://example/1.0.0", Size: 1,
@@ -165,6 +172,7 @@ func TestSelectRefusesWhenNoSpeakableVersionPublishesThisPlatform(t *testing.T) 
 		}},
 	}
 	shell := modules.ShellIdentity{
+		Version:          semver.Version{Minor: 1},
 		ProtocolVersions: []int{1},
 		Platform:         modules.Platform{OS: "linux", Arch: "amd64"},
 	}
@@ -244,7 +252,7 @@ func TestSelectRefusesAnIncompatibleShell(t *testing.T) {
 	if !strings.Contains(typed.Message, "0.0.1") {
 		t.Errorf("message %q does not name this shell's version", typed.Message)
 	}
-	if !strings.Contains(typed.Recovery, "Update the WSO2 CLI so the shell version is supported.") {
+	if !strings.Contains(typed.Recovery, "Update the module or the WSO2 CLI so the shell version is supported.") {
 		t.Errorf("recovery = %q, want recovery naming shell version support", typed.Recovery)
 	}
 }
@@ -299,11 +307,11 @@ func TestSelectRefusesMultipleIncompatibleShellRangesPinsWording(t *testing.T) {
 	if typed.Code != "modules.incompatible_shell" {
 		t.Errorf("code = %q, want modules.incompatible_shell", typed.Code)
 	}
-	expectedMsg := `no published version of the "reference" module supports this shell; the published versions require a WSO2 CLI shell matching >=0.2.0 <2.0.0 or >=0.1.0 <0.2.0, and this shell is 0.0.1`
+	expectedMsg := `no published version of the "reference" module supports this shell; the published versions require a WSO2 CLI shell matching ">=0.2.0 <2.0.0" or ">=0.1.0 <0.2.0", and this shell is 0.0.1`
 	if typed.Message != expectedMsg {
 		t.Errorf("message = %q, want %q", typed.Message, expectedMsg)
 	}
-	if !strings.Contains(typed.Recovery, "Update the WSO2 CLI so the shell version is supported.") {
+	if !strings.Contains(typed.Recovery, "Update the module or the WSO2 CLI so the shell version is supported.") {
 		t.Errorf("recovery = %q, want recovery naming shell version support", typed.Recovery)
 	}
 }
@@ -311,7 +319,10 @@ func TestSelectRefusesMultipleIncompatibleShellRangesPinsWording(t *testing.T) {
 // TestSelectDistinguishesIncompatibleShellFromProtocol pins that the shell
 // refusal and protocol refusal are distinguishable by code and recovery.
 func TestSelectDistinguishesIncompatibleShellFromProtocol(t *testing.T) {
-	shellVer, _ := semver.Parse("0.0.1")
+	shellVer, err := semver.Parse("0.0.1")
+	if err != nil {
+		t.Fatalf("Parse returned %v", err)
+	}
 	shellRangeFile := NamespaceFile{
 		Namespace: "reference",
 		Versions: []Version{{
@@ -365,7 +376,10 @@ func TestSelectDistinguishesIncompatibleShellFromProtocol(t *testing.T) {
 // than refusing outright.
 func TestSelectPicksOlderVersionSatisfyingShellRange(t *testing.T) {
 	platform := modules.Platform{OS: "linux", Arch: "amd64"}
-	shellVer, _ := semver.Parse("0.0.1")
+	shellVer, err := semver.Parse("0.0.1")
+	if err != nil {
+		t.Fatalf("Parse returned %v", err)
+	}
 	file := NamespaceFile{
 		Namespace: "reference",
 		Versions: []Version{

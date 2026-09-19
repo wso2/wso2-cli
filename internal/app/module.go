@@ -624,12 +624,12 @@ func stateOf(status install.Status) moduleState {
 	switch {
 	case status.Installed == "":
 		return stateNotInstalled
-	case status.Incompatible:
-		return stateIncompatible
 	case status.Pinned:
 		return statePinned
 	case status.Update:
 		return stateUpdatable
+	case status.Incompatible:
+		return stateIncompatible
 	case status.Available == "":
 		return stateUnpublished
 	default:
@@ -687,7 +687,7 @@ func installedSummary(counts map[moduleState]int, installed int) []string {
 	}
 	if n := counts[stateIncompatible]; n > 0 {
 		lines = append(lines, fmt.Sprintf(
-			"%d %s incompatible with this shell and cannot be launched.",
+			"%d %s incompatible with this shell and cannot be launched. Update the WSO2 CLI so the shell version is supported.",
 			n, pluralize(n, "product is", "products are")))
 	}
 	if n := counts[statePinned]; n > 0 {
