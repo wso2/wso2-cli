@@ -565,7 +565,10 @@ func (s Shell) moduleListOffline(installer install.Installer, unreachable proble
 		table := output.NewTable("product", "installed", "channel", "update")
 		for _, status := range statuses {
 			update := "unknown"
-			if status.Pinned {
+			switch {
+			case status.Incompatible:
+				update = "incompatible"
+			case status.Pinned:
 				update = "pinned to v" + status.PinnedVersion
 			}
 			table.Append(status.Namespace, installedColumn(status), channelColumn(status), update)
@@ -595,6 +598,8 @@ type moduleState int
 const (
 	// stateUpdatable has a newer version on the channel it follows.
 	stateUpdatable moduleState = iota
+	// stateIncompatible cannot be launched by this shell.
+	stateIncompatible
 	// statePinned is held at an exact version. Installer.statuses does resolve
 	// Available and compare it for a pinned module — it suppresses Update
 	// afterwards rather than skipping the comparison — so what is true of a pin
@@ -611,8 +616,9 @@ const (
 )
 
 // stateOf classifies one module. The order matters: a module that is not
-// installed has no pin or installed version for the rest to be about, and a
-// pin overrides the channel (catalog.Policy documents that), so those two are
+// installed has no pin or installed version for the rest to be about, an
+// incompatible module cannot be launched regardless of channel or pin, and a
+// pin overrides the channel (catalog.Policy documents that), so those are
 // asked about first.
 func stateOf(status install.Status) moduleState {
 	switch {
@@ -622,6 +628,8 @@ func stateOf(status install.Status) moduleState {
 		return statePinned
 	case status.Update:
 		return stateUpdatable
+	case status.Incompatible:
+		return stateIncompatible
 	case status.Available == "":
 		return stateUnpublished
 	default:
@@ -675,6 +683,11 @@ func installedSummary(counts map[moduleState]int, installed int) []string {
 	}
 	if n := counts[stateCurrent]; n > 0 {
 		lines = append(lines, fmt.Sprintf("%d %s current.",
+			n, pluralize(n, "product is", "products are")))
+	}
+	if n := counts[stateIncompatible]; n > 0 {
+		lines = append(lines, fmt.Sprintf(
+			"%d %s incompatible with this shell and cannot be launched. Update the WSO2 CLI so the shell version is supported.",
 			n, pluralize(n, "product is", "products are")))
 	}
 	if n := counts[statePinned]; n > 0 {
@@ -787,6 +800,8 @@ func updateColumn(status install.Status) string {
 	switch stateOf(status) {
 	case stateNotInstalled:
 		return "v" + status.Available + " to install"
+	case stateIncompatible:
+		return "incompatible"
 	case statePinned:
 		return "pinned to v" + status.PinnedVersion
 	case stateUpdatable:

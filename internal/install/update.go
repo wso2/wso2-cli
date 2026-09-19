@@ -56,6 +56,10 @@ type Status struct {
 	// Update reports that Available is newer than Installed and the module is
 	// free to move to it.
 	Update bool
+	// Incompatible reports whether the installed module cannot be launched by
+	// this shell because its receipt fails shell compatibility (shell range,
+	// protocol, or platform).
+	Incompatible bool
 }
 
 // Check reports what an update run would do, in one catalog request.
@@ -159,6 +163,7 @@ func (i Installer) statuses(index catalog.Index, installed []modules.Installed) 
 		if err != nil {
 			return nil, err
 		}
+		incompatible := entry.Receipt.CheckCompatibility(i.Shell) != nil
 		status := Status{
 			Namespace:     entry.Namespace,
 			Installed:     entry.Version,
@@ -166,6 +171,7 @@ func (i Installer) statuses(index catalog.Index, installed []modules.Installed) 
 			PolicyChannel: policy.Channel,
 			Pinned:        policy.Pinned(),
 			PinnedVersion: policy.PinnedVersion,
+			Incompatible:  incompatible,
 		}
 		status.Available = latestOnChannel(index, entry.Namespace, status.Channel)
 		newer, err := isNewer(status.Available, status.Installed)

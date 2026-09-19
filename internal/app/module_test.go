@@ -1055,3 +1055,26 @@ func TestProductListReportsProductsNotModules(t *testing.T) {
 		t.Fatalf("wso2 product list does not report a product column:\n%s", out)
 	}
 }
+
+func TestProductListDoesNotReportIncompatibleModuleAsCurrent(t *testing.T) {
+	shell, out, errOut := newShell(t)
+	catalogServing(t, emptyCatalog)
+	installFixture(t, shell, fixture.Module{
+		Namespace:  "reference",
+		Version:    "0.1.0",
+		ShellRange: ">=99.0.0 <100.0.0",
+	})
+	if code := shell.Run([]string{"product", "list"}); code != exit.OK {
+		t.Fatalf("wso2 product list exited %d: %s", code, errOut)
+	}
+	output := out.String()
+	if strings.Contains(output, "current") {
+		t.Fatalf("wso2 product list reported an unlaunchable module as current:\n%s", output)
+	}
+	if !strings.Contains(output, "incompatible") {
+		t.Fatalf("wso2 product list did not report incompatible in update column:\n%s", output)
+	}
+	if !strings.Contains(output, "1 product is incompatible with this shell and cannot be launched.") {
+		t.Fatalf("wso2 product list summary did not report incompatible product:\n%s", output)
+	}
+}
