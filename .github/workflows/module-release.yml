@@ -235,3 +235,39 @@ jobs:
       - name: Deploy to Pages
         id: deploy
         uses: actions/deploy-pages@v4
+
+      # GitHub Pages keys deployments by commit SHA (pages_build_version). When two
+      # module releases are tagged on the same commit SHA, actions/deploy-pages
+      # reports success even though GitHub Pages deduplicated the request and
+      # skipped serving the newly uploaded artifact (wso2/wso2-cli#209).
+      #
+      # Polling the live origin guarantees that this job fails rather than
+      # reporting a false positive when the released version was not actually served.
+      - name: Verify the released version is served live
+        env:
+          PAGE_URL: ${{ steps.deploy.outputs.page_url }}
+        run: |
+          set -euo pipefail
+
+          namespace="${GITHUB_REF_NAME%%/*}"
+          version="${GITHUB_REF_NAME##*/v}"
+          endpoint="${PAGE_URL%/}/modules/${namespace}.json"
+
+          echo "Verifying ${namespace} v${version} is served live at ${endpoint}..."
+          for attempt in $(seq 1 18); do
+            ts="$(date +%s)"
+            if content="$(curl -fsSL "${endpoint}?t=${ts}" 2>/dev/null)"; then
+              if grep -qF "\"version\": \"${version}\"" <<<"${content}"; then
+                echo "Verified: ${namespace} v${version} is live in the published catalog"
+                exit 0
+              fi
+            fi
+            echo "Waiting for GitHub Pages deployment to serve ${namespace} v${version} (attempt ${attempt}/18)..."
+            sleep 5
+          done
+
+          echo "::error::The published catalog on GitHub Pages does not serve ${namespace} v${version}"
+          echo "::error::GitHub Pages skips deployments when two module releases share the same commit SHA (${GITHUB_SHA})"
+          echo "::error::Workaround: push a new commit to main and trigger the 'Catalog origin' workflow (pages.yml)"
+          exit 1
+
