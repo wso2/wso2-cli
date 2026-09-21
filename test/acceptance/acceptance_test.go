@@ -244,6 +244,18 @@ func buildShellSpeaking(t *testing.T, protocolVersions string) string {
 	return binary
 }
 
+// buildShellVersioned builds the shell with one specific release version.
+func buildShellVersioned(t *testing.T, shellVersion string) string {
+	t.Helper()
+	binary := filepath.Join(t.TempDir(), "wso2"+executableSuffix())
+	ldflags := []string{
+		"-X github.com/wso2/wso2-cli/internal/version.shellVersion=" + shellVersion,
+		"-X github.com/wso2/wso2-cli/internal/version.protocolVersion=" + testProtocolVersion,
+	}
+	build(t, repoRoot(t), binary, strings.Join(ldflags, " "), "./cmd/wso2")
+	return binary
+}
+
 func buildReferenceModule(t *testing.T) string {
 	t.Helper()
 	return buildReferenceModuleSpeaking(t, testProtocolVersion, testModuleVersion)

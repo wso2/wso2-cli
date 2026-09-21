@@ -216,13 +216,13 @@ func declarationFor(repositoryRoot, namespace string) (catalog.Declaration, erro
 
 // launchable refuses an install the shell would not be able to launch.
 //
-// The version of the shell is deliberately not part of what catalog.Select
+// The version of the module is deliberately not part of what catalog.Select
 // gates on, because a module's version scheme is its product's and says nothing
-// about compatibility. The shell range is a different claim, and it is checked
-// only when the module is launched. For a published install the two coincide in
-// practice, but a shell built from a checkout reports 0.0.0-dev, which no
-// scaffolded module's range contains, so the install would succeed and every
-// launch afterwards would fail with modules.incompatible_shell.
+// about compatibility: the gate is protocol ∩ shell range ∩ platform, and the
+// module's own version is never compared against the shell's.
+// A shell built from a checkout reports 0.0.0-dev, which no scaffolded module's
+// range contains, so an install without this check would fail with
+// modules.incompatible_shell.
 //
 // That is refused rather than warned about. A warning would leave a module in
 // the store that cannot run, and the developer would meet the failure later as
