@@ -27,13 +27,21 @@
 package install
 
 import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
+	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 
+	"github.com/wso2/wso2-cli/internal/catalog"
+	"github.com/wso2/wso2-cli/internal/modules"
 	"github.com/wso2/wso2-cli/sdk/problem"
 )
 
@@ -123,3 +131,166 @@ func TestAFailedWriteNamesWhatFailedAndNotHowItIsImplemented(t *testing.T) {
 		t.Errorf("the message leaks an internal package name: %q", typed.Message)
 	}
 }
+
+func TestConcurrentInstallsActivateCleanlyMatchingExactlyOneInstall(t *testing.T) {
+	installer := pinFixtureInstaller(t)
+	var group sync.WaitGroup
+	errs := make(chan error, 2)
+	policies := []catalog.Policy{
+		{Version: "1.0.0"},
+		{Version: "1.1.0"},
+	}
+
+	for _, policy := range policies {
+		group.Add(1)
+		go func(p catalog.Policy) {
+			defer group.Done()
+			_, err := installer.Run(context.Background(), Request{
+				Namespace: fixtureNamespace,
+				Policy:    p,
+			})
+			errs <- err
+		}(policy)
+	}
+
+	group.Wait()
+	close(errs)
+
+	for err := range errs {
+		if err != nil {
+			t.Fatalf("concurrent install failed: %v", err)
+		}
+	}
+
+	active, err := installer.Store.ReadActive(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadActive failed: %v", err)
+	}
+	if active.Version != "1.0.0" && active.Version != "1.1.0" {
+		t.Fatalf("unexpected active version: %q", active.Version)
+	}
+
+	policy, err := installer.Store.ReadPolicy(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadPolicy failed: %v", err)
+	}
+	if policy.PinnedVersion != active.Version {
+		t.Errorf("policy pinned version = %q, want active version %q", policy.PinnedVersion, active.Version)
+	}
+
+	resolved, err := installer.Store.Resolve(fixtureNamespace, installer.Shell)
+	if err != nil {
+		t.Fatalf("Resolve failed: %v", err)
+	}
+	if resolved.Receipt.ModuleVersion != active.Version {
+		t.Errorf("resolved receipt version = %q, want active version %q", resolved.Receipt.ModuleVersion, active.Version)
+	}
+
+	replacedDir := installer.Store.VersionDir(fixtureNamespace, active.Version) + ".replaced"
+	if _, err := os.Stat(replacedDir); !os.IsNotExist(err) {
+		t.Errorf("replaced directory %q still exists", replacedDir)
+	}
+}
+
+func TestInterruptedInstallLeavesPreviousVersionActive(t *testing.T) {
+	archive := pinFixtureArchive(t)
+	digest := sha256.Sum256(archive)
+	artifact := fmt.Sprintf(`{"os": "linux", "arch": "amd64",
+		"url": "https://origin.example/demo.tar.gz",
+		"size": %d, "sha256": %q}`, len(archive), hex.EncodeToString(digest[:]))
+	index := []byte(`{
+		"schemaVersion": 1,
+		"modules": [
+			{"namespace": "demo", "path": "demo.json",
+			 "channels": [{"channel": "stable", "version": "1.1.0"}]}
+		]
+	}`)
+	// Version 1.0.0 is valid. Version 1.1.0 has an invalid product descriptor audience,
+	// which passes catalog selection and archive verification but causes receipt.Validate
+	// to fail during activation after staging and moving the previous version aside.
+	namespace := []byte(fmt.Sprintf(`{
+		"schemaVersion": 1,
+		"namespace": "demo",
+		"versions": [
+			{"version": "1.0.0", "channel": "stable",
+			 "compatibility": {"shell": ">=0.0.0", "protocolVersions": [1]},
+			 "artifacts": [%s]},
+			{"version": "1.1.0", "channel": "stable",
+			 "compatibility": {"shell": ">=0.0.0", "protocolVersions": [1]},
+			 "capabilities": {"product": {"audience": "unsupported_audience"}},
+			 "artifacts": [%s]}
+		]
+	}`, artifact, artifact))
+
+	store := modules.NewStore(t.TempDir())
+	installer := Installer{
+		Store: store,
+		Client: catalog.Client{
+			Origin: "https://origin.example",
+			HTTP: &http.Client{Transport: pinFixtureTransport{
+				index: index, namespace: namespace, archive: archive}},
+		},
+		Shell: fixtureShell(),
+	}
+
+	// 1. Install version 1.0.0 successfully.
+	installed, err := installer.Run(context.Background(), Request{
+		Namespace: fixtureNamespace,
+		Policy:    catalog.Policy{Version: "1.0.0"},
+	})
+	if err != nil {
+		t.Fatalf("initial install of 1.0.0 failed: %v", err)
+	}
+	if installed.Version != "1.0.0" {
+		t.Fatalf("initial installed version = %q, want 1.0.0", installed.Version)
+	}
+
+	activeBefore, err := store.ReadActive(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadActive failed: %v", err)
+	}
+	if activeBefore.Version != "1.0.0" {
+		t.Fatalf("active version before failure = %q, want 1.0.0", activeBefore.Version)
+	}
+
+	// 2. Attempt to install version 1.1.0 which fails during activate's receipt validation.
+	_, err = installer.Run(context.Background(), Request{
+		Namespace: fixtureNamespace,
+		Policy:    catalog.Policy{Version: "1.1.0"},
+	})
+	if err == nil {
+		t.Fatal("expected install of 1.1.0 to fail due to invalid product descriptor")
+	}
+
+	// 3. Verify rollback: previous version 1.0.0 remains active and resolvable.
+	activeAfter, err := store.ReadActive(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadActive after failed install returned %v", err)
+	}
+	if activeAfter.Version != "1.0.0" {
+		t.Errorf("active version after failed install = %q, want 1.0.0", activeAfter.Version)
+	}
+
+	policyAfter, err := store.ReadPolicy(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadPolicy after failed install returned %v", err)
+	}
+	if policyAfter.PinnedVersion != "1.0.0" {
+		t.Errorf("policy after failed install pinned = %q, want 1.0.0", policyAfter.PinnedVersion)
+	}
+
+	resolved, err := store.Resolve(fixtureNamespace, fixtureShell())
+	if err != nil {
+		t.Fatalf("Resolve after failed install returned %v", err)
+	}
+	if resolved.Receipt.ModuleVersion != "1.0.0" {
+		t.Errorf("resolved version = %q, want 1.0.0", resolved.Receipt.ModuleVersion)
+	}
+
+	// Ensure no dangling .replaced directory was left behind.
+	replacedDir := store.VersionDir(fixtureNamespace, "1.0.0") + ".replaced"
+	if _, err := os.Stat(replacedDir); !os.IsNotExist(err) {
+		t.Errorf("replaced directory %q still exists after rollback", replacedDir)
+	}
+}
+

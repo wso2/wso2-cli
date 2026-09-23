@@ -45,9 +45,11 @@ import (
 
 	"github.com/wso2/wso2-cli/internal/atomicfile"
 	"github.com/wso2/wso2-cli/internal/catalog"
+	"github.com/wso2/wso2-cli/internal/lockfile"
 	"github.com/wso2/wso2-cli/internal/modules"
 	"github.com/wso2/wso2-cli/internal/output"
 	"github.com/wso2/wso2-cli/sdk/problem"
+	"time"
 )
 
 // maxArchiveEntries and maxExtractedBytes bound what one archive may expand
@@ -220,121 +222,142 @@ func verify(namespace string, selection catalog.Selection, archive []byte) error
 
 const corruptedRecovery = "The download was corrupted or substituted. Try again; if it keeps failing, report it to the module's maintainers."
 
+// lockDeadline bounds how long an activation waits for another invocation to
+// finish activating the same module namespace. The critical section performs
+// local extraction, staging, and state file updates with no network calls, so
+// 10 seconds is well above any healthy file operation while bounding delay under
+// contention.
+const lockDeadline = 10 * time.Second
+
 // activate stages the verified archive, moves it into its immutable version
 // directory, writes the receipt and the version policy, and points the
 // active-version pointer at it.
 //
 // Everything before the last step happens where a failure can be swept away, so
 // a refused install is indistinguishable from one that never ran.
+//
+// The activation sequence is serialized per product namespace with an advisory
+// file lock in the state root, so concurrent installs or updates cannot interleave
+// staging, moving aside versions, or writing active and policy state.
 func (i Installer) activate(ctx context.Context, namespace string, selection catalog.Selection,
 	requested catalog.Policy, archive []byte) error {
-	namespaceDir := i.Store.NamespaceDir(namespace)
-	_, existedErr := os.Stat(namespaceDir)
-	namespaceExisted := existedErr == nil
+	err := lockfile.With(i.Store.LockPath(namespace), lockDeadline, func() error {
+		namespaceDir := i.Store.NamespaceDir(namespace)
+		_, existedErr := os.Stat(namespaceDir)
+		namespaceExisted := existedErr == nil
 
-	if err := os.MkdirAll(namespaceDir, 0o755); err != nil {
-		return storeFailure("creating the module directory", err)
-	}
-	staging, err := os.MkdirTemp(namespaceDir, ".staging-")
-	if err != nil {
-		return storeFailure("creating a staging directory", err)
-	}
-	// Containment is proven against an absolute directory, because a relative
-	// one would make an escaping archive entry look contained.
-	staging, err = filepath.Abs(staging)
-	if err != nil {
-		return storeFailure("resolving the staging directory", err)
-	}
-	versionDir := i.Store.VersionDir(namespace, selection.Version.Version)
-	// replaced holds an installation of this same version that was moved aside,
-	// so a failure after the move can put it back. Without it, reinstalling a
-	// version and failing would take away the installation that was working.
-	replaced := ""
-	installed := false
-	// The policy this install would replace, so a failure leaves the module
-	// following what it followed before. A failed update must change nothing at
-	// all, the channel and pin included.
-	previousPolicy, previousPolicyExists, previousPolicyAbsent := readPolicyDocument(
-		i.Store.PolicyPath(namespace))
-	defer func() {
-		_ = os.RemoveAll(staging)
-		if installed {
-			_ = os.RemoveAll(replaced)
-			return
+		if err := os.MkdirAll(namespaceDir, 0o755); err != nil {
+			return storeFailure("creating the module directory", err)
 		}
-		if previousPolicyExists {
-			_ = writeAtomically("restoring the version policy",
-				i.Store.PolicyPath(namespace), previousPolicy)
-		} else if previousPolicyAbsent {
-			_ = os.Remove(i.Store.PolicyPath(namespace))
+		staging, err := os.MkdirTemp(namespaceDir, ".staging-")
+		if err != nil {
+			return storeFailure("creating a staging directory", err)
 		}
-		// A failed install leaves nothing behind: the version it was writing
-		// goes, whatever it displaced comes back, and a namespace this run
-		// created goes with it.
-		_ = os.RemoveAll(versionDir)
-		if replaced != "" {
-			_ = os.Rename(replaced, versionDir)
-			return
+		// Containment is proven against an absolute directory, because a relative
+		// one would make an escaping archive entry look contained.
+		staging, err = filepath.Abs(staging)
+		if err != nil {
+			return storeFailure("resolving the staging directory", err)
 		}
-		if !namespaceExisted {
-			_ = os.RemoveAll(namespaceDir)
-		}
-	}()
+		versionDir := i.Store.VersionDir(namespace, selection.Version.Version)
+		// replaced holds an installation of this same version that was moved aside,
+		// so a failure after the move can put it back. Without it, reinstalling a
+		// version and failing would take away the installation that was working.
+		replaced := ""
+		installed := false
+		// The policy this install would replace, so a failure leaves the module
+		// following what it followed before. A failed update must change nothing at
+		// all, the channel and pin included.
+		previousPolicy, previousPolicyExists, previousPolicyAbsent := readPolicyDocument(
+			i.Store.PolicyPath(namespace))
+		defer func() {
+			_ = os.RemoveAll(staging)
+			if installed {
+				_ = os.RemoveAll(replaced)
+				return
+			}
+			if previousPolicyExists {
+				_ = writeAtomically("restoring the version policy",
+					i.Store.PolicyPath(namespace), previousPolicy)
+			} else if previousPolicyAbsent {
+				_ = os.Remove(i.Store.PolicyPath(namespace))
+			}
+			// A failed install leaves nothing behind: the version it was writing
+			// goes, whatever it displaced comes back, and a namespace this run
+			// created goes with it.
+			_ = os.RemoveAll(versionDir)
+			if replaced != "" {
+				_ = os.Rename(replaced, versionDir)
+				return
+			}
+			if !namespaceExisted {
+				_ = os.RemoveAll(namespaceDir)
+			}
+		}()
 
-	executableName := ExecutableName(namespace, i.Shell.Platform)
-	if err := extract(archive, staging, executableName); err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(filepath.Dir(versionDir), 0o755); err != nil {
-		return storeFailure("creating the versions directory", err)
-	}
-	if _, err := os.Stat(versionDir); err == nil {
-		replaced = versionDir + ".replaced"
-		if err := os.RemoveAll(replaced); err != nil {
-			return storeFailure("clearing a displaced version directory", err)
+		executableName := ExecutableName(namespace, i.Shell.Platform)
+		if err := extract(archive, staging, executableName); err != nil {
+			return err
 		}
-		if err := os.Rename(versionDir, replaced); err != nil {
-			replaced = ""
-			return storeFailure("moving the installed version aside", err)
+
+		if err := os.MkdirAll(filepath.Dir(versionDir), 0o755); err != nil {
+			return storeFailure("creating the versions directory", err)
 		}
-	}
-	if err := os.Rename(staging, versionDir); err != nil {
-		return storeFailure("moving the verified module into place", err)
-	}
+		if _, err := os.Stat(versionDir); err == nil {
+			replaced = versionDir + ".replaced"
+			if err := os.RemoveAll(replaced); err != nil {
+				return storeFailure("clearing a displaced version directory", err)
+			}
+			if err := os.Rename(versionDir, replaced); err != nil {
+				replaced = ""
+				return storeFailure("moving the installed version aside", err)
+			}
+		}
+		if err := os.Rename(staging, versionDir); err != nil {
+			return storeFailure("moving the verified module into place", err)
+		}
 
-	receipt, err := i.receipt(ctx, namespace, selection, versionDir, executableName)
-	if err != nil {
-		return err
-	}
-	encoded, err := receipt.Encode()
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(i.Store.ReceiptPath(namespace, receipt.ModuleVersion), encoded, 0o644); err != nil {
-		return storeFailure("writing the module receipt", err)
-	}
+		receipt, err := i.receipt(ctx, namespace, selection, versionDir, executableName)
+		if err != nil {
+			return err
+		}
+		encoded, err := receipt.Encode()
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(i.Store.ReceiptPath(namespace, receipt.ModuleVersion), encoded, 0o644); err != nil {
+			return storeFailure("writing the module receipt", err)
+		}
 
-	if err := i.recordPolicy(namespace, selection, requested); err != nil {
-		return err
-	}
+		if err := i.recordPolicy(namespace, selection, requested); err != nil {
+			return err
+		}
 
-	active := modules.Active{
-		SchemaVersion: modules.ActiveSchemaVersion,
-		Namespace:     namespace,
-		Version:       receipt.ModuleVersion,
-		ReceiptSHA256: modules.BytesDigest(encoded),
+		active := modules.Active{
+			SchemaVersion: modules.ActiveSchemaVersion,
+			Namespace:     namespace,
+			Version:       receipt.ModuleVersion,
+			ReceiptSHA256: modules.BytesDigest(encoded),
+		}
+		activeDocument, err := active.Encode()
+		if err != nil {
+			return err
+		}
+		if err := writeAtomically("writing the active-version pointer",
+			i.Store.ActivePath(namespace), activeDocument); err != nil {
+			return err
+		}
+		installed = true
+		return nil
+	})
+	if errors.Is(err, lockfile.ErrBusy) {
+		return storeFailure("locking the module namespace", err)
 	}
-	activeDocument, err := active.Encode()
-	if err != nil {
-		return err
+	var lockErr lockfile.Error
+	if errors.As(err, &lockErr) {
+		return storeFailure("locking the module namespace", lockErr.Unwrap())
 	}
-	if err := writeAtomically("writing the active-version pointer",
-		i.Store.ActivePath(namespace), activeDocument); err != nil {
-		return err
-	}
-	installed = true
-	return nil
+	return err
 }
 
 // recordPolicy writes what this install asked for beside the installation, so a

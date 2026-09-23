@@ -172,3 +172,14 @@ func TestInventoryDoesNotVerifyTheExecutableDigest(t *testing.T) {
 		t.Fatal("Resolve accepted a tampered executable")
 	}
 }
+
+func TestStoreLockPathSitsBesideTheNamespaceDirectory(t *testing.T) {
+	storeRoot := filepath.Join(t.TempDir(), "cli", "modules")
+	store := modules.NewStore(storeRoot)
+	lockPath := store.LockPath("demo")
+	want := filepath.Join(storeRoot, "demo.lock")
+	if lockPath != want {
+		t.Errorf("LockPath = %q, want %q", lockPath, want)
+	}
+}
+

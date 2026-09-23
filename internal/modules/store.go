@@ -93,6 +93,17 @@ func (s Store) ActivePath(namespace string) string {
 	return filepath.Join(s.NamespaceDir(namespace), ActiveFileName)
 }
 
+// LockPath reports the advisory lock path for one namespace.
+//
+// The lock file sits beside the namespace directory rather than inside it,
+// so that a failed first install that removes the newly created namespace
+// directory does not unlink the lock file. Removing a lock file under an
+// advisory lock would let another waiter holding the old descriptor and a
+// newcomer creating a fresh inode at that path both lock concurrently (ADR 0007).
+func (s Store) LockPath(namespace string) string {
+	return s.NamespaceDir(namespace) + ".lock"
+}
+
 // Namespaces lists the namespaces present in the store, sorted. A missing
 // store is not an error: a shell with no installed module is a valid state.
 func (s Store) Namespaces() ([]string, error) {
