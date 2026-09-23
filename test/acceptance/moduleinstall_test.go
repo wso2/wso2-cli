@@ -33,6 +33,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/wso2/wso2-cli/internal/catalog"
@@ -546,3 +547,54 @@ func TestAnInstallReportsThePinItCreatesAndThePinItClears(t *testing.T) {
 		t.Errorf("an install of an unpinned module talks about pins:\n%s", stdout)
 	}
 }
+
+// Concurrent installs of the same namespace serialize activation so the final
+// state matches exactly one install rather than a mixed state.
+func TestConcurrentInstallsMatchExactlyOneInstall(t *testing.T) {
+	shell := buildShell(t)
+	origin := newCatalogOrigin(t, hostPlatformOptions(), catalogOlderStable, catalogStable)
+	stateRoot := isolatedStateRoot(t)
+
+	var group sync.WaitGroup
+	errs := make(chan error, 2)
+	targets := []string{catalogNamespace + "@4.4.0", catalogNamespace + "@4.5.0"}
+
+	for _, target := range targets {
+		group.Add(1)
+		go func(tgt string) {
+			defer group.Done()
+			_, _, err := installModuleFrom(shell, stateRoot, origin.server.URL, tgt)
+			errs <- err
+		}(target)
+	}
+
+	group.Wait()
+	close(errs)
+
+	for err := range errs {
+		if err != nil {
+			t.Fatalf("concurrent install failed: %v", err)
+		}
+	}
+
+	active := installedVersion(t, stateRoot, catalogNamespace)
+	if active != "4.4.0" && active != "4.5.0" {
+		t.Fatalf("unexpected active version: %s", active)
+	}
+
+	store := modules.NewStore(state.ModuleStore(stateRoot))
+	policy, err := store.ReadPolicy(catalogNamespace)
+	if err != nil {
+		t.Fatalf("reading policy returned %v", err)
+	}
+	if policy.PinnedVersion != active {
+		t.Errorf("policy pinned version %q does not match active version %q", policy.PinnedVersion, active)
+	}
+
+	versionOutput, _ := runShell(t, shell, stateRoot, "version")
+	if !strings.Contains(versionOutput, "v"+active) {
+		t.Errorf("wso2 version does not report the installed module %s:\n%s", active, versionOutput)
+	}
+	requireLaunchable(t, shell, stateRoot, catalogNamespace)
+}
+
