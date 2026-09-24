@@ -127,16 +127,16 @@ func handleConfigCreateCommand() error {
 		To view details of the created config :
 			%s
 		
-		To list all the configs available within your component :
+		To list all the configs available within your integration :
 			%s
 	
-		To deploy this component :
+		To deploy this integration :
 			%s
 
 	`),
-		fmt.Sprintf(`$ wso2-integration-platform describe config --project="%s" --component="%s" --env="%s" --deployment-track="%s" --name="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch, params.nameFlag),
-		fmt.Sprintf(`$ wso2-integration-platform list configs --project="%s" --component="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch),
-		fmt.Sprintf(`$ wso2-integration-platform create deployment --project="%s" --component="%s" --deployment-track="%s" --env="%s" `, project.Name, remoteComponent.Name, deploymentTrack.Branch, selectedEnv.Name)))
+		fmt.Sprintf(`$ wso2-integration-platform describe config --project="%s" --integration="%s" --env="%s" --deployment-track="%s" --name="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch, params.nameFlag),
+		fmt.Sprintf(`$ wso2-integration-platform list configs --project="%s" --integration="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch),
+		fmt.Sprintf(`$ wso2-integration-platform create deployment --project="%s" --integration="%s" --deployment-track="%s" --env="%s" `, project.Name, remoteComponent.Name, deploymentTrack.Branch, selectedEnv.Name)))
 
 	return nil
 }

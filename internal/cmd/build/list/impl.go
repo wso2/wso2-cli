@@ -41,17 +41,17 @@ func handleBuildListCommand(flags *BuildListFlags) error {
 
 	componentInfo, err := common.ResolveTargetComponent(org, project.ID, flags.Component)
 	if err != nil {
-		return fmt.Errorf(i18n.T("Error resolving component: %w"), err)
+		return fmt.Errorf(i18n.T("Error resolving integration: %w"), err)
 	}
 
 	if strings.HasPrefix(strings.ToLower(componentInfo.DisplayType), "byoi") {
-		utils.PrintInfo("%s", i18n.T("Cannot list builds for pre-built image based components\n"))
+		utils.PrintInfo("%s", i18n.T("Cannot list builds for pre-built image based integrations\n"))
 		return nil
 	}
 
 	compInfoWithRepo, err := common.GetComponentWithRepoData(org.ID, componentInfo.Handler, project.ID)
 	if err != nil {
-		return fmt.Errorf(i18n.T("Error resolving component: %w"), err)
+		return fmt.Errorf(i18n.T("Error resolving integration: %w"), err)
 	}
 	deploymentTrack, err := common.ResolveDeploymentTrack(
 		compInfoWithRepo.DeploymentTracks,

@@ -12,7 +12,7 @@ var opts = &GatewayLogOpts{}
 var GatewayLogsCmd = &cobra.Command{
 	Use:    "gateway [flags]",
 	Short:  i18n.T("display gateway logs"),
-	Long:   i18n.T("Display gateway logs of a deployed component"),
+	Long:   i18n.T("Display gateway logs of a deployed integration"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := printGatewayLogs(opts); err != nil {

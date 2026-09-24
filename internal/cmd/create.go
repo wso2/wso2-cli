@@ -22,6 +22,7 @@ var createCmd = &cobra.Command{
 
 func init() {
 	createCmd.AddCommand(componentCreate.ComponentCreateCommand)
+	createCmd.AddCommand(common.LegacyAliasCommand(componentCreate.ComponentCreateCommand, "component", "components"))
 	createCmd.AddCommand(projectCreate.ProjectCreateCommand)
 	createCmd.AddCommand(configCreate.ConfigCreateCommand)
 	createCmd.AddCommand(connectionCreate.ConnectionCreateCommand)

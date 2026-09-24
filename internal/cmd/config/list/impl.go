@@ -126,8 +126,8 @@ func handleConfigListCommand() error {
 			%s
 
 	`),
-		fmt.Sprintf(`$ wso2-integration-platform describe config --project="%s" --component="%s" --env=<env-name> --deployment-track="%s" --name=<config-name>`, project.Name, remoteComponent.Name, deploymentTrack.Branch),
-		fmt.Sprintf(`$ wso2-integration-platform create config --project="%s" --component="%s" --deployment-track="%s" --env=<env-name>`, project.Name, remoteComponent.Name, deploymentTrack.Branch)))
+		fmt.Sprintf(`$ wso2-integration-platform describe config --project="%s" --integration="%s" --env=<env-name> --deployment-track="%s" --name=<config-name>`, project.Name, remoteComponent.Name, deploymentTrack.Branch),
+		fmt.Sprintf(`$ wso2-integration-platform create config --project="%s" --integration="%s" --deployment-track="%s" --env=<env-name>`, project.Name, remoteComponent.Name, deploymentTrack.Branch)))
 
 	return nil
 }

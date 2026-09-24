@@ -32,11 +32,11 @@ func getBuildPacks(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	componentType := utils.GetArgument(request, "type")
 	if componentType == nil {
-		return utils.NewMCPErrorResponse(fmt.Errorf("Component type is required"), "Failed to retrieve buildpacks."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("Integration type is required"), "Failed to retrieve buildpacks."), nil
 	}
 	componentTypeStr := componentType.(string)
 	if componentTypeStr == "" {
-		return utils.NewMCPErrorResponse(fmt.Errorf("Component type cannot be empty"), "Failed to retrieve buildpacks."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("Integration type cannot be empty"), "Failed to retrieve buildpacks."), nil
 	}
 
 	allBuildPacks, err := utils.GetDevopsClient(ctx).GetBuildPackOptions(targetOrg.UUID, targetOrg.ID, componentTypeStr)

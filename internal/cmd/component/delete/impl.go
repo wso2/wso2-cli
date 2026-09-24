@@ -43,11 +43,11 @@ func HandleDeleteComponent(opts *ComponentDeleteOpts) error {
 		okTodelete := commons.ConfirmDeleteWithName(cmp.Name)
 
 		if !okTodelete {
-			return errors.New("Component delete cancelled")
+			return errors.New("Integration delete cancelled")
 		}
 	}
 
-	delCmpSpinner := utils.CreateSpinner("Deleting component", "")
+	delCmpSpinner := utils.CreateSpinner("Deleting integration", "")
 	delCmpSpinner.Start()
 	resp, err := auth.ComponentClient.DeleteComponent(org.ID, org.Handle, cmp.Id, project.ID)
 	delCmpSpinner.Stop()
@@ -57,9 +57,9 @@ func HandleDeleteComponent(opts *ComponentDeleteOpts) error {
 	}
 
 	if resp.Status == "success" {
-		fmt.Fprintln(utils.IO.Out, "Component deleted successfully")
+		fmt.Fprintln(utils.IO.Out, "Integration deleted successfully")
 		return nil
 	} else {
-		return fmt.Errorf("Error deleting component: %s", resp.Message)
+		return fmt.Errorf("Error deleting integration: %s", resp.Message)
 	}
 }

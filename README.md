@@ -66,10 +66,10 @@ wso2-integration-platform login
 wso2-integration-platform list projects
 
 # 3. List your integrations
-wso2-integration-platform list components
+wso2-integration-platform list integrations
 
 # 4. Describe a resource
-wso2-integration-platform describe <project|component>
+wso2-integration-platform describe <project|integration>
 ```
 
 ---
@@ -77,12 +77,13 @@ wso2-integration-platform describe <project|component>
 ## Commands
 
 Resource operations follow a `<verb> <resource>` shape. Run `--help` on any of
-them for flags.
+them for flags, or see the full
+[CLI command reference](docs/cli-commands.md) for every command, flag and alias.
 
 | Resource | create | list | describe | delete | suspend / resume | logs |
 |----------|:------:|:----:|:--------:|:------:|:----------------:|:----:|
 | project | ✓ | ✓ | ✓ | ✓ | | |
-| component | ✓ | ✓ | ✓ | ✓ | | |
+| integration | ✓ | ✓ | ✓ | ✓ | | |
 | build | ✓ | ✓ | ✓ | | | ✓ |
 | deployment | ✓ | | ✓ | | ✓ | |
 | execution | ✓ | ✓ | ✓ | | | ✓ |
@@ -91,9 +92,14 @@ them for flags.
 | test-key | ✓ | | | | | |
 | organization | | ✓ | | | | |
 
-`list components` shows integrations only — automations, APIs, AI agents, MCP
+`list integrations` shows integrations only — automations, APIs, AI agents, MCP
 servers, event and file integrations. Other component types that may exist in
 the same project are filtered out.
+
+Integrations were previously called components. `create component`,
+`list components`, `describe component`, `delete component` and the
+`--component`/`-c` flag still work, but are deprecated and hidden from `--help`;
+see the [legacy spellings](docs/cli-commands.md#legacy-component-spellings).
 
 Logs come from four sources: `logs application`, `logs build`, `logs executions`
 and `logs gateway`.
@@ -106,7 +112,7 @@ and `logs gateway`.
 | `change-org` | Switch the active organization |
 | `region` | Set or view the region (US, EU) |
 | `set-context` | Bind a repository directory to a project |
-| `connect` | Connect a local component to its deployed dependencies |
+| `connect` | Connect a local integration to its deployed dependencies |
 | `env` | List the environment variables the CLI recognizes |
 
 The MCP server runs as `start-mcp-server`; see [MCP Server](#mcp-server).

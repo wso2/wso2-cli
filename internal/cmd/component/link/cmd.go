@@ -11,16 +11,16 @@ import (
 var linkParams LinkComponentParams
 
 var ComponentLinkCommand = &cobra.Command{
-	Use:   "link [component-name] [flags]",
-	Short: i18n.T("link directory to a component"),
-	Long:  i18n.T("Associate a directory with a component by creating a .wso2/link.yaml file within the component directory"),
+	Use:   "link [integration-name] [flags]",
+	Short: i18n.T("link directory to an integration"),
+	Long:  i18n.T("Associate a directory with an integration by creating a .wso2/link.yaml file within the integration directory"),
 	Example: heredoc.Docf(i18n.T(`
 	
-		To link a component directory :
+		To link an integration directory :
 			%s
 
 	`),
-		"$ wso2-integration-platform link <component-name> --project=<project-name>"),
+		"$ wso2-integration-platform link <integration-name> --project=<project-name>"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {

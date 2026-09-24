@@ -30,7 +30,7 @@ func handleDescribeConfig(params *DescribeConfigParams) error {
 			--name is required with --output=json when output is piped or redirected.
 
 			Provide the config (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe config --name=<config-name> --project=<project> --component=<component> --env=<env> --deployment-track=<track>
+			  wso2-integration-platform describe config --name=<config-name> --project=<project> --integration=<integration> --env=<env> --deployment-track=<track>
 
 			Or run the command on a terminal without a pipe to choose a config interactively:
 			  wso2-integration-platform describe config --output=json`)))
@@ -129,12 +129,12 @@ func handleDescribeConfig(params *DescribeConfigParams) error {
 		To add a new config or secret:
 			%s
 
-		To list all the configs available within your component :
+		To list all the configs available within your integration :
 			%s
 
 	`),
-		fmt.Sprintf(`$ wso2-integration-platform create config --project="%s" --component="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch),
-		fmt.Sprintf(`$ wso2-integration-platform list configs --project="%s" --component="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch)))
+		fmt.Sprintf(`$ wso2-integration-platform create config --project="%s" --integration="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch),
+		fmt.Sprintf(`$ wso2-integration-platform list configs --project="%s" --integration="%s" --env="%s" --deployment-track="%s"`, project.Name, remoteComponent.Name, selectedEnv.Name, deploymentTrack.Branch)))
 
 	return nil
 }

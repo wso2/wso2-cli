@@ -51,7 +51,7 @@ func getDeploymentDetails(ctx context.Context, request mcp.CallToolRequest) (*mc
 		selectedEnvironment.ID)
 
 	if componentDeployment == nil {
-		return utils.NewMCPErrorResponse(fmt.Errorf("component deployment not found"), "Failed to retrieve deployment details."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("integration deployment not found"), "Failed to retrieve deployment details."), nil
 	}
 
 	if err != nil {
@@ -236,7 +236,7 @@ func createDeployment(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	nextSteps := []string{
-		fmt.Sprintf("Deployment initiated for component '%s' in environment '%s'. To check the deployment status, use `get_deployment` with `integration_uuid`: '%s' and `environment_uuid`: '%s'.", targetComponent.Id, selectedEnvironment.ID, targetComponent.Id, selectedEnvironment.ID),
+		fmt.Sprintf("Deployment initiated for integration '%s' in environment '%s'. To check the deployment status, use `get_deployment` with `integration_uuid`: '%s' and `environment_uuid`: '%s'.", targetComponent.Id, selectedEnvironment.ID, targetComponent.Id, selectedEnvironment.ID),
 		"Make sure deployment gets active within 5 minutes by checking the deployment status using `get_deployment`.",
 		"To view the application logs for this deployment, use `get_logs` with `log_type`: 'application'.",
 	}

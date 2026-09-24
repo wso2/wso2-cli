@@ -26,9 +26,9 @@ var ConnectionDescribeCommand = &cobra.Command{
 		To save the output to a file:
 			%s
 	`),
-		"$ wso2-integration-platform describe connection --project=<project-name> --component=<component-name> --name=<connection-name>",
-		"$ wso2-integration-platform describe connection --project=<project-name> --component=<component-name> --name=<connection-name> --output=json",
-		"$ wso2-integration-platform describe connection --project=<project-name> --component=<component-name> --name=<connection-name> --output=json > connection.json",
+		"$ wso2-integration-platform describe connection --project=<project-name> --integration=<integration-name> --name=<connection-name>",
+		"$ wso2-integration-platform describe connection --project=<project-name> --integration=<integration-name> --name=<connection-name> --output=json",
+		"$ wso2-integration-platform describe connection --project=<project-name> --integration=<integration-name> --name=<connection-name> --output=json > connection.json",
 	),
 	Run: func(cmd *cobra.Command, args []string) {
 		err := handleDescribeConnection(&DescribeParams)

@@ -24,7 +24,7 @@ func AddRunIdFlag(cmdFlags *pflag.FlagSet, bindTo *int) {
 }
 
 func GetDeploymentBuild(orgId string, componentName string, projectHandle string, deploymentTrackId string) (deploymentBuild *[]deploymentbuild.BuildKind, err error) {
-	deploymentBuildSpinner := utils.CreateSpinner(" Fetching component build...", "")
+	deploymentBuildSpinner := utils.CreateSpinner(" Fetching integration build...", "")
 	deploymentBuildSpinner.Start()
 	deploymentBuildRes, err := auth.DeploymentBuildClient.GetDeploymentBuilds(orgId, componentName, projectHandle, deploymentTrackId)
 	deploymentBuildSpinner.Stop()
@@ -50,7 +50,7 @@ func ResolveBuild(
 	}
 
 	if len(*buildList) == 0 {
-		return nil, fmt.Errorf("no builds found for the deployment track of the component")
+		return nil, fmt.Errorf("no builds found for the deployment track of the integration")
 	}
 
 	if runIdFlag != 0 {
@@ -101,7 +101,7 @@ func ResolveSucceededBuild(
 	}
 
 	if len(succeededBuilds) == 0 {
-		return nil, fmt.Errorf("No succeeded builds found for the selected component")
+		return nil, fmt.Errorf("No succeeded builds found for the selected integration")
 	}
 
 	if runIdFlag != 0 {
@@ -193,7 +193,7 @@ func GetArgoBuildLog(orgId string, selectedDataPlaneHost string, component model
 		WorkflowName:      workflowName,
 	}
 
-	logsSpinner := utils.CreateSpinner(fmt.Sprintf(i18n.T(" Fetching build logs for component %s "), component.Name), "\n")
+	logsSpinner := utils.CreateSpinner(fmt.Sprintf(i18n.T(" Fetching build logs for integration %s "), component.Name), "\n")
 	logsSpinner.Start()
 	logs, err := auth.LogsClient.GetBuildLogs(reqBody, orgId, selectedDataPlaneHost)
 	logsSpinner.Stop()

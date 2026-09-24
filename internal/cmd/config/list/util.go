@@ -42,7 +42,7 @@ func printConfigListStructured(configs []configWithEnv, format common.OutputForm
 	// On an empty result, guide the user via stderr (kept out of stdout so
 	// the JSON stays machine-parseable).
 	if len(configs) == 0 {
-		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No config-maps or secrets found for the component %s of %s project.\n"),
+		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No config-maps or secrets found for the integration %s of %s project.\n"),
 			utils.CS.Bold(sComponent.Name),
 			utils.CS.Bold(sProject.Name))
 	}

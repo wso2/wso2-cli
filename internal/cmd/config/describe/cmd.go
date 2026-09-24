@@ -13,7 +13,7 @@ var DescribeParams DescribeConfigParams
 var ConfigDescribeCommand = &cobra.Command{
 	Use:   "config [flags]",
 	Short: i18n.T("describe a config"),
-	Long:  i18n.T("Get information about a specific config-map or secret of a component"),
+	Long:  i18n.T("Get information about a specific config-map or secret of an integration"),
 	Example: heredoc.Docf(i18n.T(`
 
 		To view details of a particular config :
@@ -25,9 +25,9 @@ var ConfigDescribeCommand = &cobra.Command{
 		To save the output to a file:
 			%s
 	`),
-		"$ wso2-integration-platform describe config --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch> --name=<config-name>",
-		"$ wso2-integration-platform describe config --output=json --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch> --name=<config-name>",
-		"$ wso2-integration-platform describe config --output=json --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch> --name=<config-name> > config.json",
+		"$ wso2-integration-platform describe config --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch> --name=<config-name>",
+		"$ wso2-integration-platform describe config --output=json --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch> --name=<config-name>",
+		"$ wso2-integration-platform describe config --output=json --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch> --name=<config-name> > config.json",
 	),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {

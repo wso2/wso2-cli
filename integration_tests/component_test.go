@@ -18,7 +18,7 @@ func TestListComponentsEmpty(t *testing.T) {
 	log.Printf("=== Starting TestListComponentsEmpty ===")
 	log.Printf("Target project: %s", TestProjectName)
 
-	log.Printf("Step 1: Listing components in empty project")
+	log.Printf("Step 1: Listing integrations in empty project")
 	var opts = &componentList.CmpListOptions{
 		ProjectFlag: TestProjectName,
 	}
@@ -27,19 +27,19 @@ func TestListComponentsEmpty(t *testing.T) {
 		err := componentList.HandleComponentListCommand(opts)
 
 		if err != nil {
-			log.Printf("Error listing components: %v", err)
+			log.Printf("Error listing integrations: %v", err)
 			t.Errorf("Error: %v", err)
 		}
 	})
 
-	log.Printf("Step 2: Validating empty components response")
+	log.Printf("Step 2: Validating empty integrations response")
 	log.Printf("Command output: %s", got)
 
-	if !strings.Contains(got, "No components found") {
-		log.Printf("Expected 'No components found' but got: %s", got)
-		t.Errorf("Expected: No components found, Got: %s", got)
+	if !strings.Contains(got, "No integrations found") {
+		log.Printf("Expected 'No integrations found' but got: %s", got)
+		t.Errorf("Expected: No integrations found, Got: %s", got)
 	} else {
-		log.Printf("Successfully verified project has no components")
+		log.Printf("Successfully verified project has no integrations")
 	}
 
 	log.Printf("=== TestListComponentsEmpty Completed ===")

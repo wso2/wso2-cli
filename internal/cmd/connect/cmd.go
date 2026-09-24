@@ -52,10 +52,10 @@ var ConnectCmd = &cobra.Command{
 		To create a shell environment that is connected a different non-critical environment :
 			%s
 
-		To inject connection configurations for a specific component :
+		To inject connection configurations for a specific integration :
 			%s
 		
-		To start your local component connected to its dependencies :
+		To start your local integration connected to its dependencies :
 			%s
 
 		To skip injecting connection configurations for the given connection names :
@@ -64,8 +64,8 @@ var ConnectCmd = &cobra.Command{
 	`),
 		"$ wso2-integration-platform connect --project <project-name>",
 		"$ wso2-integration-platform connect --project <project-name> --env <env-name>",
-		"$ wso2-integration-platform connect --project <project-name> --component <component-name>",
-		"$ wso2-integration-platform connect --project <project-name> -- <command-to-start-local-component>",
+		"$ wso2-integration-platform connect --project <project-name> --integration <integration-name>",
+		"$ wso2-integration-platform connect --project <project-name> -- <command-to-start-local-integration>",
 		"$ wso2-integration-platform connect --project <project-name> --skip-connection <conn-name-1> --skip-connection <conn-name-2>"),
 }
 

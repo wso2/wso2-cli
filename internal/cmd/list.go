@@ -17,13 +17,14 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
 	Short:   i18n.T("list available resources"),
-	Long:    i18n.T(`Display a list of resources (projects, components, configs, etc.) in the Integration Platform`),
+	Long:    i18n.T(`Display a list of resources (projects, integrations, configs, etc.) in the Integration Platform`),
 }
 
 func init() {
 	listCmd.AddCommand(orgList.OrgListCommand)
 	listCmd.AddCommand(projectList.ProjectListCommand)
 	listCmd.AddCommand(componentList.ComponentListCommand)
+	listCmd.AddCommand(common.LegacyAliasCommand(componentList.ComponentListCommand, "components", "component"))
 	listCmd.AddCommand(configList.ConfigListCommand)
 	listCmd.AddCommand(connectionList.ConnectionListCommand)
 	listCmd.AddCommand(buildList.BuildListCommand)

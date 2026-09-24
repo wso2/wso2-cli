@@ -151,7 +151,7 @@ func getCompPort(portFlag *ConnectCmdOpts, component *models.Component, deployme
 		}
 
 		if len(*endpoints) == 0 {
-			utils.PrintError("no endpoint found for the service component")
+			utils.PrintError("no endpoint found for the service integration")
 			ports, err := promptForPort()
 			if err != nil {
 				return err

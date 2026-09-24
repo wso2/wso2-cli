@@ -21,7 +21,7 @@ func getEndpointForEnv(orgId string, comp models.Component, selectedEnv project.
 	endpoints, err := auth.ProjectClient.GetComponentEndpoints(comp.Id, deploymentTrack.Id, orgId)
 	endpointsSpinner.Stop()
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("failed to get component endpoints: %w"), err)
+		return nil, fmt.Errorf(i18n.T("failed to get integration endpoints: %w"), err)
 	}
 
 	var selectedEndpoints []project.Endpoint

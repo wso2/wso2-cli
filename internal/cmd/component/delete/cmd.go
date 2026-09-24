@@ -10,10 +10,11 @@ import (
 var cmpDeleteOpts = &ComponentDeleteOpts{}
 
 var ComponentDeleteCmd = &cobra.Command{
-	Use:     "component [component-name] [flags]",
-	Short:   i18n.T("delete a component"),
-	Long:    i18n.T(`This command allows you to delete a component in the Project`),
-	Example: `wso2-integration-platform delete component <component-name>`,
+	Use:     "integration [integration-name] [flags]",
+	Aliases: []string{"integrations"},
+	Short:   i18n.T("delete an integration"),
+	Long:    i18n.T(`This command allows you to delete an integration in the Project`),
+	Example: `wso2-integration-platform delete integration <integration-name>`,
 	Args:    cobra.MaximumNArgs(1),
 	PreRun:  common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -32,5 +33,5 @@ var ComponentDeleteCmd = &cobra.Command{
 func init() {
 	common.AddProjectFlag(ComponentDeleteCmd.Flags(), &cmpDeleteOpts.Project)
 	common.AddOrgFlag(ComponentDeleteCmd.Flags(), &cmpDeleteOpts.Org)
-	ComponentDeleteCmd.Flags().BoolVarP(&cmpDeleteOpts.SkipConfirm, "skip-confirm", "", false, "Skip confirmation prompt before deleting the component")
+	ComponentDeleteCmd.Flags().BoolVarP(&cmpDeleteOpts.SkipConfirm, "skip-confirm", "", false, "Skip confirmation prompt before deleting the integration")
 }

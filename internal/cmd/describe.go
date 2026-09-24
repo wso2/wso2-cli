@@ -22,6 +22,7 @@ var describeCmd = &cobra.Command{
 
 func init() {
 	describeCmd.AddCommand(cmpDescribe.ComponentDescribeCommand)
+	describeCmd.AddCommand(common.LegacyAliasCommand(cmpDescribe.ComponentDescribeCommand, "component", "components"))
 	describeCmd.AddCommand(project.ProjectDescribeCmd)
 	describeCmd.AddCommand(configDescribe.ConfigDescribeCommand)
 	describeCmd.AddCommand(connectionDescribe.ConnectionDescribeCommand)

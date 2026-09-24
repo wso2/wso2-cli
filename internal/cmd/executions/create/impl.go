@@ -55,7 +55,7 @@ func handleImpl(params *CreateExecutionParams) error {
 	}
 
 	if cInitStat.Data.Status == "queued" || cInitStat.Data.Status == "in_progress" {
-		utils.PrintInfo("%s", i18n.T("Component initialization is in progress. Please run the command in a while...\n"))
+		utils.PrintInfo("%s", i18n.T("Integration initialization is in progress. Please run the command in a while...\n"))
 		return nil
 	}
 
@@ -95,8 +95,8 @@ func handleImpl(params *CreateExecutionParams) error {
             %s
 
 	`,
-		fmt.Sprintf("wso2-integration-platform list executions --project '%s' --component '%s' --env %s", sProject.Name, sComponent.Name, sEnv.Name),
-		fmt.Sprintf("wso2-integration-platform describe execution --project '%s' --component %s --env %s\n", sProject.Name, sComponent.Name, sEnv.Name),
+		fmt.Sprintf("wso2-integration-platform list executions --project '%s' --integration '%s' --env %s", sProject.Name, sComponent.Name, sEnv.Name),
+		fmt.Sprintf("wso2-integration-platform describe execution --project '%s' --integration %s --env %s\n", sProject.Name, sComponent.Name, sEnv.Name),
 	))
 
 	return nil

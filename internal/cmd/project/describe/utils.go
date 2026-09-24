@@ -43,7 +43,7 @@ func printProjectInfo(project *models.Project, org *api.Organization) {
 
 func printProjectComponents(components []models.Component) {
 	if len(components) == 0 {
-		utils.PrintInfo("%s", i18n.T("No components found in the project"))
+		utils.PrintInfo("%s", i18n.T("No integrations found in the project"))
 		return
 	}
 
@@ -63,7 +63,7 @@ func printProjectComponents(components []models.Component) {
 
 	utils.PrintInfo("%s", heredoc.Docf(
 		i18n.T(`
-			Listing components in the project:
+			Listing integrations in the project:
 
 			%s
 		`),

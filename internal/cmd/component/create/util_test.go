@@ -8,7 +8,7 @@ import (
 
 func newTestCreateParams() *CreateComponentParams {
 	return &CreateComponentParams{
-		ComponentName: "test-component",
+		ComponentName: "test-integration",
 		ComponentType: component.ComponentTypeService,
 		BuildPack:     component.ComponentBuildPackBallerina,
 		RepoBranch:    "main",

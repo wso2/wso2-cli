@@ -10,7 +10,7 @@ import (
 var suspendOpts = &SuspendCmdOpts{}
 
 var SuspendCmd = &cobra.Command{
-	Use:    "deployment [component-name] [flags]",
+	Use:    "deployment [integration-name] [flags]",
 	Short:  i18n.T("Suspend a deployment"),
 	Long:   i18n.T("Suspend a deployment that is deployed"),
 	PreRun: common.VerifyIsUserLoggedIn,

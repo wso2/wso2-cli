@@ -342,7 +342,7 @@ func (c *DeploymentBuildClient) SuspendDeployment(
 
 	resp, err := c.Client.Do(req, orgId)
 	if err != nil {
-		return "", fmt.Errorf("error while fetching component endpoints: %w", err)
+		return "", fmt.Errorf("error while fetching integration endpoints: %w", err)
 	}
 	defer resp.Body.Close()
 	type Response struct {
@@ -443,7 +443,7 @@ func (c *DeploymentBuildClient) ResumeDeployment(
 
 	resp, err := c.Client.Do(req, orgId)
 	if err != nil {
-		return "", fmt.Errorf("error while fetching component endpoints: %w", err)
+		return "", fmt.Errorf("error while fetching integration endpoints: %w", err)
 	}
 	defer resp.Body.Close()
 	type Response struct {

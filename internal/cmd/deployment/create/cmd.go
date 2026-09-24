@@ -13,15 +13,15 @@ var deployParams DeployComponentParams
 var deployConfigMapBaseName = "deploy-envs"
 
 var ComponentDeployCommand = &cobra.Command{
-	Use:   "deployment [component-name] [flags]",
+	Use:   "deployment [integration-name] [flags]",
 	Args:  cobra.MaximumNArgs(1),
-	Short: i18n.T("trigger a deployment for a component"),
-	Long:  i18n.T("Trigger a deployment for a component in a selected environment within your project."),
+	Short: i18n.T("trigger a deployment for an integration"),
+	Long:  i18n.T("Trigger a deployment for an integration in a selected environment within your project."),
 	Example: heredoc.Docf(i18n.T(`
-		To trigger a deployment of a specific component to the development environment:
+		To trigger a deployment of a specific integration to the development environment:
 			%s
 	`),
-		"$ wso2-integration-platform create deployment <component-name> --project=<project-name> --deployment-track=main --env=Development"),
+		"$ wso2-integration-platform create deployment <integration-name> --project=<project-name> --deployment-track=main --env=Development"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
@@ -94,7 +94,7 @@ func init() {
 			"byoi-image",
 			"",
 			"",
-			i18n.T("deployment image with tag (image based components only)"),
+			i18n.T("deployment image with tag (image based integrations only)"),
 		)
 	ComponentDeployCommand.Flags().
 		StringArrayVarP(
@@ -102,7 +102,7 @@ func init() {
 			"byoi-api-schema-file",
 			"",
 			[]string{},
-			i18n.T("API schema file path (image based components only)"),
+			i18n.T("API schema file path (image based integrations only)"),
 		)
 	ComponentDeployCommand.Flags().
 		StringVarP(
@@ -110,6 +110,6 @@ func init() {
 			"byoi-endpoints-file",
 			"",
 			"",
-			i18n.T("service endpoints file path (image based components only)"),
+			i18n.T("service endpoints file path (image based integrations only)"),
 		)
 }

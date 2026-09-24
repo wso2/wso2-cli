@@ -29,7 +29,7 @@ func getProjects(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 			return utils.NewMCPErrorResponse(err, "Failed to retrieve project."), nil
 		}
 		nextSteps := []string{
-			fmt.Sprintf("To see the components within a specific project, use `get_components` with the `project_uuid`: '%s'.", project.ID),
+			fmt.Sprintf("To see the integrations within a specific project, use `get_integrations` with the `project_uuid`: '%s'.", project.ID),
 			fmt.Sprintf("To see the configured environments for a project, use `get_project_environments` with the `project_uuid`: '%s'.", project.ID),
 		}
 		return utils.NewMCPResponse([]*models.Project{project}, "Project retrieved successfully.", nextSteps)
@@ -42,7 +42,7 @@ func getProjects(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	}
 
 	nextSteps := []string{
-		"To see the components within a specific project, use `get_components` with the `project_uuid`.",
+		"To see the integrations within a specific project, use `get_integrations` with the `project_uuid`.",
 		"To see the configured environments for a project, use `get_project_environments` with the `project_uuid`.",
 	}
 	return utils.NewMCPResponse(projects, "Projects retrieved successfully.", nextSteps)
@@ -70,7 +70,7 @@ func getProjectEnvironments(ctx context.Context, request mcp.CallToolRequest) (*
 	}
 
 	nextSteps := []string{
-		"To deploy a component, use the `environment_uuid` for your target environment (e.g., Development) in the `create_deployment` tool.",
+		"To deploy an integration, use the `environment_uuid` for your target environment (e.g., Development) in the `create_deployment` tool.",
 		"To manage test users for an environment, use `manage_test_users` with the `environment_template_id`.",
 	}
 	return utils.NewMCPResponse(environments, "Project environments retrieved successfully.", nextSteps)
@@ -120,6 +120,6 @@ func createProject(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		return utils.NewMCPErrorResponse(err, "Failed to create project."), nil
 	}
 
-	nextSteps := []string{fmt.Sprintf("Project created successfully. To deploy components, you first need the environment details. Use `get_project_environments` with `project_uuid`: '%s'.", createdProject.ID)}
+	nextSteps := []string{fmt.Sprintf("Project created successfully. To deploy integrations, you first need the environment details. Use `get_project_environments` with `project_uuid`: '%s'.", createdProject.ID)}
 	return utils.NewMCPResponse(createdProject, "Project created successfully.", nextSteps)
 }

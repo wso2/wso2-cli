@@ -37,10 +37,10 @@ var ProjectCreateCommand = &cobra.Command{
 		} else {
 			utils.PrintInfo("%s", heredoc.Docf(i18n.T(`
 			
-			To create a new component within your newly created project :
+			To create a new integration within your newly created project :
 				%s	
 		`),
-				fmt.Sprintf("$ wso2-integration-platform create component <component-name> --project=%s", createParams.Name),
+				fmt.Sprintf("$ wso2-integration-platform create integration <integration-name> --project=%s", createParams.Name),
 			))
 		}
 	},

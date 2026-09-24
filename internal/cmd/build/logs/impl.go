@@ -53,7 +53,7 @@ func printBuildLog(opts *BuildLogFlags) (err error) {
 	}
 
 	if strings.HasPrefix(strings.ToLower(cmp.DisplayType), "byoi") {
-		utils.PrintInfo("%s", i18n.T("Cannot get build logs for pre-built image based components\n"))
+		utils.PrintInfo("%s", i18n.T("Cannot get build logs for pre-built image based integrations\n"))
 		return
 	}
 

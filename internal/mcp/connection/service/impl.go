@@ -61,7 +61,7 @@ func CreateConnection(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 			}
 		}
 		if !found {
-			return utils.NewMCPErrorResponse(fmt.Errorf("component not found in any project"), "Failed to create connection."), nil
+			return utils.NewMCPErrorResponse(fmt.Errorf("integration not found in any project"), "Failed to create connection."), nil
 		}
 		// Set it in the request for downstream utils
 		request.Params.Arguments.(map[string]interface{})["project_uuid"] = projectUuid
@@ -235,10 +235,10 @@ func CreateConnection(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		nextSteps = append(nextSteps, "IMPORTANT: Update your API calls to use the format `window.configs.apiUrl + \"/your-backend-path\"`. You must configure the request to include credentials so the secure session cookie is sent automatically.")
 		nextSteps = append(nextSteps, "IMPORTANT: Code changes to the frontend should be EXTREMELY minimal but above mentioned changes are required. So plan the least disruptive way to implement these changes.")
 		nextSteps = append(nextSteps, "Commit and push the changes to the repository.")
-		nextSteps = append(nextSteps, "Call create_build and create_deployment to create a new build and deployment for the component.")
+		nextSteps = append(nextSteps, "Call create_build and create_deployment to create a new build and deployment for the integration.")
 		nextSteps = append(nextSteps, fmt.Sprintf("Create new configmap with `create_configurations` with window.config.apiUrl as the value of the %s. This config needs to be mounted to the webapp at '/app/public/config.js'. Refer the guide for the more details.", serviceURLs))
 	} else {
-		nextSteps = append(nextSteps, "Connection created. A new build is required to inject the connection details into the component.")
+		nextSteps = append(nextSteps, "Connection created. A new build is required to inject the connection details into the integration.")
 		nextSteps = append(nextSteps, fmt.Sprintf("Use `create_build` for integration_uuid: '%s' and then deploy the new build.", selectedComponent.Id))
 		nextSteps = append(nextSteps, "To connect to this service, add the following to your component.yaml file under the `connections` section:")
 		nextSteps = append(nextSteps, fmt.Sprintf(

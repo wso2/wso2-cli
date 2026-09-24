@@ -22,7 +22,7 @@ func GetProjectConnectionList(orgId string, projectId string) ([]connections.Con
 }
 
 func GetComponentConnectionList(orgId string, projectId string, componentId string) ([]connections.Connection, error) {
-	connectionsSpinner := utils.CreateSpinner(i18n.T(" Fetching component connections..."), "")
+	connectionsSpinner := utils.CreateSpinner(i18n.T(" Fetching integration connections..."), "")
 	connectionsSpinner.Start()
 	connections, err := auth.ConnectionsClient.GetConnectionList(orgId, projectId, componentId)
 	connectionsSpinner.Stop()

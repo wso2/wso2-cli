@@ -100,7 +100,7 @@ func printComponentLogs(
 
 	logsSpinner := utils.CreateSpinner(
 		fmt.Sprintf(
-			i18n.T(" Fetching %s logs for component %s within %s environment"),
+			i18n.T(" Fetching %s logs for integration %s within %s environment"),
 			logType,
 			component.Name,
 			selectedEnv.Name,
@@ -122,7 +122,7 @@ func printComponentLogs(
 	logsSpinner.Stop()
 
 	if err != nil {
-		return fmt.Errorf(i18n.T("failed to get component logs: %w"), err)
+		return fmt.Errorf(i18n.T("failed to get integration logs: %w"), err)
 	}
 
 	if len(logs) == 0 {
@@ -161,7 +161,7 @@ func printComponentLogs(
 						true,
 					)
 					if err != nil {
-						utils.HandleErr(fmt.Errorf(i18n.T("failed to follow component logs: %w"), err))
+						utils.HandleErr(fmt.Errorf(i18n.T("failed to follow integration logs: %w"), err))
 					}
 					auth.LogsClient.PrintComponentLogs(logs)
 				}()

@@ -12,7 +12,7 @@ var opts = &ApplicationLogsOpts{}
 var ApplicationLogsCmd = &cobra.Command{
 	Use:    "application [flags]",
 	Short:  i18n.T("display application logs"),
-	Long:   i18n.T("Display application logs of a deployed component"),
+	Long:   i18n.T("Display application logs of a deployed integration"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := printApplicationLogs(opts); err != nil {

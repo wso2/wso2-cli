@@ -59,7 +59,7 @@ func getRuntimeLogs(logType string, ctx context.Context, request mcp.CallToolReq
 	}
 
 	if selectedComponent.DisplayType == component.DisplayTypeProxy {
-		return utils.NewMCPErrorResponse(fmt.Errorf("application logs is not applicable for proxy type components"), "Failed to retrieve runtime logs."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("application logs is not applicable for proxy type integrations"), "Failed to retrieve runtime logs."), nil
 	}
 
 	dpTrack, err := utils.GetDeploymentTrack(*selectedComponent, request)

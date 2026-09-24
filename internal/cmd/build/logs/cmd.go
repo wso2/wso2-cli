@@ -11,7 +11,7 @@ var bLogOpts = &BuildLogFlags{}
 var BuildLogsCmd = &cobra.Command{
 	Use:    "build [flags]",
 	Short:  "display build logs",
-	Long:   "Display build logs for specific build run of a component",
+	Long:   "Display build logs for specific build run of an integration",
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := printBuildLog(bLogOpts); err != nil {

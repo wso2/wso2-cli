@@ -16,6 +16,7 @@ var deleteCmd = &cobra.Command{
 
 func init() {
 	deleteCmd.AddCommand(cmpDel.ComponentDeleteCmd)
+	deleteCmd.AddCommand(common.LegacyAliasCommand(cmpDel.ComponentDeleteCmd, "component", "components"))
 	deleteCmd.AddCommand(projDel.DeleteCmd)
 	deleteCmd.AddCommand(configDel.ConfigDeleteCommand)
 	common.AddGenericHelper(deleteCmd)

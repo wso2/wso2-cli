@@ -11,16 +11,16 @@ import (
 var buildParams BuildComponentParams
 
 var ComponentBuildCommand = &cobra.Command{
-	Use:   "build [component-name] [flags]",
-	Short: i18n.T("Trigger a build for a component"),
+	Use:   "build [integration-name] [flags]",
+	Short: i18n.T("Trigger a build for an integration"),
 	Args:  cobra.MaximumNArgs(1),
-	Long:  i18n.T("Trigger a build for a component in a selected deployment track within your project."),
+	Long:  i18n.T("Trigger a build for an integration in a selected deployment track within your project."),
 	Example: heredoc.Docf(`
 	
-		To build a component from your default project :
+		To build an integration from your default project :
 			%s
 	`,
-		"$ wso2-integration-platform create build <component-name> --project='Default Project' --deployment-track=main"),
+		"$ wso2-integration-platform create build <integration-name> --project='Default Project' --deployment-track=main"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {

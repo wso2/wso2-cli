@@ -249,6 +249,6 @@ func publishDefaultDatabase(ctx context.Context, request mcp.CallToolRequest) (*
 		"database": database,
 	}
 
-	nextSteps := []string{"The database has been published to the marketplace. It is now discoverable and can be connected to a component using `create_database_connection`."}
+	nextSteps := []string{"The database has been published to the marketplace. It is now discoverable and can be connected to an integration using `create_database_connection`."}
 	return utils.NewMCPResponse(response, "Database published successfully.", nextSteps)
 }

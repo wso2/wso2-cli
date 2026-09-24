@@ -42,7 +42,7 @@ func HandleDescribeBuild(params *BuildDescribeParams) error {
 			A build id is required with --output=json when output is piped or redirected.
 
 			Provide the build id (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe build <build-id> --project=<project> --component=<component> --deployment-track=<track>
+			  wso2-integration-platform describe build <build-id> --project=<project> --integration=<integration> --deployment-track=<track>
 
 			Or run the command on a terminal without a pipe to choose a build interactively:
 			  wso2-integration-platform describe build --output=json`)))
@@ -67,9 +67,9 @@ func HandleDescribeBuild(params *BuildDescribeParams) error {
 		// In JSON mode, keep stdout empty so machine consumers see a clean
 		// (empty) payload; the explanation still goes to the user via stderr.
 		if outputFormat.IsStructured() {
-			fmt.Fprint(utils.IO.ErrOut, i18n.T("Cannot describe a build for pre-built image based components\n"))
+			fmt.Fprint(utils.IO.ErrOut, i18n.T("Cannot describe a build for pre-built image based integrations\n"))
 		} else {
-			utils.PrintInfo("%s", i18n.T("Cannot describe a build for pre-built image based components\n"))
+			utils.PrintInfo("%s", i18n.T("Cannot describe a build for pre-built image based integrations\n"))
 		}
 		return nil
 	}
@@ -211,7 +211,7 @@ func HandleDescribeBuild(params *BuildDescribeParams) error {
 			%s
 
 		`,
-			fmt.Sprintf(`$ wso2-integration-platform logs build --project="%s" --component="%s" --deployment-track="%s" --build-id=%s`,
+			fmt.Sprintf(`$ wso2-integration-platform logs build --project="%s" --integration="%s" --deployment-track="%s" --build-id=%s`,
 				project.Name,
 				remoteComponent.Name,
 				deploymentTrack.Branch,
@@ -221,7 +221,7 @@ func HandleDescribeBuild(params *BuildDescribeParams) error {
 
 		if selectedBuild.Status.Conclusion == "success" {
 			utils.PrintInfo("%s", heredoc.Docf(`
-				To deploy this component to the Development environment :
+				To deploy this integration to the Development environment :
 					%s
 
 			`,

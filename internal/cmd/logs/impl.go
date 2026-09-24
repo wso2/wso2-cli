@@ -62,9 +62,9 @@ func HandleComponentLogs(params *LogsParams) error {
 				!strings.HasSuffix(remoteComponent.DisplayType, "Service") &&
 				!strings.HasSuffix(remoteComponent.DisplayType, "Webhook") &&
 				remoteComponent.DisplayType != component.DisplayTypeGitProxy {
-				return errors.New(i18n.T("gateway logs is only applicable for service, webhook and proxy type components"))
+				return errors.New(i18n.T("gateway logs is only applicable for service, webhook and proxy type integrations"))
 			} else if params.typeFlag == ApplicationLog && remoteComponent.DisplayType == component.DisplayTypeProxy {
-				return errors.New(i18n.T("application logs is not applicable for proxy type components"))
+				return errors.New(i18n.T("application logs is not applicable for proxy type integrations"))
 			}
 
 			err = printComponentLogs(logsParams, selectedOrg.ID, *remoteComponent, *selectedEnv, selectedDataPlaneHost, isCilium, []string{deploymentTrack.ApiVersion}, []string{deploymentTrack.Id})

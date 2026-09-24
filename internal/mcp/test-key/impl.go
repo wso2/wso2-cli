@@ -96,7 +96,7 @@ func generateTestKey(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		}
 
 		if len(*endpoints) == 0 {
-			return utils.NewMCPErrorResponse(fmt.Errorf("No endpoints found for the selected component."), "Failed to generate test key."), nil
+			return utils.NewMCPErrorResponse(fmt.Errorf("No endpoints found for the selected integration."), "Failed to generate test key."), nil
 		}
 
 		var selectedEndpoints []project.Endpoint

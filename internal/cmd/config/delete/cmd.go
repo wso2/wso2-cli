@@ -13,14 +13,14 @@ var params ConfigDeleteOptions
 var ConfigDeleteCommand = &cobra.Command{
 	Use:   "config [config-name] [flags]",
 	Short: i18n.T("delete config or secret"),
-	Long:  heredoc.Doc(i18n.T(`Delete a config or secret within your component`)),
+	Long:  heredoc.Doc(i18n.T(`Delete a config or secret within your integration`)),
 	Example: heredoc.Docf(i18n.T(`
 
 		To delete a config :
 			%s
 			
 	`),
-		`$ wso2-integration-platform delete config <config-name> --project=<project-name> --component=<component-name> --org=<org-name> --env=<env-name>`),
+		`$ wso2-integration-platform delete config <config-name> --project=<project-name> --integration=<integration-name> --org=<org-name> --env=<env-name>`),
 	Args:   cobra.MaximumNArgs(1),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {

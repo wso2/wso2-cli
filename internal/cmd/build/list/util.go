@@ -34,7 +34,7 @@ func printBuildListStructured(builds []deploymentbuild.BuildKind, format common.
 	// On an empty result, guide the user via stderr (kept out of stdout so
 	// the JSON stays machine-parseable).
 	if len(builds) == 0 {
-		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No builds found for the component %s of %s project.\n"),
+		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No builds found for the integration %s of %s project.\n"),
 			utils.CS.Bold(componentInfo.Name),
 			utils.CS.Bold(currentProject.Name))
 	}
@@ -46,7 +46,7 @@ func printBuildListTable(builds []deploymentbuild.BuildKind, componentInfo model
 		fmt.Fprintln(
 			utils.IO.Out,
 			fmt.Sprintf(
-				i18n.T(`No builds found for the component %s of %s project`),
+				i18n.T(`No builds found for the integration %s of %s project`),
 				utils.CS.Bold(componentInfo.Name),
 				utils.CS.Bold(currentProject.Name),
 			),
@@ -58,7 +58,7 @@ func printBuildListTable(builds []deploymentbuild.BuildKind, componentInfo model
 		utils.IO.Out,
 		fmt.Sprintf(
 			i18n.T(heredoc.Doc(`
-                        List of available builds of the component %s of %s project:
+                        List of available builds of the integration %s of %s project:
                     `)),
 			utils.CS.Bold(componentInfo.Name),
 			utils.CS.Bold(currentProject.Name),

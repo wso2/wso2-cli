@@ -33,7 +33,7 @@ func triggerComponentDeployments(
 	buildRef string,
 	params *DeployComponentParams,
 ) (deployments *deployment.DeploymentTrackResponse, err error) {
-	getDeploymentSpinner := utils.CreateSpinner(i18n.T(" Triggering component deployment..."), "")
+	getDeploymentSpinner := utils.CreateSpinner(i18n.T(" Triggering integration deployment..."), "")
 
 	deployOpts := deployment.DeploySpecOpts{}
 
@@ -166,7 +166,7 @@ func setDeployEnvConfigs(
 
 func resolveProxyBuild(builds []gqlbuild.BuildListResponse, buildId string) (build gqlbuild.BuildListResponse, err error) {
 	if len(builds) == 0 {
-		err = fmt.Errorf("No succeeded builds found for the selected component")
+		err = fmt.Errorf("No succeeded builds found for the selected integration")
 		return
 	}
 
@@ -267,7 +267,7 @@ func getBuildList(orgId, cmpId, versionId string) ([]gqlbuild.BuildListResponse,
 }
 
 func getImageHistory(orgId, orgIdUuid, projectId, compId, versionId string) ([]devops.ImageHistoryResponse, error) {
-	imageHistorySpinner := utils.CreateSpinner(i18n.T(" Fetching component images..."), "")
+	imageHistorySpinner := utils.CreateSpinner(i18n.T(" Fetching integration images..."), "")
 	imageHistorySpinner.Start()
 	imageHistory, err := auth.DevopsClient.GetImageHistory(orgId, orgIdUuid, projectId, compId, versionId)
 
@@ -281,7 +281,7 @@ func getImageHistory(orgId, orgIdUuid, projectId, compId, versionId string) ([]d
 }
 
 func deployByoiComponent(orgId, compId, envReleaseId, imageNameWithTag string) (bool, error) {
-	imageHistorySpinner := utils.CreateSpinner(i18n.T(" Deploying image based component..."), "")
+	imageHistorySpinner := utils.CreateSpinner(i18n.T(" Deploying image based integration..."), "")
 	imageHistorySpinner.Start()
 	success, err := auth.ComponentClient.DeployByoiComponent(orgId, compId, envReleaseId, imageNameWithTag)
 
@@ -332,7 +332,7 @@ func verifyWorkflowStatus(
 		workflowmgt.WFS_TIMEOUT, workflowmgt.WFS_CANCELLED:
 		// instruct user to create new workflow
 		return errors.New(fmt.Sprintf(
-			"Workflows are enabled for this component please create an workflow approval request at:\n%s",
+			"Workflows are enabled for this integration please create an workflow approval request at:\n%s",
 			genComponentDeployUrl(org.Handle, projectId, cmpHandle),
 		))
 	case workflowmgt.WFS_DISABLED, workflowmgt.WFS_APPROVED:
@@ -365,7 +365,7 @@ func generateByoiEndpoint(org api.Organization, project models.Project, remoteCo
 			}
 		}
 
-		createEndppointsSpinner := utils.CreateSpinner(i18n.T(" Creating endpoints for the component..."), "")
+		createEndppointsSpinner := utils.CreateSpinner(i18n.T(" Creating endpoints for the integration..."), "")
 		createEndppointsSpinner.Start()
 		err = auth.DevopsClient.CreateByoiEndpoints(org.ID, org.UUID, remoteComponent.Id, matchingAppEnv.ReleaseId, project.ID, createEndpointsReq)
 		createEndppointsSpinner.Stop()

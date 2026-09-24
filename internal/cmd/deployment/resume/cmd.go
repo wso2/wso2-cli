@@ -21,7 +21,7 @@ type RedeployCmdOpts struct {
 var cmdOpts RedeployCmdOpts
 
 var RedeployCmd = &cobra.Command{
-	Use:    "deployment [component-name] [flags]",
+	Use:    "deployment [integration-name] [flags]",
 	Short:  "Resume a deployment",
 	Long:   "Resume a suspended deployment",
 	PreRun: common.VerifyIsUserLoggedIn,

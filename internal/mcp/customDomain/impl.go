@@ -28,7 +28,7 @@ func getCustomDomains(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	}
 
 	nextSteps := []string{
-		"Check if your domain is already registered for your target environment and component type.",
+		"Check if your domain is already registered for your target environment and integration type.",
 		"If not found, register it using register_custom_domain.",
 	}
 	return utils.NewMCPResponse(customDomains, "Custom domains retrieved successfully.", nextSteps)
@@ -109,7 +109,7 @@ func registerCustomDomain(ctx context.Context, request mcp.CallToolRequest) (*mc
 	}
 
 	nextSteps := []string{
-		fmt.Sprintf("Custom domain has been registered successfully. To create a url mapping for a component with it call create_url_mapping tool with domain_id: '%s'.", customDomain.ID),
+		fmt.Sprintf("Custom domain has been registered successfully. To create a url mapping for an integration with it call create_url_mapping tool with domain_id: '%s'.", customDomain.ID),
 	}
 
 	return utils.NewMCPResponse(customDomain, "Custom domain registered successfully.", nextSteps)
@@ -210,13 +210,13 @@ func createUrlMapping(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		wfRequestUrl := fmt.Sprintf("%s/organizations/%s/approvals", utils.GetChoreConsoleBaseUrl(), targetOrg.Handle)
 
 		nextSteps := []string{
-			"Your organization requires approvals to map custom domains with components. URL mapping request has been submitted.",
+			"Your organization requires approvals to map custom domains with integrations. URL mapping request has been submitted.",
 			fmt.Sprintf("A reviewer with workflow management permissions should approve the request through following link: %s", wfRequestUrl),
 		}
 		return utils.NewMCPResponse(nil, "URL mapping request submitted successfully.", nextSteps)
 	}
 	nextSteps := []string{
-		"Custom domain was successfully mapped to your component. Component is now accessible through your custom domain.",
+		"Custom domain was successfully mapped to your integration. Integration is now accessible through your custom domain.",
 	}
 	return utils.NewMCPResponse(urlMapping, "URL mapping created successfully.", nextSteps)
 }

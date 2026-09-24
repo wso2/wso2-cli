@@ -7,7 +7,7 @@ import (
 )
 
 func triggerComponentBuild(orgId string, componentName string, projectHandle string, deploymentTrackId string, commitHash string) (deploymentBuild *deploymentbuild.BuildKind, err error) {
-	deploymentBuildSpinner := utils.CreateSpinner(" Triggering component build...", "")
+	deploymentBuildSpinner := utils.CreateSpinner(" Triggering integration build...", "")
 	deploymentBuildSpinner.Start()
 	deploymentBuildRes, err := auth.DeploymentBuildClient.CreateDeploymentBuilds(orgId, componentName, projectHandle, deploymentTrackId, commitHash)
 	deploymentBuildSpinner.Stop()
