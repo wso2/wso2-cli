@@ -96,11 +96,6 @@ them for flags, or see the full
 servers, event and file integrations. Other component types that may exist in
 the same project are filtered out.
 
-Integrations were previously called components. `create component`,
-`list components`, `describe component`, `delete component` and the
-`--component`/`-c` flag still work, but are deprecated and hidden from `--help`;
-see the [legacy spellings](docs/cli-commands.md#legacy-component-spellings).
-
 Logs come from four sources: `logs application`, `logs build`, `logs executions`
 and `logs gateway`.
 

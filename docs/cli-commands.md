@@ -7,7 +7,6 @@ the same information from the binary itself.
 - [Conventions](#conventions)
 - [Global flags](#global-flags)
 - [Common resource flags](#common-resource-flags)
-- [Legacy `component` spellings](#legacy-component-spellings)
 - [Authentication and session](#authentication-and-session)
 - [create](#create)
 - [list](#list)
@@ -49,28 +48,6 @@ These flags are shared by most resource commands and are not repeated in full be
 | `-e`, `--env` | Environment name (`Development`, `Production`, …). |
 | `-d`, `--deployment-track` | Deployment track, e.g. `main`. |
 | `-o`, `--output` | Output format: `table` or `json`. Defaults to `$OUTPUT_FORMAT`, else `table`. |
-
----
-
-## Legacy `component` spellings
-
-Integrations were previously called components. The old spellings still work so
-existing scripts keep running, but they are deprecated, hidden from `--help`,
-and print a one-line notice on stderr:
-
-| Deprecated | Use instead |
-|------------|-------------|
-| `create component` / `create components` | `create integration` |
-| `list components` / `list component` | `list integrations` |
-| `describe component` / `describe components` | `describe integration` |
-| `delete component` / `delete components` | `delete integration` |
-| `--component`, `-c` (selector flag) | `--integration`, `-i` |
-| `-c` on `create integration` (i.e. `--component-name`) | `-n`, `--name` |
-
-Two places still say `component`, because changing them would break something
-outside the CLI: the `components` key in `describe project --output=json` (the
-machine-readable contract), and the bridge component that `connect` creates on
-the platform.
 
 ---
 
