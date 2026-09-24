@@ -38,15 +38,15 @@ func HandleDeleteProject(opts *ProjectDeleteOpts) error {
 	}
 
 	if len(comps) > 0 && !opts.Force {
-		return errors.New("Project contains components. Delete the components before deleting the project.")
+		return errors.New("Project contains integrations. Delete the integrations before deleting the project.")
 	}
 
 	if opts.Force {
-		deleteCmpSpinner := utils.CreateSpinner("Deleting components.", "")
+		deleteCmpSpinner := utils.CreateSpinner("Deleting integrations.", "")
 		if len(comps) > 0 {
 			fmt.Fprintln(
 				utils.IO.Out,
-				i18n.T("Detected components in the project. Deleting components prior to project deletion."),
+				i18n.T("Detected integrations in the project. Deleting integrations prior to project deletion."),
 			)
 		}
 		for _, comp := range comps {
@@ -59,9 +59,9 @@ func HandleDeleteProject(opts *ProjectDeleteOpts) error {
 			}
 
 			if resp.Status == "success" {
-				fmt.Fprintln(utils.IO.Out, fmt.Sprintf("Component %s deleted successfully.", comp.Name))
+				fmt.Fprintln(utils.IO.Out, fmt.Sprintf("Integration %s deleted successfully.", comp.Name))
 			} else {
-				return errors.New("Error deleting component.")
+				return errors.New("Error deleting integration.")
 			}
 		}
 	}

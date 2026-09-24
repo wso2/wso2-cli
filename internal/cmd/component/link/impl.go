@@ -41,8 +41,8 @@ func HandleLinkComponent(params *LinkComponentParams) error {
 	if relativePath != declarativeComponent.Spec.Source.Github.Path {
 		utils.PrintError("%s", heredoc.Docf(`
 
-		Invalid component directory.
-		Please navigate into the component directory and re-run this command.
+		Invalid integration directory.
+		Please navigate into the integration directory and re-run this command.
 
 		`))
 		return nil
@@ -57,7 +57,7 @@ func HandleLinkComponent(params *LinkComponentParams) error {
 
 	utils.PrintInfo("%s", heredoc.Docf(`
 
-		%s file successfully created within component directory.
+		%s file successfully created within integration directory.
 
 		`,
 		constants.COMPONENT_LINK_FILE,

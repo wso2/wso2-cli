@@ -16,18 +16,18 @@ var params ConfigCreateOptions
 var ConfigCreateCommand = &cobra.Command{
 	Use:   "config [flags]",
 	Short: i18n.T("create config"),
-	Long:  heredoc.Doc(i18n.T(`Create a new config-map or secret for a component`)),
+	Long:  heredoc.Doc(i18n.T(`Create a new config-map or secret for an integration`)),
 	Example: heredoc.Docf(i18n.T(`
 	
-		To create a new config-map containing environment variables within your component :
+		To create a new config-map containing environment variables within your integration :
 			%s
 
-		To create a new secret file mount within your component :
+		To create a new secret file mount within your integration :
 			%s
 			
 	`),
-		`$ wso2-integration-platform create config --project=<project-name> --component=<component-name> --type=config-map --mount-type=env-variables  --name=<config-name> --env-vars=key1=val1,key2=val`,
-		`$ wso2-integration-platform create config --project=<project-name> --component=<component-name> --type=secret --mount-type=file-mount  --name=<config-name>`),
+		`$ wso2-integration-platform create config --project=<project-name> --integration=<integration-name> --type=config-map --mount-type=env-variables  --name=<config-name> --env-vars=key1=val1,key2=val`,
+		`$ wso2-integration-platform create config --project=<project-name> --integration=<integration-name> --type=secret --mount-type=file-mount  --name=<config-name>`),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 

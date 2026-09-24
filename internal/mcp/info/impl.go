@@ -129,12 +129,12 @@ const getStartedResponse = `{
     },
     "integration_subtypes": {
       "concept": "Integration Subtypes and Key Distinctions",
-      "note": "These are the ONLY integration subtypes this platform can create. The subtype is what you pass to create_integration; it is resolved internally to the matching backend component type.",
+      "note": "These are the ONLY integration subtypes this platform can create. The subtype is what you pass to create_integration; it is resolved internally to the matching backend integration type.",
       "taxonomy_rules": [
         "CRITICAL: these six subtypes are a FLAT, MUTUALLY EXCLUSIVE set. There is no hierarchy, no parent category and no subtype-of relationship between any of them. Every integration is exactly one of the six.",
-        "'Automation' is NOT an umbrella term for anything that runs without human intervention. It is one specific subtype meaning a scheduled (cron) task. An Event Integration is NOT a kind of Automation, even though both run unattended — they resolve to different backend component types and therefore support different operations.",
+        "'Automation' is NOT an umbrella term for anything that runs without human intervention. It is one specific subtype meaning a scheduled (cron) task. An Event Integration is NOT a kind of Automation, even though both run unattended — they resolve to different backend integration types and therefore support different operations.",
         "Do not invent, infer or accept subtypes outside this list (e.g. Webhook, Web App, Manual Task, Proxy, Worker, Job). create_integration rejects them.",
-        "The three underlying backend component types are what actually determine behaviour: scheduleTask (Automation), service (API, AI Agent, MCP Server), eventHandler (Event Integration, File Integration). Group by these when reasoning about which tools apply.",
+        "The three underlying backend integration types are what actually determine behaviour: scheduleTask (Automation), service (API, AI Agent, MCP Server), eventHandler (Event Integration, File Integration). Group by these when reasoning about which tools apply.",
         "When a user's wording is ambiguous ('automate this', 'run this in the background'), decide from the TRIGGER: a clock/schedule means Automation; an inbound HTTP call means API; an external event or message means Event Integration; a file arriving means File Integration. Ask the user if the trigger is still unclear — do not guess."
       ],
       "types": {
@@ -152,13 +152,13 @@ const getStartedResponse = `{
         },
         "AI Agent": {
           "backend_component_type": "service",
-          "trigger": "An inbound HTTP request. Same runtime and capabilities as API, distinguished only by component subtype 'aiAgent'.",
+          "trigger": "An inbound HTTP request. Same runtime and capabilities as API, distinguished only by integration subtype 'aiAgent'.",
           "supports": "Everything API supports: endpoints, test keys, custom domains, URL mappings.",
           "does_not_support": "No executions."
         },
         "MCP Server": {
           "backend_component_type": "service",
-          "trigger": "An inbound MCP client request over HTTP. Same runtime and capabilities as API, distinguished only by component subtype 'MCP'.",
+          "trigger": "An inbound MCP client request over HTTP. Same runtime and capabilities as API, distinguished only by integration subtype 'MCP'.",
           "supports": "Everything API supports: endpoints, test keys, custom domains, URL mappings.",
           "does_not_support": "No executions."
         },
@@ -170,7 +170,7 @@ const getStartedResponse = `{
         },
         "File Integration": {
           "backend_component_type": "eventHandler",
-          "trigger": "A file arriving or changing, via a file-based trigger. An eventHandler specialised with component subtype 'fileIntegration'.",
+          "trigger": "A file arriving or changing, via a file-based trigger. An eventHandler specialised with integration subtype 'fileIntegration'.",
           "supports": "Same as Event Integration.",
           "does_not_support": "Same as Event Integration — no executions, no HTTP endpoint."
         }

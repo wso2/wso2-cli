@@ -38,17 +38,17 @@ var Version = "DEV"
 
 func getExampleMessage() string {
 	return heredoc.Docf(i18n.T(`
-		To list existing projects or components :
+		To list existing projects or integrations :
 			%s
 			%s
 
 		To create a new project :
 			%s
 
-		To add a component from your locally cloned repository :
+		To add an integration from your locally cloned repository :
 			%s
 
-		To build & deploy a component :
+		To build & deploy an integration :
 			%s
 			%s
 			%s
@@ -57,12 +57,12 @@ func getExampleMessage() string {
 			%s
 	`),
 		"$ wso2-integration-platform list projects",
-		"$ wso2-integration-platform list components",
+		"$ wso2-integration-platform list integrations",
 		"$ wso2-integration-platform create project",
-		"$ wso2-integration-platform create component <component-name>",
-		"$ wso2-integration-platform create build <component-name>",
-		"$ wso2-integration-platform create deployment <component-name> -e=Development",
-		"$ wso2-integration-platform suspend deployment <component-name> -e=Development",
+		"$ wso2-integration-platform create integration <integration-name>",
+		"$ wso2-integration-platform create build <integration-name>",
+		"$ wso2-integration-platform create deployment <integration-name> -e=Development",
+		"$ wso2-integration-platform suspend deployment <integration-name> -e=Development",
 		"$ wso2-integration-platform change-org",
 	)
 }

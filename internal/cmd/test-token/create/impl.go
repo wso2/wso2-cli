@@ -31,7 +31,7 @@ func handleGetApiKey(params *GetTokenParams) error {
 	compInfoWithRepo, err := common.GetComponentWithRepoData(selectedOrg.ID, remoteComponent.Handler, project.ID)
 
 	if err != nil {
-		utils.HandleErr(fmt.Errorf(i18n.T("Error resolving component: %w"), err))
+		utils.HandleErr(fmt.Errorf(i18n.T("Error resolving integration: %w"), err))
 	}
 
 	deploymentTrack, err := common.ResolveDeploymentTrack(compInfoWithRepo.DeploymentTracks, params.deploymentTrackFlag)

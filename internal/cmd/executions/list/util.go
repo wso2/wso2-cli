@@ -36,7 +36,7 @@ func printExecutionsStructured(executions []logs.ExecutionListItemV2, format com
 	// On an empty result, guide the user via stderr (kept out of stdout so
 	// the JSON stays machine-parseable).
 	if len(executions) == 0 {
-		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No executions found for the component %s of %s project.\n"),
+		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No executions found for the integration %s of %s project.\n"),
 			utils.CS.Bold(sComponent.Name),
 			utils.CS.Bold(sProject.Name))
 	}
@@ -59,7 +59,7 @@ func printExecutionsTable(executions []logs.ExecutionListItemV2, sComponent mode
 		" ",
 	)
 	utils.PrintInfo(
-		"\nList of executions for the component %s of %s\n\n",
+		"\nList of executions for the integration %s of %s\n\n",
 		boldStyle.Text(sComponent.Name),
 		boldStyle.Text(sProject.Name),
 	)

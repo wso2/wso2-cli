@@ -84,7 +84,7 @@ func (c *GraphQLClient) CreateBuildpackServiceComponent(
 
 	resp, err := c.client.Do(req, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("error while creating component: %w, query: %s", err, q)
+		return nil, fmt.Errorf("error while creating integration: %w, query: %s", err, q)
 	}
 	defer resp.Body.Close()
 
@@ -223,7 +223,7 @@ func (c *GraphQLClient) CreateBuildpackWebAppComponent(
 
 	resp, err := c.client.Do(req, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("error while creating buildpack component: %w, query: %s", err, q)
+		return nil, fmt.Errorf("error while creating buildpack integration: %w, query: %s", err, q)
 	}
 	defer resp.Body.Close()
 

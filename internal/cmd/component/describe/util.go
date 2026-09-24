@@ -149,7 +149,7 @@ func BuildDeploymentEnvOutput(cmp *models.Component, org *api.Organization, env 
 			endpoints, err := auth.ProjectClient.GetComponentEndpoints(cmp.Id, latestVersion.Id, org.ID)
 			endpointsSpinner.Stop()
 			if err != nil {
-				return out, fmt.Errorf(i18n.T("failed to get component endpoints: %w"), err)
+				return out, fmt.Errorf(i18n.T("failed to get integration endpoints: %w"), err)
 			}
 
 			for _, endpoint := range *endpoints {
@@ -222,7 +222,7 @@ func BuildProxyEnvOutput(org *api.Organization, cmp *models.Component, env *proj
 func PrintGeneralComponentInfo(cmpWithRepoData *models.Component, org *api.Organization, project models.Project) error {
 	utils.PrintInfo("%s", heredoc.Docf(i18n.T(`
 
-			Component details:
+			Integration details:
 			
 			ID:              %s
 			Name:            %s
@@ -351,7 +351,7 @@ func PrintDeploymentInfoForEnv(cmp *models.Component, org *api.Organization, env
 				endpoints, err := auth.ProjectClient.GetComponentEndpoints(cmp.Id, latestVersion.Id, org.ID)
 				endpointsEndpoints.Stop()
 				if err != nil {
-					return fmt.Errorf(i18n.T("failed to get component endpoints: %w"), err)
+					return fmt.Errorf(i18n.T("failed to get integration endpoints: %w"), err)
 				}
 
 				for _, endpoint := range *endpoints {

@@ -13,7 +13,7 @@ var describeParams DescribeDeploymentParams
 var DeploymentDescribeCommand = &cobra.Command{
 	Use:   "deployment [flags]",
 	Short: i18n.T("describe a deployment"),
-	Long:  i18n.T("Get detailed information, component deployment status and deployed endpoints/URLs."),
+	Long:  i18n.T("Get detailed information, integration deployment status and deployed endpoints/URLs."),
 	Example: heredoc.Docf(i18n.T(`
 
 		To view details of a particular deployment :
@@ -25,9 +25,9 @@ var DeploymentDescribeCommand = &cobra.Command{
 		To save the output to a file:
 			%s
 	`),
-		"$ wso2-integration-platform describe deployment --project=<project-name> --component=<component-name> --env=<env-name>",
-		"$ wso2-integration-platform describe deployment --project=<project-name> --component=<component-name> --env=<env-name> --output=json",
-		"$ wso2-integration-platform describe deployment --project=<project-name> --component=<component-name> --env=<env-name> --output=json > deployment.json",
+		"$ wso2-integration-platform describe deployment --project=<project-name> --integration=<integration-name> --env=<env-name>",
+		"$ wso2-integration-platform describe deployment --project=<project-name> --integration=<integration-name> --env=<env-name> --output=json",
+		"$ wso2-integration-platform describe deployment --project=<project-name> --integration=<integration-name> --env=<env-name> --output=json > deployment.json",
 	),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {

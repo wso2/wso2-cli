@@ -12,8 +12,8 @@
       "translation": "\n\t\t\t\tInvalid log type\n\t\t\t\tLog type must be one of %s\n\t\t\t"
    },
    {
-      "id": "\n\t\t\t\n\t\t\tTo create a new component within your newly created project :\n\t\t\t\t%s\t\n\t\t",
-      "translation": "\n\t\t\t\n\t\t\tTo create a new component within your newly created project :\n\t\t\t\t%s\t\n\t\t"
+      "id": "\n\t\t\t\n\t\t\tTo create a new integration within your newly created project :\n\t\t\t\t%s\t\n\t\t",
+      "translation": "\n\t\t\t\n\t\t\tTo create a new integration within your newly created project :\n\t\t\t\t%s\t\n\t\t"
    },
    {
       "id": "\n\t\t\t\n\t\tTo add a new config or secret:\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\n\t",
@@ -24,16 +24,16 @@
       "translation": "\n\t\t\t\n\t\tTo view details of a particular config :\n\t\t\t%s\n\t\t\n\t\tTo add a new config or secret :\n\t\t\t%s\n\n\t"
    },
    {
-      "id": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\t\n\t\tTo deploy this component :\n\t\t\t%s\n\n\t",
-      "translation": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your component :\n\t\t\t%s\n\t\n\t\tTo deploy this component :\n\t\t\t%s\n\n\t"
+      "id": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your integration :\n\t\t\t%s\n\t\n\t\tTo deploy this integration :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\t\t\n\t\tTo view details of the created config :\n\t\t\t%s\n\t\t\n\t\tTo list all the configs available within your integration :\n\t\t\t%s\n\t\n\t\tTo deploy this integration :\n\t\t\t%s\n\n\t"
    },
    {
       "id": "\n\t\t\t%s\n\n\t\t\tAvailable commands:\n\t\t\t%s\n\t\t\t%s\n\t\t\t%s\n\n\t\t\tFlags:\n\t\t\t\t-h, --help      help for wso2-integration-platform\n\t\t\t\t-v, --version   version for wso2-integration-platform\n\n\t\t\tUse \"wso2-integration-platform [command] --help\" for more information about a command.\n\n\n\t\t\tExamples:\n\t\t\t%s\n\t\t",
       "translation": "\n\t\t\t%s\n\n\t\t\tAvailable commands:\n\t\t\t%s\n\t\t\t%s\n\t\t\t%s\n\n\t\t\tFlags:\n\t\t\t\t-h, --help      help for wso2-integration-platform\n\t\t\t\t-v, --version   version for wso2-integration-platform\n\n\t\t\tUse \"wso2-integration-platform [command] --help\" for more information about a command.\n\n\n\t\t\tExamples:\n\t\t\t%s\n\t\t"
    },
    {
-      "id": "\n\t\t\tListing components in the project:\n\n\t\t\t%s\n\t\t",
-      "translation": "\n\t\t\tListing components in the project:\n\n\t\t\t%s\n\t\t"
+      "id": "\n\t\t\tListing integrations in the project:\n\n\t\t\t%s\n\t\t",
+      "translation": "\n\t\t\tListing integrations in the project:\n\n\t\t\t%s\n\t\t"
    },
    {
       "id": "\n\t\t\tNotice: Secret values are only visible once. \n\t\t",
@@ -76,8 +76,8 @@
       "translation": "\n\t\tTo list existing projects or components :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo create a new project :\n\t\t\t%s\n\n\t\tTo add a component from your locally cloned repository :\n\t\t\t%s\n\n\t\tTo build \u0026 deploy a component :\n\t\t\t%s\n\t\t\t%s\n\n\t\tTo change the current organization :\n\t\t\t%s\n\t"
    },
    {
-      "id": "\n\t\tTo trigger a deployment of a specific component to the development environment:\n\t\t\t%s\n\t",
-      "translation": "\n\t\tTo trigger a deployment of a specific component to the development environment:\n\t\t\t%s\n\t"
+      "id": "\n\t\tTo trigger a deployment of a specific integration to the development environment:\n\t\t\t%s\n\t",
+      "translation": "\n\t\tTo trigger a deployment of a specific integration to the development environment:\n\t\t\t%s\n\t"
    },
    {
       "id": "\n\t\n\t\tTo create a connection for a service :\n\t\t\t%s\n\t\t\t\n\t",
@@ -88,16 +88,16 @@
       "translation": "\n\t\n\t\tTo create a mono-repository project :\n\t\t\t%s\n\n\t\tTo create a multi-repository project :\n\t\t\t%s\n\t"
    },
    {
-      "id": "\n\t\n\t\tTo create a new config-map containing environment variables within your component :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your component :\n\t\t\t%s\n\t\t\t\n\t",
-      "translation": "\n\t\n\t\tTo create a new config-map containing environment variables within your component :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your component :\n\t\t\t%s\n\t\t\t\n\t"
+      "id": "\n\t\n\t\tTo create a new config-map containing environment variables within your integration :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your integration :\n\t\t\t%s\n\t\t\t\n\t",
+      "translation": "\n\t\n\t\tTo create a new config-map containing environment variables within your integration :\n\t\t\t%s\n\n\t\tTo create a new secret file mount within your integration :\n\t\t\t%s\n\t\t\t\n\t"
    },
    {
-      "id": "\n\t\n\t\tTo get the test key of a particular component in the development environment :\n\t\t\t%s\n\t",
-      "translation": "\n\t\n\t\tTo get the test key of a particular component in the development environment :\n\t\t\t%s\n\t"
+      "id": "\n\t\n\t\tTo get the test key of a particular integration in the development environment :\n\t\t\t%s\n\t",
+      "translation": "\n\t\n\t\tTo get the test key of a particular integration in the development environment :\n\t\t\t%s\n\t"
    },
    {
-      "id": "\n\t\n\t\tTo link a component directory :\n\t\t\t%s\n\n\t",
-      "translation": "\n\t\n\t\tTo link a component directory :\n\t\t\t%s\n\n\t"
+      "id": "\n\t\n\t\tTo link an integration directory :\n\t\t\t%s\n\n\t",
+      "translation": "\n\t\n\t\tTo link an integration directory :\n\t\t\t%s\n\n\t"
    },
    {
       "id": "\n\t\n\t\tTo list connections within a integration platform project :\n\t\t\t%s\n\t\t\t\n\t",
@@ -292,16 +292,16 @@
       "translation": " Deleting config mount..."
    },
    {
-      "id": " Fetching %s logs for component %s within %s environment",
-      "translation": " Fetching %s logs for component %s within %s environment"
+      "id": " Fetching %s logs for integration %s within %s environment",
+      "translation": " Fetching %s logs for integration %s within %s environment"
    },
    {
       "id": " Fetching Organizations...",
       "translation": " Fetching Organizations..."
    },
    {
-      "id": " Fetching additional component details...",
-      "translation": " Fetching additional component details..."
+      "id": " Fetching additional integration details...",
+      "translation": " Fetching additional integration details..."
    },
    {
       "id": " Fetching branches...",
@@ -316,20 +316,20 @@
       "translation": " Fetching commit history..."
    },
    {
-      "id": " Fetching component MI build logs...",
-      "translation": " Fetching component MI build logs..."
+      "id": " Fetching integration MI build logs...",
+      "translation": " Fetching integration MI build logs..."
    },
    {
-      "id": " Fetching component build logs...",
-      "translation": " Fetching component build logs..."
+      "id": " Fetching integration build logs...",
+      "translation": " Fetching integration build logs..."
    },
    {
-      "id": " Fetching component information...",
-      "translation": " Fetching component information..."
+      "id": " Fetching integration information...",
+      "translation": " Fetching integration information..."
    },
    {
-      "id": " Fetching component status for the selected deployment track...",
-      "translation": " Fetching component status for the selected deployment track..."
+      "id": " Fetching integration status for the selected deployment track...",
+      "translation": " Fetching integration status for the selected deployment track..."
    },
    {
       "id": " Fetching config mounts...",
@@ -416,8 +416,8 @@
       "translation": " Setting active organization..."
    },
    {
-      "id": " Triggering component deployment...",
-      "translation": " Triggering component deployment..."
+      "id": " Triggering integration deployment...",
+      "translation": " Triggering integration deployment..."
    },
    {
       "id": " Validating Organization access...",
@@ -668,8 +668,8 @@
       "translation": "Description"
    },
    {
-      "id": "Detected components in the project. Deleting components prior to project deletion.",
-      "translation": "Detected components in the project. Deleting components prior to project deletion."
+      "id": "Detected integrations in the project. Deleting integrations prior to project deletion.",
+      "translation": "Detected integrations in the project. Deleting integrations prior to project deletion."
    },
    {
       "id": "Detected multiple registered contexts",
@@ -716,8 +716,8 @@
       "translation": "Error getting deployment builds: %w"
    },
    {
-      "id": "Error resolving component: %w",
-      "translation": "Error resolving component: %w"
+      "id": "Error resolving integration: %w",
+      "translation": "Error resolving integration: %w"
    },
    {
       "id": "Error resolving deployment track: %w",
@@ -744,8 +744,8 @@
       "translation": "Fetching directory structure..."
    },
    {
-      "id": "Fetching project components...",
-      "translation": "Fetching project components..."
+      "id": "Fetching project integrations...",
+      "translation": "Fetching project integrations..."
    },
    {
       "id": "Get a link to open in browser manually",
@@ -840,12 +840,12 @@
       "translation": "Name:"
    },
    {
-      "id": "No builds found for the component %s of %s project",
-      "translation": "No builds found for the component %s of %s project"
+      "id": "No builds found for the integration %s of %s project",
+      "translation": "No builds found for the integration %s of %s project"
    },
    {
-      "id": "No components found in the project",
-      "translation": "No components found in the project"
+      "id": "No integrations found in the project",
+      "translation": "No integrations found in the project"
    },
    {
       "id": "No description",
@@ -916,8 +916,8 @@
       "translation": "Schedule timezone for the cron job (scheduled tasks only)"
    },
    {
-      "id": "Select a directory to create the component",
-      "translation": "Select a directory to create the component"
+      "id": "Select a directory to create the integration",
+      "translation": "Select a directory to create the integration"
    },
    {
       "id": "Select remote repository URL:",
@@ -952,8 +952,8 @@
       "translation": "This command allows you to create a resource on the WSO2 Integration Platform."
    },
    {
-      "id": "This command allows you to delete a component in the Project",
-      "translation": "This command allows you to delete a component in the Project"
+      "id": "This command allows you to delete an integration in the Project",
+      "translation": "This command allows you to delete an integration in the Project"
    },
    {
       "id": "This command allows you to delete a project on the WSO2 Integration Platform.",
@@ -972,8 +972,8 @@
       "translation": "This command allows you to list all builds of a component on the WSO2 Integration Platform."
    },
    {
-      "id": "Trigger a build for a component",
-      "translation": "Trigger a build for a component"
+      "id": "Trigger a build for an integration",
+      "translation": "Trigger a build for an integration"
    },
    {
       "id": "Trigger a build for a component in a selected deployment track within your integration platform project.",
@@ -1008,16 +1008,16 @@
       "translation": "Welcome, %s!\n\n"
    },
    {
-      "id": "application logs is not applicable for proxy type components",
-      "translation": "application logs is not applicable for proxy type components"
+      "id": "application logs is not applicable for proxy type integrations",
+      "translation": "application logs is not applicable for proxy type integrations"
    },
    {
       "id": "component name, ID, or handle",
       "translation": "component name, ID, or handle"
    },
    {
-      "id": "create a component",
-      "translation": "create a component"
+      "id": "create an integration",
+      "translation": "create an integration"
    },
    {
       "id": "create a new resource",
@@ -1036,8 +1036,8 @@
       "translation": "create connection"
    },
    {
-      "id": "delete a component",
-      "translation": "delete a component"
+      "id": "delete an integration",
+      "translation": "delete an integration"
    },
    {
       "id": "delete a project",
@@ -1076,8 +1076,8 @@
       "translation": "failed to fetch cloud data plane information: %w"
    },
    {
-      "id": "failed to fetch components: %w",
-      "translation": "failed to fetch components: %w"
+      "id": "failed to fetch integrations: %w",
+      "translation": "failed to fetch integrations: %w"
    },
    {
       "id": "failed to fetch config mount list: %w",
@@ -1124,8 +1124,8 @@
       "translation": "failed to find sub directory path"
    },
    {
-      "id": "failed to follow component logs: %w",
-      "translation": "failed to follow component logs: %w"
+      "id": "failed to follow integration logs: %w",
+      "translation": "failed to follow integration logs: %w"
    },
    {
       "id": "failed to follow project logs: %w",
@@ -1140,12 +1140,12 @@
       "translation": "failed to get api key: %w"
    },
    {
-      "id": "failed to get component endpoints: %w",
-      "translation": "failed to get component endpoints: %w"
+      "id": "failed to get integration endpoints: %w",
+      "translation": "failed to get integration endpoints: %w"
    },
    {
-      "id": "failed to get component logs: %w",
-      "translation": "failed to get component logs: %w"
+      "id": "failed to get integration logs: %w",
+      "translation": "failed to get integration logs: %w"
    },
    {
       "id": "failed to get environment",
@@ -1176,8 +1176,8 @@
       "translation": "filter logs against a search query"
    },
    {
-      "id": "gateway logs is only applicable for service, webhook and proxy type components",
-      "translation": "gateway logs is only applicable for service, webhook and proxy type components"
+      "id": "gateway logs is only applicable for service, webhook and proxy type integrations",
+      "translation": "gateway logs is only applicable for service, webhook and proxy type integrations"
    },
    {
       "id": "get detailed information about a resource",
@@ -1212,20 +1212,20 @@
       "translation": "limit the number of logs"
    },
    {
-      "id": "link directory to a component",
-      "translation": "link directory to a component"
+      "id": "link directory to an integration",
+      "translation": "link directory to an integration"
    },
    {
-      "id": "list all builds of a component",
-      "translation": "list all builds of a component"
+      "id": "list all builds of an integration",
+      "translation": "list all builds of an integration"
    },
    {
       "id": "list available Resources",
       "translation": "list available Resources"
    },
    {
-      "id": "list components",
-      "translation": "list components"
+      "id": "list integrations",
+      "translation": "list integrations"
    },
    {
       "id": "list configs",
@@ -1300,8 +1300,8 @@
       "translation": "switch the active organization"
    },
    {
-      "id": "trigger a deployment for a component",
-      "translation": "trigger a deployment for a component"
+      "id": "trigger a deployment for an integration",
+      "translation": "trigger a deployment for an integration"
    },
    {
       "id": "type of the logs (%s)",

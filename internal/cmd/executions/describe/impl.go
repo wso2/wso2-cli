@@ -48,10 +48,10 @@ func handleDescribeImpl(params *DescribeExecutionParams) error {
 	if outputFormat.IsStructured() && !utils.IO.IsStdoutTTY() &&
 		(params.Component == "" || params.Env == "") {
 		return fmt.Errorf("%s", heredoc.Doc(i18n.T(`
-			--component and --env are required with --output=json when output is piped or redirected.
+			--integration and --env are required with --output=json when output is piped or redirected.
 
 			Provide the execution (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe execution --id=<execution-id> --project=<project> --component=<component> --env=<env>
+			  wso2-integration-platform describe execution --id=<execution-id> --project=<project> --integration=<integration> --env=<env>
 
 			Or run the command on a terminal without a pipe to choose them interactively:
 			  wso2-integration-platform describe execution --id=<execution-id> --output=json`)))
@@ -99,7 +99,7 @@ func handleDescribeImpl(params *DescribeExecutionParams) error {
 	}
 
 	if cInitStat.Data.Status == "queued" || cInitStat.Data.Status == "in_progress" {
-		msg := i18n.T("Component initialization is in progress. Please run the command in a while...\n")
+		msg := i18n.T("Integration initialization is in progress. Please run the command in a while...\n")
 		// In JSON mode keep stdout empty so machine consumers see a clean
 		// (empty) stream; the explanation still reaches the user via stderr.
 		if outputFormat.IsStructured() {

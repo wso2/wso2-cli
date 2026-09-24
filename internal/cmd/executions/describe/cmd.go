@@ -27,9 +27,9 @@ var DescribeExecCmd = &cobra.Command{
 		To save the output to a file:
 			%s
 	`),
-		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --component=<component-name> --env=<env-name>",
-		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --component=<component-name> --env=<env-name> --output=json",
-		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --component=<component-name> --env=<env-name> --output=json > execution.json",
+		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --integration=<integration-name> --env=<env-name>",
+		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --integration=<integration-name> --env=<env-name> --output=json",
+		"$ wso2-integration-platform describe execution --id=<execution-id> --project=<project-name> --integration=<integration-name> --env=<env-name> --output=json > execution.json",
 	),
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := handleDescribeImpl(opts); err != nil {

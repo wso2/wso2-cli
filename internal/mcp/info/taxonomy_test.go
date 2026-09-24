@@ -213,7 +213,7 @@ func TestProductLeadsRuntimeInAgentFacingText(t *testing.T) {
 		"implemented in Ballerina",
 		"non-Ballerina code",
 		"writing Ballerina code for",
-		"build a Ballerina integration",
+		"build a Ballerinan integration",
 		"deploy Ballerina to",
 	}
 

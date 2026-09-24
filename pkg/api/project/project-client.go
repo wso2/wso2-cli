@@ -174,7 +174,7 @@ func (c *ProjectClient) GetComponentEndpoints(componentId string, versionId stri
 
 	resp, err := c.client.Do(req, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("error while fetching component endpoints: %w", err)
+		return nil, fmt.Errorf("error while fetching integration endpoints: %w", err)
 	}
 	defer resp.Body.Close()
 	if err != nil {
@@ -246,7 +246,7 @@ func (c *ProjectClient) GetProjectComponents(
 	resp, err := c.client.Do(req, orgId)
 
 	if err != nil {
-		return nil, fmt.Errorf("error while fetching project components: %w", err)
+		return nil, fmt.Errorf("error while fetching project integrations: %w", err)
 	}
 
 	defer resp.Body.Close()

@@ -17,7 +17,7 @@ var ListExecCmd = &cobra.Command{
 	Long:    "List executions of a sheduled/manual task",
 	Example: heredoc.Docf(i18n.T(`
 
-		To list executions of a component :
+		To list executions of an integration :
 			%s
 
 		To get the output in JSON format :
@@ -27,9 +27,9 @@ var ListExecCmd = &cobra.Command{
 			%s
 
 	`),
-		"$ wso2-integration-platform list executions --component=<component-name> --project=<project-name>",
-		"$ wso2-integration-platform list executions --component=<component-name> --project=<project-name> --output=json",
-		"$ wso2-integration-platform list executions --component=<component-name> --project=<project-name> --output=json > executions.json"),
+		"$ wso2-integration-platform list executions --integration=<integration-name> --project=<project-name>",
+		"$ wso2-integration-platform list executions --integration=<integration-name> --project=<project-name> --output=json",
+		"$ wso2-integration-platform list executions --integration=<integration-name> --project=<project-name> --output=json > executions.json"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := handleImpl(opts); err != nil {

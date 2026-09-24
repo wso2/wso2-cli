@@ -39,7 +39,7 @@ func GetGitRepoRoot(path string) (string, error) {
 func GetGitRepoRelative(repoRoot string, componentPath string) (string, error) {
 	subPath, err := filepath.Rel(repoRoot, componentPath)
 	if strings.HasPrefix(subPath, ".."+string(filepath.Separator)) {
-		return "", errors.New("invalid component path")
+		return "", errors.New("invalid integration path")
 	}
 	if err != nil {
 		return "", err

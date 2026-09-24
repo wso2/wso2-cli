@@ -309,7 +309,7 @@ func genComponentConfigFile(params *CreateComponentParams, repoPath string, file
 				fmt.Fprintln(
 					utils.IO.Out,
 					fmt.Sprintf(
-						i18n.T("\nComponent configurations created at %s\n"),
+						i18n.T("\nIntegration configurations created at %s\n"),
 						utils.CS.Bold(relPath),
 					),
 				)
@@ -358,7 +358,7 @@ func handleCreateComponent(
 		return err
 	}
 
-	createCmpSpinner := utils.CreateSpinner(i18n.T(" Creating component..."), "")
+	createCmpSpinner := utils.CreateSpinner(i18n.T(" Creating integration..."), "")
 	createCmpSpinner.Start()
 	_, err = auth.ComponentClient.CreateNewComponent(orgId, project.Handler, *componentReqData)
 	createCmpSpinner.Stop()
@@ -382,7 +382,7 @@ func GetComponentKindForCreate(
 	sanitizedComponentName := strings.ToLower(params.ComponentName)
 	regex, err := regexp.Compile(`[^a-z0-9-]`)
 	if err != nil {
-		return nil, fmt.Errorf("component name validation failed: %w", err)
+		return nil, fmt.Errorf("integration name validation failed: %w", err)
 	}
 	sanitizedComponentName = regex.ReplaceAllString(
 		strings.ReplaceAll(sanitizedComponentName, " ", "-"),
@@ -494,7 +494,7 @@ func validateComponentName(componentName string, existingComps []models.Componen
 
 	for _, item := range existingComps {
 		if item.Name == componentName {
-			return fmt.Errorf("component name already exists")
+			return fmt.Errorf("integration name already exists")
 		}
 	}
 

@@ -44,7 +44,7 @@ func HandleBuildComponent(params *BuildComponentParams) error {
 	}
 
 	if strings.HasPrefix(strings.ToLower(remoteComponent.DisplayType), "byoi") {
-		utils.PrintInfo("%s", i18n.T("Cannot trigger a build for pre-built image based components\n"))
+		utils.PrintInfo("%s", i18n.T("Cannot trigger a build for pre-built image based integrations\n"))
 		return nil
 	}
 
@@ -59,7 +59,7 @@ func HandleBuildComponent(params *BuildComponentParams) error {
 	}
 
 	if resp.Data.Status == "queued" || resp.Data.Status == "in_progress" {
-		utils.PrintInfo("%s", i18n.T("Component initialization is in progress. Please run the command in a while...\n"))
+		utils.PrintInfo("%s", i18n.T("Integration initialization is in progress. Please run the command in a while...\n"))
 		return nil
 	}
 
@@ -132,7 +132,7 @@ func HandleBuildComponent(params *BuildComponentParams) error {
 
 	utils.PrintInfo("%s", heredoc.Docf(`
 
-		Build for component '%s' has been successfully triggered (Build ID: %s).
+		Build for integration '%s' has been successfully triggered (Build ID: %s).
 
 		To view the status of this build :
 			%s
@@ -141,7 +141,7 @@ func HandleBuildComponent(params *BuildComponentParams) error {
 	`,
 		remoteComponent.Name,
 		strconv.Itoa(int(deploymentBuildRes.Status.RunID)),
-		fmt.Sprintf(`$ wso2-integration-platform describe build %s --project="%s" --component="%s" --deployment-track="%s"`, strconv.Itoa(int(deploymentBuildRes.Status.RunID)), project.Name, remoteComponent.Name, deploymentTrack.Branch),
+		fmt.Sprintf(`$ wso2-integration-platform describe build %s --project="%s" --integration="%s" --deployment-track="%s"`, strconv.Itoa(int(deploymentBuildRes.Status.RunID)), project.Name, remoteComponent.Name, deploymentTrack.Branch),
 	))
 
 	return nil

@@ -30,14 +30,14 @@ func handleProjectDescribe(flags *ProjectDescribeFlags) error {
 	// not blank out the rest of the describe. Warn on stderr and continue with
 	// an empty list so JSON consumers still get a parseable object and text-mode
 	// users still see the project details.
-	spinner := utils.CreateSpinner(i18n.T("Fetching project components..."), "")
+	spinner := utils.CreateSpinner(i18n.T("Fetching project integrations..."), "")
 	spinner.Start()
 	cmpsPtr, cmpsErr := auth.ProjectClient.GetProjectComponents(org.ID, org.Handle, project.ID)
 	spinner.Stop()
 	var components []models.Component
 	if cmpsErr != nil {
 		fmt.Fprintf(utils.IO.ErrOut,
-			i18n.T("warning: failed to fetch project components: %s\n"), cmpsErr)
+			i18n.T("warning: failed to fetch project integrations: %s\n"), cmpsErr)
 	} else if cmpsPtr != nil {
 		components = *cmpsPtr
 	}

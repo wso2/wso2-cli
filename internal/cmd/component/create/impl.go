@@ -193,7 +193,7 @@ func HandleComponentCreate(params *CreateComponentParams, buildFlagsGiven bool, 
 			err = prompt.NewPromptSelectMessage(
 				prompt.PromptSelectOpts[string]{
 					Message:     i18n.T("Directory:"),
-					Description: i18n.T("Select a directory to create the component"),
+					Description: i18n.T("Select a directory to create the integration"),
 					Values:      generatedPaths,
 				},
 				&params.Subpath,
@@ -278,7 +278,7 @@ func HandleComponentCreate(params *CreateComponentParams, buildFlagsGiven bool, 
 	}
 
 	fmt.Fprintln(utils.IO.Out, heredoc.Docf(
-		`Creating a new component in project %s of %s Organization`,
+		`Creating a new integration in project %s of %s Organization`,
 		utils.CS.Bold(projInfo.Name),
 		utils.CS.Bold(org.Name),
 	))
@@ -288,7 +288,7 @@ func HandleComponentCreate(params *CreateComponentParams, buildFlagsGiven bool, 
 		return err
 	}
 
-	utils.PrintInfo(i18n.T("\nComponent '%s' has been successfully created!\n"), params.ComponentName)
+	utils.PrintInfo(i18n.T("\nIntegration '%s' has been successfully created!\n"), params.ComponentName)
 
 	err = genComponentConfigFile(params, repoRootPath, configFileExists)
 	if err != nil {
@@ -303,14 +303,14 @@ func HandleComponentCreate(params *CreateComponentParams, buildFlagsGiven bool, 
 
 	utils.PrintInfo("%s", heredoc.Docf(i18n.T(`
 
-			To view details of the created component :
+			To view details of the created integration :
 				%s
 
-			To build the component :
+			To build the integration :
 				%s
 
 		`),
-		fmt.Sprintf(`$ wso2-integration-platform describe component "%s" --project="%s"`, params.ComponentName, projInfo.Name),
+		fmt.Sprintf(`$ wso2-integration-platform describe integration "%s" --project="%s"`, params.ComponentName, projInfo.Name),
 		fmt.Sprintf(`$ wso2-integration-platform create build "%s" --project="%s" --deployment-track="%s"`, params.ComponentName, projInfo.Name, params.RepoBranch),
 	))
 

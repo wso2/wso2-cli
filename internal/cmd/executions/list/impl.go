@@ -61,7 +61,7 @@ func handleImpl(params *ListExecutionParams) error {
 	}
 
 	if cInitStat.Data.Status == "queued" || cInitStat.Data.Status == "in_progress" {
-		utils.PrintInfo("%s", i18n.T("Component initialization is in progress. Please run the command in a while...\n"))
+		utils.PrintInfo("%s", i18n.T("Integration initialization is in progress. Please run the command in a while...\n"))
 		return nil
 	}
 

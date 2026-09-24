@@ -273,12 +273,12 @@ func createIntegration(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 	if declErr != nil || declarativeKind.Metadata.Name == "" {
 		utils.MCPDebugf("create_integration: declarative confirmation failed: err=%v, name=%q", declErr, declarativeKind.Metadata.Name)
 		return utils.NewMCPErrorResponse(
-			fmt.Errorf("component creation returned HTTP 201 but the declarative API found no record for %q — the backend silently rejected it (correlation-id: %s); provide this ID to the backend team", componentHandle, created.CorrelationID),
+			fmt.Errorf("integration creation returned HTTP 201 but the declarative API found no record for %q — the backend silently rejected it (correlation-id: %s); provide this ID to the backend team", componentHandle, created.CorrelationID),
 			"Integration creation could not be confirmed.",
 		), nil
 	}
 
-	utils.MCPDebugf("create_integration: declarative confirmed; polling GraphQL for component handle=%q", componentHandle)
+	utils.MCPDebugf("create_integration: declarative confirmed; polling GraphQL for integration handle=%q", componentHandle)
 	// GraphQL may lag, so poll until the full component record (with UUID and
 	// deployment tracks) appears. We already know creation succeeded above.
 	var createdComponent *models.Component
@@ -299,7 +299,7 @@ func createIntegration(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 			}
 		}
 		if createdComponent != nil {
-			utils.MCPDebugf("create_integration: component found in GraphQL on attempt %d; uuid=%s", attempt+1, createdComponent.Id)
+			utils.MCPDebugf("create_integration: integration found in GraphQL on attempt %d; uuid=%s", attempt+1, createdComponent.Id)
 			break
 		}
 	}
@@ -326,7 +326,7 @@ func createIntegration(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 	// conversation, so the notice below states that cost explicitly rather than
 	// letting the agent suggest a reload as if it were free.
 	if utils.IsCloudEditor() {
-		utils.MCPDebugf("create_integration: cloud editor detected; binding code server to component uuid=%s", createdComponent.Id)
+		utils.MCPDebugf("create_integration: cloud editor detected; binding code server to integration uuid=%s", createdComponent.Id)
 		if bindErr := utils.BindCodeServer(ctx, targetOrg, selectedProject.ID, createdComponent.Id, ""); bindErr != nil {
 			utils.MCPDebugf("create_integration: code server binding failed: %v", bindErr)
 			codeServerBindWarning = fmt.Sprintf(
@@ -334,7 +334,7 @@ func createIntegration(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 					"The integration itself is unaffected and is building normally. Tell the user they can open the "+
 					"integration from the console, or reload the editor window to re-link it. %s", bindErr, reloadCostNotice)
 		} else {
-			utils.MCPDebugf("create_integration: code server bound to component uuid=%s", createdComponent.Id)
+			utils.MCPDebugf("create_integration: code server bound to integration uuid=%s", createdComponent.Id)
 			codeServerBindWarning = "NOTE: this cloud editor session is now linked to the new integration. " +
 				"The editor may not reflect the new integration in its UI until the window is reloaded. " +
 				"This is cosmetic — the integration is already building and deploying regardless. " + reloadCostNotice

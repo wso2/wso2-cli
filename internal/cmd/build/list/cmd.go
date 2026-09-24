@@ -13,11 +13,11 @@ var buildListFlags = &BuildListFlags{}
 var BuildListCommand = &cobra.Command{
 	Use:     "builds",
 	Aliases: []string{"build"},
-	Short:   i18n.T("list all builds of a component"),
-	Long:    i18n.T(`This command allows you to list all builds of a component.`),
+	Short:   i18n.T("list all builds of an integration"),
+	Long:    i18n.T(`This command allows you to list all builds of an integration.`),
 	Example: heredoc.Docf(i18n.T(`
 
-		To list builds of a component :
+		To list builds of an integration :
 			%s
 
 		To get the output in JSON format :
@@ -27,9 +27,9 @@ var BuildListCommand = &cobra.Command{
 			%s
 
 	`),
-		"$ wso2-integration-platform list builds --component=<component-name> --project=<project-name> --deployment-track=<deployment-track>",
-		"$ wso2-integration-platform list builds --component=<component-name> --project=<project-name> --output=json",
-		"$ wso2-integration-platform list builds --component=<component-name> --project=<project-name> --output=json > builds.json"),
+		"$ wso2-integration-platform list builds --integration=<integration-name> --project=<project-name> --deployment-track=<deployment-track>",
+		"$ wso2-integration-platform list builds --integration=<integration-name> --project=<project-name> --output=json",
+		"$ wso2-integration-platform list builds --integration=<integration-name> --project=<project-name> --output=json > builds.json"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		if err := handleBuildListCommand(buildListFlags); err != nil {

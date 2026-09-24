@@ -53,8 +53,8 @@ func TestBindCodeServerValidatesArguments(t *testing.T) {
 		wantErr     string
 	}{
 		{"nil org", nil, "p-1", "c-1", "organization is required"},
-		{"empty project id", org, "", "c-1", "project id and component id are required"},
-		{"empty component id", org, "p-1", "", "project id and component id are required"},
+		{"empty project id", org, "", "c-1", "project id and integration id are required"},
+		{"empty component id", org, "p-1", "", "project id and integration id are required"},
 	}
 
 	for _, tc := range cases {

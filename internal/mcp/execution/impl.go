@@ -40,7 +40,7 @@ func getExecutions(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	selectedComponent, err := utils.GetTargetComponent(ctx, *targetOrg, *selectedProject, request)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("failed to get target component", err), nil
+		return mcp.NewToolResultErrorFromErr("failed to get target integration", err), nil
 	}
 
 	if !isExecutionSupported(selectedComponent.DisplayType) {
@@ -70,7 +70,7 @@ func getExecutions(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		latestVersion.Id,
 		selectedEnvironment.ID)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("failed to get component deployment", err), nil
+		return mcp.NewToolResultErrorFromErr("failed to get integration deployment", err), nil
 	}
 
 	cloudDplanes, dplanes, err := common.GetDataPlaneInfo(targetOrg.ID, targetOrg.UUID)
@@ -113,7 +113,7 @@ func executeTask(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 
 	selectedComponent, err := utils.GetTargetComponent(ctx, *targetOrg, *selectedProject, request)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("failed to get target component", err), nil
+		return mcp.NewToolResultErrorFromErr("failed to get target integration", err), nil
 	}
 
 	if !isExecutionSupported(selectedComponent.DisplayType) {
@@ -143,11 +143,11 @@ func executeTask(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		latestVersion.Id,
 		selectedEnvironment.ID)
 	if err != nil {
-		return mcp.NewToolResultErrorFromErr("failed to get component deployment", err), nil
+		return mcp.NewToolResultErrorFromErr("failed to get integration deployment", err), nil
 	}
 
 	if componentDeployment == nil {
-		return utils.NewMCPErrorResponse(fmt.Errorf("component is not deployed in the selected environment"), "Failed to execute task."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("integration is not deployed in the selected environment"), "Failed to execute task."), nil
 	}
 
 	runtimeArguments := utils.GetOptionalStringArgument(request, "runtime_arguments", "")

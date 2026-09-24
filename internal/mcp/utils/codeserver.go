@@ -33,7 +33,7 @@ func BindCodeServer(ctx context.Context, org *api.Organization, projectID, compo
 		return fmt.Errorf("organization is required")
 	}
 	if projectID == "" || componentID == "" {
-		return fmt.Errorf("project id and component id are required")
+		return fmt.Errorf("project id and integration id are required")
 	}
 
 	// The IDP subject is part of the mutation input. In stdio mode this comes

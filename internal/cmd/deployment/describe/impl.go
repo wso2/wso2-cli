@@ -30,10 +30,10 @@ func HandleDescribeDeployment(params *DescribeDeploymentParams) error {
 	if outputFormat.IsStructured() && !utils.IO.IsStdoutTTY() &&
 		(params.componentFlag == "" || params.envFlag == "") {
 		return fmt.Errorf("%s", heredoc.Doc(i18n.T(`
-			--component and --env are required with --output=json when output is piped or redirected.
+			--integration and --env are required with --output=json when output is piped or redirected.
 
 			Provide the deployment (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe deployment --project=<project> --component=<component> --env=<env>
+			  wso2-integration-platform describe deployment --project=<project> --integration=<integration> --env=<env>
 
 			Or run the command on a terminal without a pipe to choose them interactively:
 			  wso2-integration-platform describe deployment --output=json`)))

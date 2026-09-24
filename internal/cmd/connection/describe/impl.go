@@ -32,10 +32,10 @@ func handleDescribeConnection(params *DescribeConnectionsParams) error {
 	if outputFormat.IsStructured() && !utils.IO.IsStdoutTTY() &&
 		(params.nameFlag == "" || params.componentFlag == "") {
 		return fmt.Errorf("%s", heredoc.Doc(i18n.T(`
-			--component and --name are required with --output=json when output is piped or redirected.
+			--integration and --name are required with --output=json when output is piped or redirected.
 
 			Provide the connection (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe connection --name=<connection-name> --project=<project> --component=<component>
+			  wso2-integration-platform describe connection --name=<connection-name> --project=<project> --integration=<integration>
 
 			Or run the command on a terminal without a pipe to choose them interactively:
 			  wso2-integration-platform describe connection --output=json`)))

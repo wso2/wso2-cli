@@ -17,8 +17,15 @@ import (
 	"github.com/wso2/integration-platform-tools/pkg/api/models"
 )
 
+// AddComponentFlag registers the integration selector flag. `--component`/`-c`
+// is kept as a hidden, deprecated spelling bound to the same value so existing
+// scripts keep working.
 func AddComponentFlag(cmdFlags *pflag.FlagSet, bindTo *string) {
-	cmdFlags.StringVarP(bindTo, "component", "c", "", i18n.T("component name, ID, or handle"))
+	cmdFlags.StringVarP(bindTo, "integration", "i", "", i18n.T("integration name, ID, or handle"))
+	cmdFlags.StringVarP(bindTo, "component", "c", "", i18n.T("integration name, ID, or handle"))
+	if err := cmdFlags.MarkDeprecated("component", i18n.T("use --integration instead")); err != nil {
+		panic(err)
+	}
 }
 
 func AddDeploymentTrackFlag(cmdFlags *pflag.FlagSet, bindTo *string) {
@@ -30,7 +37,7 @@ func ResolveTargetComponent(
 	projectId string,
 	componentFlag string) (*models.Component, error) {
 
-	getComponentSpinner := utils.CreateSpinner(i18n.T(" Fetching component information..."), "")
+	getComponentSpinner := utils.CreateSpinner(i18n.T(" Fetching integration information..."), "")
 	getComponentSpinner.Start()
 	remoteComponents, err := auth.ComponentClient.GetComponents(selectedOrg.Handle, selectedOrg.ID, projectId)
 	getComponentSpinner.Stop()
@@ -39,7 +46,7 @@ func ResolveTargetComponent(
 	}
 
 	if len(remoteComponents) == 0 {
-		return nil, fmt.Errorf("%w - no components found in project", api.ErrFailedToResolveComp)
+		return nil, fmt.Errorf("%w - no integrations found in project", api.ErrFailedToResolveComp)
 	}
 
 	return ResolveTargetComponentFromCompList(selectedOrg, projectId, remoteComponents, componentFlag)
@@ -68,7 +75,7 @@ func ResolveTargetComponentFromCompList(
 		selectedComponentName, err := promptToSelectComponent(remoteComponents)
 		if err != nil {
 			if errors.Is(err, internal.ErrNonInteractive) {
-				return nil, utils.CreateNonInteractiveError("component selection", "component")
+				return nil, utils.CreateNonInteractiveError("integration selection", "integration")
 			}
 			return nil, fmt.Errorf("%w - %s", api.ErrFailedToResolveComp, err)
 		}
@@ -81,7 +88,7 @@ func ResolveTargetComponentFromCompList(
 	}
 
 	if selectedComponent == nil {
-		return nil, fmt.Errorf("%w - no matching component found", api.ErrFailedToResolveComp)
+		return nil, fmt.Errorf("%w - no matching integration found", api.ErrFailedToResolveComp)
 	}
 
 	return selectedComponent, nil
@@ -97,7 +104,7 @@ func promptToSelectComponent(components []models.Component) (string, error) {
 
 	err := prompt.NewPromptSelectMessage[string](
 		prompt.PromptSelectOpts[string]{
-			Message: "Component:",
+			Message: "Integration:",
 			Values:  componentNames,
 		},
 		&selectedComponentName,
@@ -197,7 +204,7 @@ func GetLatestDeployementTrack(deploymentTracks []models.DeploymentTrack) (*mode
 	if len(deploymentTracks) > 0 {
 		return &deploymentTracks[0], nil
 	}
-	return nil, errors.New(i18n.T(" no deployment track found for the component"))
+	return nil, errors.New(i18n.T(" no deployment track found for the integration"))
 }
 
 func GetComponentDeploymentStatusByVersion(
@@ -205,7 +212,7 @@ func GetComponentDeploymentStatusByVersion(
 	versionId string,
 	orgId string) (componentDeploymentData []component.ComponentDeploymentStatusForVersion, err error) {
 
-	componentVersionSpinner := utils.CreateSpinner(i18n.T(" Fetching component status for the selected deployment track..."), "")
+	componentVersionSpinner := utils.CreateSpinner(i18n.T(" Fetching integration status for the selected deployment track..."), "")
 	componentVersionSpinner.Start()
 	componentDeploymentData, err = auth.ComponentClient.GetDeploymentStatusByVersion(componentId, versionId, orgId)
 	componentVersionSpinner.Stop()
@@ -222,7 +229,7 @@ func GetComponentBuildLogs(
 	componentId string,
 	runId int) (*component.DeploymentBuildStatusResponse, error) {
 
-	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching component build logs..."), "")
+	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching integration build logs..."), "")
 	buildLogsSpinner.Start()
 	buildLogsDataRes, err := auth.ComponentClient.GetComponentBuildStatus(orgHandle, projectId, componentId, runId, orgId)
 	buildLogsSpinner.Stop()
@@ -238,7 +245,7 @@ func GetBuildLogForPhase(
 	runId int,
 	logPhase string,
 ) (*component.ProjectBuildLogsData, error) {
-	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching component build logs..."), "")
+	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching integration build logs..."), "")
 	buildLogsSpinner.Start()
 	buildLogsDataRes, err := auth.ComponentClient.GetBuildLogsForType(orgId, componentId, runId, logPhase)
 	buildLogsSpinner.Stop()
@@ -249,7 +256,7 @@ func GetBuildLogForPhase(
 }
 
 func GetMiComponentBuildLogs(orgId string, componentId string, runId int) (string, error) {
-	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching component MI build logs..."), "")
+	buildLogsSpinner := utils.CreateSpinner(i18n.T(" Fetching integration MI build logs..."), "")
 	buildLogsSpinner.Start()
 	buildLogsDataRes, err := auth.ComponentClient.GetBuildLogsForType(orgId, componentId, runId, "integrationProjectBuild")
 	buildLogsSpinner.Stop()
@@ -260,7 +267,7 @@ func GetMiComponentBuildLogs(orgId string, componentId string, runId int) (strin
 }
 
 func GetComponentWithRepoData(orgId string, componentHandle string, projectId string) (models.Component, error) {
-	componentSpinner := utils.CreateSpinner(i18n.T(" Fetching additional component details..."), "")
+	componentSpinner := utils.CreateSpinner(i18n.T(" Fetching additional integration details..."), "")
 	componentSpinner.Start()
 
 	remoteComWithRepoData, err := auth.ComponentClient.GetComponentInfo(
@@ -306,7 +313,7 @@ func GetReleaseEnvForDeploymentTrack(remoteCompWithRepoData models.Component, de
 }
 
 func GetComponentsForProject(org *api.Organization, project *models.Project) (comps []models.Component, err error) {
-	compSpinner := utils.CreateSpinner("Fetching components", "")
+	compSpinner := utils.CreateSpinner("Fetching integrations", "")
 	compSpinner.Start()
 	comps, err = auth.ComponentClient.GetComponents(org.Handle, org.ID, project.ID)
 	compSpinner.Stop()
@@ -315,7 +322,7 @@ func GetComponentsForProject(org *api.Organization, project *models.Project) (co
 }
 
 func GetComponentsWithSystemCompsForProject(org *api.Organization, project *models.Project) (comps []models.Component, err error) {
-	compSpinner := utils.CreateSpinner("Fetching components", "")
+	compSpinner := utils.CreateSpinner("Fetching integrations", "")
 	compSpinner.Start()
 	comps, err = auth.ComponentClient.GetAllComponents(org.Handle, org.ID, project.ID, true)
 	compSpinner.Stop()
@@ -433,7 +440,7 @@ func SubPathHasEndpointsYaml(subPath string, pathEntries *[]component.PathEntry)
 func GetComponentDeplayment(
 	orgId, orgHandler, orgUUID, componentId, versionId, envId string) (*component.ComponentDeployment, error) {
 
-	getCompDeploymentSpinner := utils.CreateSpinner(i18n.T(" Fetching component deployment information..."), "")
+	getCompDeploymentSpinner := utils.CreateSpinner(i18n.T(" Fetching integration deployment information..."), "")
 	getCompDeploymentSpinner.Start()
 	deploymentInfo, err := auth.ComponentClient.GetComponentDeployment(
 		orgHandler,

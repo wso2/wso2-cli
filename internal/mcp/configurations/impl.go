@@ -60,7 +60,7 @@ func createConfigurations(ctx context.Context, request mcp.CallToolRequest) (*mc
 		}
 	}
 	if appEnvId == "" {
-		return utils.NewMCPErrorResponse(fmt.Errorf("App Environment ID is not found. Deploy the component before creating configurations"), "Failed to create configurations."), nil
+		return utils.NewMCPErrorResponse(fmt.Errorf("App Environment ID is not found. Deploy the integration before creating configurations"), "Failed to create configurations."), nil
 	}
 
 	configType, err := utils.GetRequiredStringArgument(request, "configuration_type")
@@ -153,7 +153,7 @@ func createConfigurations(ctx context.Context, request mcp.CallToolRequest) (*mc
 	}
 
 	nextSteps := []string{
-		"Configuration has been applied and the component will automatically restart to apply the changes.",
+		"Configuration has been applied and the integration will automatically restart to apply the changes.",
 		"Use `get_deployment` to get the deployment status and wait for it to be ready.",
 		"Use `get_logs` with `log_type`: 'application' to ensure the changes are applied successfully.",
 	}

@@ -153,6 +153,35 @@ MCP tool responses use `utils.NewMCPResponse(data, conclusion, nextSteps)` for s
 
 All user-facing strings must be wrapped in `i18n.T("...")`. Translation files live in `i18n/translations/` (JSON format). The build process generates and embeds translation assets via `scripts/translations/`.
 
+## Component vs. Integration
+
+What users see is an **integration**; what the code and the platform API call it
+is a **component**. The two never have to agree, and the split is deliberate:
+
+| Layer | Wording | Why |
+|---|---|---|
+| CLI commands, flags, help, prompts, table headers, error text | integration | What the product calls it |
+| MCP tool names and parameters (`create_integration`, `integration_uuid`) | integration | Agent-facing surface |
+| Go identifiers, package paths (`internal/cmd/component`, `pkg/api/component`, `models.Component`) | component | Matches the GraphQL/REST schema it maps to |
+| JSON/YAML tags, URL paths, GraphQL queries, `component.yaml` | component | Wire format and files on disk |
+
+So `common.AddComponentFlag` registers a flag named `--integration`, and
+`internal/cmd/component/list` implements `list integrations`. Renaming a Go
+identifier to `Integration` only makes sense if the API type it mirrors is
+renamed too.
+
+The pre-rename spellings stay reachable: `create`/`list`/`describe`/`delete`
+accept `component` and `components` as hidden subcommands registered through
+`common.LegacyAliasCommand`, and `--component`/`-c` is a hidden deprecated alias
+of `--integration`/`-i`. Both print a deprecation notice on stderr. Two places
+keep the old word on purpose — the `components` key in `describe project
+--output=json`, and the bridge component `connect` creates on the platform.
+
+New user-facing strings say "integration". When you change one, remember the
+matching entry in `i18n/translations/all.en_US.json` (id and translation both);
+a missing entry falls back to the English source string, so a stale file is not
+a build failure, just drift.
+
 ## Brand and Identifier Policy
 
 This codebase is open-sourced as the **WSO2 Integration Platform CLI**. Go identifiers (variable names, struct fields, package names, function names, comments) must not contain Choreo brand references. Backend-enforced strings are intentionally left unchanged.

@@ -221,7 +221,7 @@ func (c *ComponentClient) CreateNewComponent(
 			}
 		}
 		if strings.Contains(errorResponse.Message, "free tier") ||
-			strings.Contains(errorResponse.Message, "maximum number of components reached") {
+			strings.Contains(errorResponse.Message, "maximum number of integrations reached") {
 			return ComponentKind{}, api.ErrMaxComponentCountReached
 		}
 		return ComponentKind{}, err
@@ -501,13 +501,13 @@ func (c *ComponentClient) GetComponentLimits(orgId string, orgUuid string) (Comp
 
 	res, err := c.client.Do(req, orgId)
 	if err != nil {
-		return ComponentLimits{}, fmt.Errorf("error while fetching component limits: %w", err)
+		return ComponentLimits{}, fmt.Errorf("error while fetching integration limits: %w", err)
 	}
 	defer res.Body.Close()
 
 	var response ComponentLimitsResponse
 	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
-		return ComponentLimits{}, fmt.Errorf("error while decoding component limits response: %w", err)
+		return ComponentLimits{}, fmt.Errorf("error while decoding integration limits response: %w", err)
 	}
 
 	return response.Data, nil

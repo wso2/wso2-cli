@@ -27,13 +27,13 @@ func HandleDescribeComponent(params *DescribeComponentParams) error {
 	// quickest fix is often to drop the pipe and let the picker run.
 	if outputFormat.IsStructured() && params.componentFlag == "" && !utils.IO.IsStdoutTTY() {
 		return fmt.Errorf("%s", heredoc.Doc(i18n.T(`
-			A component name is required with --output=json when output is piped or redirected.
+			An integration name is required with --output=json when output is piped or redirected.
 
-			Provide the component (and the flags that identify it) explicitly:
-			  wso2-integration-platform describe component <component-name> --project=<project> --org=<org>
+			Provide the integration (and the flags that identify it) explicitly:
+			  wso2-integration-platform describe integration <integration-name> --project=<project> --org=<org>
 
-			Or run the command on a terminal without a pipe to choose a component interactively:
-			  wso2-integration-platform describe component --output=json`)))
+			Or run the command on a terminal without a pipe to choose an integration interactively:
+			  wso2-integration-platform describe integration --output=json`)))
 	}
 
 	orgId, projectId, err := common.ResolveContext(params.orgFlag, params.projectFlag)

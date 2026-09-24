@@ -183,7 +183,7 @@ func listThirdPartyServices(ctx context.Context, request mcp.CallToolRequest) (*
 
 	nextSteps := []string{
 		"To get the implementation details of a third party service, use `list_marketplace_resources{resource_type: 'third-party', resource_id: 'RESOURCE_ID_OF_THE_THIRD_PARTY_SERVICE'}`",
-		"To connect a component to one of these services, use `create_connection` with the `marketplace_service_id` of the desired service.",
+		"To connect an integration to one of these services, use `create_connection` with the `marketplace_service_id` of the desired service.",
 	}
 	return utils.NewMCPResponse(response, "Marketplace services listed successfully.", nextSteps)
 }

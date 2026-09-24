@@ -14,10 +14,10 @@ var ConfigListCommand = &cobra.Command{
 	Use:     "configs [flags]",
 	Aliases: []string{"config"},
 	Short:   i18n.T("list configs"),
-	Long:    heredoc.Doc(i18n.T(`List config-maps and secrets within a component`)),
+	Long:    heredoc.Doc(i18n.T(`List config-maps and secrets within an integration`)),
 	Example: heredoc.Docf(i18n.T(`
 
-		To list the configs within a component :
+		To list the configs within an integration :
 			%s
 
 		To get the output in JSON format :
@@ -27,9 +27,9 @@ var ConfigListCommand = &cobra.Command{
 			%s
 
 	`),
-		"$ wso2-integration-platform list configs --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch>",
-		"$ wso2-integration-platform list configs --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch> --output=json",
-		"$ wso2-integration-platform list configs --project=<project-name> --component=<component-name> --env=<env-name> --deployment-track=<branch> --output=json > configs.json"),
+		"$ wso2-integration-platform list configs --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch>",
+		"$ wso2-integration-platform list configs --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch> --output=json",
+		"$ wso2-integration-platform list configs --project=<project-name> --integration=<integration-name> --env=<env-name> --deployment-track=<branch> --output=json > configs.json"),
 	PreRun: common.VerifyIsUserLoggedIn,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := handleConfigListCommand()

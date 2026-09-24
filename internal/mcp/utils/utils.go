@@ -135,7 +135,7 @@ func GetTargetComponentByUUID(ctx context.Context, targetOrg api.Organization, t
 	componentClient := GetComponentClient(ctx)
 	components, err := componentClient.GetAllComponents(targetOrg.Handle, targetOrg.ID, targetProject.ID, false)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get retrieve components: %w", err)
+		return nil, fmt.Errorf("failed to get retrieve integrations: %w", err)
 	}
 
 	var selectedComponent *models.Component
@@ -146,12 +146,12 @@ func GetTargetComponentByUUID(ctx context.Context, targetOrg api.Organization, t
 		}
 	}
 	if selectedComponent == nil {
-		return nil, fmt.Errorf("matching component not found")
+		return nil, fmt.Errorf("matching integration not found")
 	}
 
 	component, err := componentClient.GetComponentInfo(targetOrg.ID, selectedComponent.Handler, targetProject.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get retrieve component: %w", err)
+		return nil, fmt.Errorf("failed to get retrieve integration: %w", err)
 	}
 
 	return component, nil
@@ -371,7 +371,7 @@ func GetPlatformHostname(componentType string) (string, error) {
 	case "webapp":
 		return auth.GetEnvConfig().PlatformHostnames.WebApp, nil
 	default:
-		return "", fmt.Errorf("unknown component type: %s", componentType)
+		return "", fmt.Errorf("unknown integration type: %s", componentType)
 	}
 }
 

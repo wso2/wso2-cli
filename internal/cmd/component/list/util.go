@@ -35,20 +35,20 @@ func printComponentListStructured(components []models.Component, format common.O
 	// On an empty result, guide the user via stderr (kept out of stdout so
 	// the JSON stays machine-parseable).
 	if len(components) == 0 {
-		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No components found in project %s.\n"),
+		fmt.Fprintf(utils.IO.ErrOut, i18n.T("No integrations found in project %s.\n"),
 			utils.CS.Bold(currentProject.Name))
 	}
 	return nil
 }
 
 func getComponents(orgHandler string, orgId string, projectId string) ([]models.Component, error) {
-	componentsSpinner := utils.CreateSpinner(" Fetching components...", "\n")
+	componentsSpinner := utils.CreateSpinner(" Fetching integrations...", "\n")
 	componentsSpinner.Start()
 	components, err := auth.ComponentClient.GetAllComponents(orgHandler, orgId, projectId, false)
 	componentsSpinner.Stop()
 
 	if err != nil {
-		return nil, fmt.Errorf(i18n.T("failed to fetch components: %w"), err)
+		return nil, fmt.Errorf(i18n.T("failed to fetch integrations: %w"), err)
 	}
 
 	// Keep only integrations, matching the Devant console's isDevantComponent
@@ -69,7 +69,7 @@ func getComponents(orgHandler string, orgId string, projectId string) ([]models.
 
 func printComponentList(orgId string, projectId string, components []models.Component) error {
 	if len(components) == 0 {
-		fmt.Fprintf(utils.IO.Out, i18n.T("%s No components found\n"), utils.CS.Yellow("!"))
+		fmt.Fprintf(utils.IO.Out, i18n.T("%s No integrations found\n"), utils.CS.Yellow("!"))
 		return nil
 	} else {
 		data := [][]string{}
@@ -89,11 +89,11 @@ func printComponentList(orgId string, projectId string, components []models.Comp
 			} else if strings.HasPrefix(componentItem.DisplayType, "byoc") {
 				buildPack = component.ComponentBuildPackDocker
 			} else if strings.HasPrefix(componentItem.DisplayType, "buildpack") {
-				componentsSpinner := utils.CreateSpinner(" Fetching component details...", "\n")
+				componentsSpinner := utils.CreateSpinner(" Fetching integration details...", "\n")
 				componentsSpinner.Start()
 				compDetails, err := auth.ComponentClient.GetComponentInfo(orgId, componentItem.Handler, projectId)
 				if err != nil {
-					return fmt.Errorf(i18n.T("failed to fetch component details: %w"), err)
+					return fmt.Errorf(i18n.T("failed to fetch integration details: %w"), err)
 				}
 				componentsSpinner.Stop()
 				if len(compDetails.Repository.BuildPackConfig) > 0 {

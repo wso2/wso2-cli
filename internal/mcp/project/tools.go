@@ -29,7 +29,7 @@ var GetProjectEnvironmentsTool = mcp.NewTool("get_project_environments",
 
 var CreateProjectTool = mcp.NewTool("create_project",
 	mcp.WithTitleAnnotation("Create Project"),
-	mcp.WithDescription("Creates a new project within your active organization. Projects serve as organizational containers for your components and environments. PRE-CONDITION: get_projects tool must be called first."),
+	mcp.WithDescription("Creates a new project within your active organization. Projects serve as organizational containers for your integrations and environments. PRE-CONDITION: get_projects tool must be called first."),
 	mcp.WithReadOnlyHintAnnotation(false),
 	mcp.WithDestructiveHintAnnotation(true),
 	mcp.WithIdempotentHintAnnotation(false),

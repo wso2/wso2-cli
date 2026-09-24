@@ -57,7 +57,7 @@ func HandleDeployComponent(params *DeployComponentParams) error {
 	}
 
 	if resp.Data.Status == "queued" || resp.Data.Status == "in_progress" {
-		utils.PrintInfo("%s", i18n.T("Component initialization is in progress. Please run the command in a while...\n"))
+		utils.PrintInfo("%s", i18n.T("Integration initialization is in progress. Please run the command in a while...\n"))
 		return nil
 	}
 
@@ -102,7 +102,7 @@ func HandleDeployComponent(params *DeployComponentParams) error {
 
 	utils.PrintInfo("%s", heredoc.Docf(`
 
-			Deployment for component '%s' has been successfully triggered
+			Deployment for integration '%s' has been successfully triggered
 		`,
 		remoteComponent.Name,
 	))
@@ -111,22 +111,22 @@ func HandleDeployComponent(params *DeployComponentParams) error {
 
 	utils.PrintInfo("%s", heredoc.Docf(`
 
-			To view deployment status of the component deployed in %s environment :
+			To view deployment status of the integration deployed in %s environment :
 				%s
 		`,
 		selectedEnv.Name,
-		fmt.Sprintf(`$ wso2-integration-platform describe component "%s" --project="%s"`, remoteComponent.Name, project.Name),
+		fmt.Sprintf(`$ wso2-integration-platform describe integration "%s" --project="%s"`, remoteComponent.Name, project.Name),
 	))
 
 	if strings.HasSuffix(remoteComponent.DisplayType, "Service") {
 		utils.PrintInfo("%s", heredoc.Docf(`
 
-			To get the test key needed to invoke the component deployed in %s environment :
+			To get the test key needed to invoke the integration deployed in %s environment :
 				%s
 		`,
 			selectedEnv.Name,
 			fmt.Sprintf(
-				`$ wso2-integration-platform create test-key --project="%s" --component="%s" --deployment-track="%s" --env="%s"`,
+				`$ wso2-integration-platform create test-key --project="%s" --integration="%s" --deployment-track="%s" --env="%s"`,
 				project.Name,
 				remoteComponent.Name,
 				deploymentTrack.Branch,
@@ -137,12 +137,12 @@ func HandleDeployComponent(params *DeployComponentParams) error {
 
 	utils.PrintInfo("%s", heredoc.Docf(`
 
-			To view application logs of the component deployed in %s environment :
+			To view application logs of the integration deployed in %s environment :
 				%s
 		`,
 		selectedEnv.Name,
 		fmt.Sprintf(
-			`$ wso2-integration-platform logs application --project="%s" --component="%s" --deployment-track="%s" --env=%s`,
+			`$ wso2-integration-platform logs application --project="%s" --integration="%s" --deployment-track="%s" --env=%s`,
 			project.Name,
 			remoteComponent.Name,
 			deploymentTrack.Branch,
@@ -324,7 +324,7 @@ func handleProxyDeployment(selectedOrg *api.Organization, project *models.Projec
 
 			utils.PrintInfo("%s", heredoc.Docf(`
 
-                    Deployment for component '%s' has been successfully triggered
+                    Deployment for integration '%s' has been successfully triggered
                 `,
 				remoteComWithRepoData.Name,
 			))

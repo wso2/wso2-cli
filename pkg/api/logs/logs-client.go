@@ -139,7 +139,7 @@ func (c *LogsClient) GetComponentLogs(
 
 	resp, err := c.client.Do(req, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("error while fetching component logs: %w", err)
+		return nil, fmt.Errorf("error while fetching integration logs: %w", err)
 	}
 	defer resp.Body.Close()
 	if err != nil {
@@ -191,7 +191,7 @@ func (c *LogsClient) GetExecutionLogs(
 
 	resp, err := c.client.Do(req, orgId)
 	if err != nil {
-		return nil, fmt.Errorf("error while fetching component logs: %w", err)
+		return nil, fmt.Errorf("error while fetching integration logs: %w", err)
 	}
 	defer resp.Body.Close()
 	if err != nil {

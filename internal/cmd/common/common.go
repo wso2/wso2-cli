@@ -10,6 +10,33 @@ import (
 	"github.com/wso2/integration-platform-tools/internal/utils"
 )
 
+// LegacyAliasCommand returns a hidden command that runs target under an older
+// name. `component`/`components` were renamed to `integration`/`integrations`;
+// the old spellings keep working for existing scripts, print a one-line
+// deprecation notice on stderr, and stay out of the help output.
+func LegacyAliasCommand(target *cobra.Command, use string, aliases ...string) *cobra.Command {
+	alias := &cobra.Command{
+		Use:     use,
+		Aliases: aliases,
+		Short:   target.Short,
+		Long:    target.Long,
+		Example: target.Example,
+		Args:    target.Args,
+		Hidden:  true,
+		Run:     target.Run,
+		RunE:    target.RunE,
+	}
+	alias.PreRun = func(cmd *cobra.Command, args []string) {
+		utils.PrintError("Note: \"%s\" is deprecated, use \"%s\" instead.\n", cmd.CalledAs(), target.Name())
+		if target.PreRun != nil {
+			target.PreRun(cmd, args)
+		}
+	}
+	// Shares the flag pointers with target, so both spellings bind the same values.
+	alias.Flags().AddFlagSet(target.Flags())
+	return alias
+}
+
 func AddGenericHelper(command *cobra.Command) {
 	command.SetHelpFunc(func(c *cobra.Command, s []string) {
 		if c.HasSubCommands() && len(c.Flags().Args()) > 0 {
