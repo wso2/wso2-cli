@@ -181,11 +181,6 @@ Trigger a deployment for an integration in an environment.
 | `--env-vars` | Environment variables, e.g. `--env-vars="key1=val1,key2=val2"`. |
 | `--cron-expression` | Schedule expression for the cron job (scheduled tasks only). |
 | `--cron-timezone` | Schedule timezone for the cron job (scheduled tasks only). |
-| `--byoi-image` | Deployment image with tag (image-based integrations only). |
-| `--byoi-endpoints-file` | Service endpoints file path (image-based integrations only). |
-| `--byoi-api-schema-file` | API schema file path (image-based integrations only, repeatable). |
-| `--proxy-target-url` | Target endpoint for the proxy (git-based proxies only). |
-| `--proxy-sandbox-url` | Sandbox endpoint for the proxy (git-based proxies only). |
 | `--org`, `-p`/`--project`, `-e`/`--env`, `-d`/`--deployment-track` | Common resource flags. |
 
 ```bash
