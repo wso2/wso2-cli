@@ -18,7 +18,7 @@ details, see the [module manifest](../reference/module-manifest.md) and
 
 | Error | Cause | Fix |
 | --- | --- | --- |
-| `modules.incompatible_shell` | The shell's version is outside `compatibility.shell`. A plain `go build` of the shell reports `0.0.0-dev`, which `>=0.1.0` excludes. Install succeeds; the first command fails. | Use the shell `make build-shell` or `make install-module` builds. With a released shell, use a version inside the declared range. |
+| `modules.incompatible_shell` | The shell's version is outside `compatibility.shell`. A plain `go build` of the shell reports `0.0.0-dev`, which `>=0.1.0` excludes. Install or launch is refused. | Use the shell `make build-shell` or `make install-module` builds. With a released shell, use a version inside the declared range. |
 | `modules.incompatible_protocol` | The module and shell share no protocol version. At install time, no published version speaks this shell's protocol. | Rebuild against an SDK whose protocol the shell speaks. Don't edit `protocolVersions` by hand. Run `make gate-module` before tagging. |
 | `modules.incompatible_platform` | The installed binary was built for another OS or architecture. | Install on the machine that runs it. |
 | `modules.executable_digest_mismatch` | The binary changed after install, usually because a build was copied over it. | `wso2 product remove <namespace>`, then install again. |

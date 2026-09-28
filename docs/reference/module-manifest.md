@@ -103,11 +103,12 @@ This is a policy statement, and the only field whose value is genuinely the
 author's choice. `make new-module` writes `>=0.1.0 <2.0.0` because that is what
 a new module is expected to support, not because anything measured it.
 
-The shell checks this on **every launch**, against its own version, and refuses
-with `modules.incompatible_shell` when it does not hold. Catalog selection does
-not check it, so a module can install successfully and then refuse to launch.
-That gap is why a shell built from a checkout, which reports `0.0.0-dev`, cannot
-launch a module declaring `>=0.1.0`: a prerelease sorts below its own release.
+The shell checks this during **catalog selection** before installing, and
+again on **every launch**, against its own version, refusing with
+`modules.incompatible_shell` when it does not hold. When the catalog publishes an
+older version this shell does satisfy, selection picks it rather than refusing
+outright. A shell built from a checkout, which reports `0.0.0-dev`, cannot install
+or launch a module declaring `>=0.1.0`: a prerelease sorts below its own release.
 See [troubleshooting](../guides/troubleshoot-module.md).
 
 The release gate refuses a range it cannot parse, naming the module, rather than

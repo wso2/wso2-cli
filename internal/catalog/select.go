@@ -46,18 +46,20 @@ type Selection struct {
 // Select chooses the version to install from a published version history.
 //
 // Among the versions the user's channel and pin permit, it selects the newest
-// whose protocol versions intersect what the shell speaks and which publishes
+// whose protocol versions intersect what the shell speaks, whose declared
+// shell compatibility range contains this shell's version, and which publishes
 // an artifact for the shell's platform. The numerically newest release is not
 // assumed usable.
 //
-// The gate is the protocol versions intersected with the platform, and nothing
-// else. A module's version is never compared against the shell's, in either
+// A module's version is never compared against the shell's, in either
 // direction: a product module carries its product's version scheme, chosen so
 // its users recognise it, and that scheme does not track the shell's, so a
 // module numbered far above or far below the shell says nothing about whether
-// the two can speak. The same invariant is recorded at negotiateProtocol in
-// internal/modules/resolve.go, because a selection gate and a launch gate that
-// disagreed would install a module that could not then be launched.
+// the two can speak. The compatibility gate is the declared protocol versions
+// and shell range, intersected with the platform. The same invariant is recorded
+// at negotiateProtocol and checkShellCompatibility in internal/modules/resolve.go,
+// because a selection gate and a launch gate that disagreed would install a module
+// that could not then be launched.
 func Select(file NamespaceFile, policy Policy, shell modules.ShellIdentity) (Selection, error) {
 	permitted, err := permittedVersions(file, policy)
 	if err != nil {
@@ -74,7 +76,28 @@ func Select(file NamespaceFile, policy Policy, shell modules.ShellIdentity) (Sel
 		return Selection{}, incompatibleProtocol(file.Namespace, permitted, shell)
 	}
 
+	compatible := make([]Version, 0, len(speakable))
+	ranges := make([]string, 0, len(speakable))
 	for _, version := range speakable {
+		supported, err := semver.ParseRange(version.Compatibility.Shell)
+		if err != nil {
+			return Selection{}, problem.New(problem.CategoryModuleTrust, "catalog.malformed_version",
+				fmt.Sprintf("the module catalog publishes an unreadable shell compatibility range %q", version.Compatibility.Shell)).
+				WithRecovery("Report this to the module catalog's maintainers.")
+		}
+		spec := supported.String()
+		if !slices.Contains(ranges, spec) {
+			ranges = append(ranges, spec)
+		}
+		if supported.Contains(shell.Version) {
+			compatible = append(compatible, version)
+		}
+	}
+	if len(compatible) == 0 {
+		return Selection{}, incompatibleShell(file.Namespace, ranges, shell)
+	}
+
+	for _, version := range compatible {
 		for _, artifact := range version.Artifacts {
 			if artifact.Platform == shell.Platform {
 				return Selection{Version: version, Artifact: artifact}, nil
@@ -216,6 +239,31 @@ func incompatibleProtocol(namespace string, permitted []Version, shell modules.S
 			"the published versions speak %s, and this shell speaks %s",
 			namespace, formatProtocols(published), formatVersions(shell.ProtocolVersions))).
 		WithRecovery("Update the WSO2 CLI. This shell is too old for every published version of this module.")
+}
+
+// incompatibleShell states the refusal in terms of the declared shell range and
+// this shell's version, so a user reads a compatibility problem before anything
+// is downloaded or written.
+func incompatibleShell(namespace string, ranges []string, shell modules.ShellIdentity) problem.Problem {
+	quoted := make([]string, len(ranges))
+	for i, r := range ranges {
+		quoted[i] = fmt.Sprintf("%q", r)
+	}
+	var message string
+	if len(quoted) <= 1 {
+		targetRange := `""`
+		if len(quoted) == 1 {
+			targetRange = quoted[0]
+		}
+		message = fmt.Sprintf("the %q module requires a WSO2 CLI shell matching %s, and this shell is %s",
+			namespace, targetRange, shell.Version)
+	} else {
+		message = fmt.Sprintf("no published version of the %q module supports this shell; "+
+			"the published versions require a WSO2 CLI shell matching %s, and this shell is %s",
+			namespace, strings.Join(quoted, " or "), shell.Version)
+	}
+	return problem.New(problem.CategoryModuleTrust, "modules.incompatible_shell", message).
+		WithRecovery("Update the module or the WSO2 CLI so the shell version is supported.")
 }
 
 func formatProtocols(versions map[int]bool) string {

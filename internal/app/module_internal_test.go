@@ -129,6 +129,9 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 	unpublished := install.Status{
 		Namespace: "orphan", Installed: "1.2.3", Channel: "stable",
 	}
+	incompatible := install.Status{
+		Namespace: "reference", Installed: "0.1.0", Channel: "stable", Available: "0.1.0", Incompatible: true,
+	}
 	current := install.Status{
 		Namespace: "gateway", Installed: "2.0.0", Channel: "stable", Available: "2.0.0",
 	}
@@ -148,6 +151,14 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 		"a pinned module alone": {
 			statuses: []install.Status{pinned},
 			mustName: []string{"pinned"},
+		},
+		"an incompatible module alone": {
+			statuses: []install.Status{incompatible},
+			mustName: []string{"incompatible with this shell and cannot be launched"},
+		},
+		"an incompatible module beside a current one": {
+			statuses: []install.Status{incompatible, current},
+			mustName: []string{"incompatible with this shell", "1 product is current"},
 		},
 		"an unpublished module alone": {
 			statuses: []install.Status{unpublished},
@@ -203,6 +214,7 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 func TestTheListSummaryAndTheUpdateColumnCannotDisagree(t *testing.T) {
 	for name, status := range map[string]install.Status{
 		"pinned":        {Namespace: "a", Installed: "1.0.0", Pinned: true, PinnedVersion: "1.0.0"},
+		"incompatible":  {Namespace: "f", Installed: "1.0.0", Incompatible: true},
 		"unpublished":   {Namespace: "b", Installed: "1.0.0", Channel: "stable"},
 		"updatable":     {Namespace: "c", Installed: "1.0.0", Channel: "stable", Available: "1.1.0", Update: true},
 		"current":       {Namespace: "d", Installed: "1.0.0", Channel: "stable", Available: "1.0.0"},
