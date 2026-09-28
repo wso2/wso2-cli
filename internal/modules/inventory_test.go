@@ -182,4 +182,3 @@ func TestStoreLockPathSitsBesideTheNamespaceDirectory(t *testing.T) {
 		t.Errorf("LockPath = %q, want %q", lockPath, want)
 	}
 }
-

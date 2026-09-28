@@ -205,10 +205,11 @@ func TestInterruptedInstallLeavesPreviousVersionActive(t *testing.T) {
 			 "channels": [{"channel": "stable", "version": "1.1.0"}]}
 		]
 	}`)
-	// Version 1.0.0 is valid. Version 1.1.0 has an invalid product descriptor audience,
-	// which passes catalog selection and archive verification but causes receipt.Validate
-	// to fail during activation after staging and moving the previous version aside.
-	namespace := []byte(fmt.Sprintf(`{
+	// Version 1.0.0 is initially valid.
+	// Version 1.1.0 has an invalid product descriptor audience, which passes catalog
+	// selection and archive verification but causes receipt.Validate to fail during
+	// activation after staging.
+	validNamespace := []byte(fmt.Sprintf(`{
 		"schemaVersion": 1,
 		"namespace": "demo",
 		"versions": [
@@ -222,13 +223,42 @@ func TestInterruptedInstallLeavesPreviousVersionActive(t *testing.T) {
 		]
 	}`, artifact, artifact))
 
+	// In failedReinstallNamespace, version 1.0.0 also carries an invalid audience,
+	// exercising the rollback path where a same-version reinstall fails after
+	// moving the existing installed version aside to .replaced.
+	failedReinstallNamespace := []byte(fmt.Sprintf(`{
+		"schemaVersion": 1,
+		"namespace": "demo",
+		"versions": [
+			{"version": "1.0.0", "channel": "stable",
+			 "compatibility": {"shell": ">=0.0.0", "protocolVersions": [1]},
+			 "capabilities": {"product": {"audience": "unsupported_audience"}},
+			 "artifacts": [%s]},
+			{"version": "1.1.0", "channel": "stable",
+			 "compatibility": {"shell": ">=0.0.0", "protocolVersions": [1]},
+			 "capabilities": {"product": {"audience": "unsupported_audience"}},
+			 "artifacts": [%s]}
+		]
+	}`, artifact, artifact))
+
+	currentNamespace := validNamespace
 	store := modules.NewStore(t.TempDir())
 	installer := Installer{
 		Store: store,
 		Client: catalog.Client{
 			Origin: "https://origin.example",
-			HTTP: &http.Client{Transport: pinFixtureTransport{
-				index: index, namespace: namespace, archive: archive}},
+			HTTP: &http.Client{
+				Transport: roundTripFunc(func(r *http.Request) (*http.Response, error) {
+					switch r.URL.Path {
+					case "/" + catalog.IndexPath:
+						return jsonResponse(index), nil
+					case "/demo.json":
+						return jsonResponse(currentNamespace), nil
+					default:
+						return jsonResponse(archive), nil
+					}
+				}),
+			},
 		},
 		Shell: fixtureShell(),
 	}
@@ -245,15 +275,65 @@ func TestInterruptedInstallLeavesPreviousVersionActive(t *testing.T) {
 		t.Fatalf("initial installed version = %q, want 1.0.0", installed.Version)
 	}
 
-	activeBefore, err := store.ReadActive(fixtureNamespace)
-	if err != nil {
-		t.Fatalf("ReadActive failed: %v", err)
-	}
-	if activeBefore.Version != "1.0.0" {
-		t.Fatalf("active version before failure = %q, want 1.0.0", activeBefore.Version)
+	// Place a sentinel file in the installed version directory. When a same-version
+	// reinstall moves the directory to .replaced and later restores it on failure,
+	// the sentinel proves that the original installation was restored rather than
+	// replaced by a fresh extraction.
+	versionDir := store.VersionDir(fixtureNamespace, "1.0.0")
+	sentinelPath := filepath.Join(versionDir, "installed-sentinel.txt")
+	if err := os.WriteFile(sentinelPath, []byte("sentinel"), 0o644); err != nil {
+		t.Fatalf("writing sentinel file failed: %v", err)
 	}
 
-	// 2. Attempt to install version 1.1.0 which fails during activate's receipt validation.
+	// 2. Attempt a same-version reinstall of 1.0.0 with the invalid descriptor.
+	// This exercises moving the existing version directory to .replaced and
+	// rolling back by renaming .replaced back to the version directory.
+	currentNamespace = failedReinstallNamespace
+	_, err = installer.Run(context.Background(), Request{
+		Namespace: fixtureNamespace,
+		Policy:    catalog.Policy{Version: "1.0.0"},
+	})
+	if err == nil {
+		t.Fatal("expected reinstall of 1.0.0 to fail due to invalid product descriptor")
+	}
+
+	// Verify rollback after same-version reinstall failure: version 1.0.0 remains active and resolvable.
+	activeAfterReinstall, err := store.ReadActive(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadActive after failed same-version reinstall returned %v", err)
+	}
+	if activeAfterReinstall.Version != "1.0.0" {
+		t.Errorf("active version after failed same-version reinstall = %q, want 1.0.0", activeAfterReinstall.Version)
+	}
+
+	policyAfterReinstall, err := store.ReadPolicy(fixtureNamespace)
+	if err != nil {
+		t.Fatalf("ReadPolicy after failed same-version reinstall returned %v", err)
+	}
+	if policyAfterReinstall.PinnedVersion != "1.0.0" {
+		t.Errorf("policy after failed same-version reinstall pinned = %q, want 1.0.0", policyAfterReinstall.PinnedVersion)
+	}
+
+	resolvedAfterReinstall, err := store.Resolve(fixtureNamespace, fixtureShell())
+	if err != nil {
+		t.Fatalf("Resolve after failed same-version reinstall returned %v", err)
+	}
+	if resolvedAfterReinstall.Receipt.ModuleVersion != "1.0.0" {
+		t.Errorf("resolved version = %q, want 1.0.0", resolvedAfterReinstall.Receipt.ModuleVersion)
+	}
+
+	if sentinelContent, err := os.ReadFile(sentinelPath); err != nil || string(sentinelContent) != "sentinel" {
+		t.Errorf("sentinel file in restored version directory missing or altered: %v", err)
+	}
+
+	replacedDir := versionDir + ".replaced"
+	if _, err := os.Stat(replacedDir); !os.IsNotExist(err) {
+		t.Errorf("replaced directory %q still exists after same-version rollback", replacedDir)
+	}
+
+	// 3. Attempt to install version 1.1.0 which also fails receipt validation.
+	// This exercises the rollback path where a new version fails without displacing
+	// an existing directory of the same version.
 	_, err = installer.Run(context.Background(), Request{
 		Namespace: fixtureNamespace,
 		Policy:    catalog.Policy{Version: "1.1.0"},
@@ -262,35 +342,33 @@ func TestInterruptedInstallLeavesPreviousVersionActive(t *testing.T) {
 		t.Fatal("expected install of 1.1.0 to fail due to invalid product descriptor")
 	}
 
-	// 3. Verify rollback: previous version 1.0.0 remains active and resolvable.
-	activeAfter, err := store.ReadActive(fixtureNamespace)
+	// Verify rollback: previous version 1.0.0 still remains active and resolvable.
+	activeAfterNewVersion, err := store.ReadActive(fixtureNamespace)
 	if err != nil {
 		t.Fatalf("ReadActive after failed install returned %v", err)
 	}
-	if activeAfter.Version != "1.0.0" {
-		t.Errorf("active version after failed install = %q, want 1.0.0", activeAfter.Version)
+	if activeAfterNewVersion.Version != "1.0.0" {
+		t.Errorf("active version after failed install = %q, want 1.0.0", activeAfterNewVersion.Version)
 	}
 
-	policyAfter, err := store.ReadPolicy(fixtureNamespace)
+	policyAfterNewVersion, err := store.ReadPolicy(fixtureNamespace)
 	if err != nil {
 		t.Fatalf("ReadPolicy after failed install returned %v", err)
 	}
-	if policyAfter.PinnedVersion != "1.0.0" {
-		t.Errorf("policy after failed install pinned = %q, want 1.0.0", policyAfter.PinnedVersion)
+	if policyAfterNewVersion.PinnedVersion != "1.0.0" {
+		t.Errorf("policy after failed install pinned = %q, want 1.0.0", policyAfterNewVersion.PinnedVersion)
 	}
 
-	resolved, err := store.Resolve(fixtureNamespace, fixtureShell())
+	resolvedAfterNewVersion, err := store.Resolve(fixtureNamespace, fixtureShell())
 	if err != nil {
 		t.Fatalf("Resolve after failed install returned %v", err)
 	}
-	if resolved.Receipt.ModuleVersion != "1.0.0" {
-		t.Errorf("resolved version = %q, want 1.0.0", resolved.Receipt.ModuleVersion)
+	if resolvedAfterNewVersion.Receipt.ModuleVersion != "1.0.0" {
+		t.Errorf("resolved version = %q, want 1.0.0", resolvedAfterNewVersion.Receipt.ModuleVersion)
 	}
 
-	// Ensure no dangling .replaced directory was left behind.
-	replacedDir := store.VersionDir(fixtureNamespace, "1.0.0") + ".replaced"
-	if _, err := os.Stat(replacedDir); !os.IsNotExist(err) {
-		t.Errorf("replaced directory %q still exists after rollback", replacedDir)
+	newVersionDir := store.VersionDir(fixtureNamespace, "1.1.0")
+	if _, err := os.Stat(newVersionDir); !os.IsNotExist(err) {
+		t.Errorf("failed version directory %q was not removed after rollback", newVersionDir)
 	}
 }
-

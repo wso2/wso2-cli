@@ -597,4 +597,3 @@ func TestConcurrentInstallsMatchExactlyOneInstall(t *testing.T) {
 	}
 	requireLaunchable(t, shell, stateRoot, catalogNamespace)
 }
-
