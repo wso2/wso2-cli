@@ -5,9 +5,9 @@
 [architecture](../architecture.md)
 
 This reference describes the shared `ws` shell commands: `context`, `login`,
-`logout`, `whoami`, `org`, `doctor`, `config`, `product`, `version` and
-`help`. Product operations belong to product modules, such as `ws api`,
-`ws identity`, `ws integration`, and `ws agent`; the
+`logout`, `whoami`, `org`, `doctor`, `config`, `product`, `version`,
+`completion` and `help`. Product operations belong to product modules, such as `ws apim`,
+`ws iam`, `ws intg`, and `ws am`; the
 [module catalog](module-catalog.md) reference describes what a product install
 selects, what it verifies, how a channel and a pin are recorded per module,
 and how each refusal is reported.
@@ -20,22 +20,22 @@ and how each refusal is reported.
 | `ws version` | Shows the shell, protocol, and installed module versions. |
 | `ws completion install [<shell>]` | Sets up tab completion for `bash`, `zsh`, `fish` or `powershell`, or for the shell `$SHELL` names (PowerShell on Windows when it is unset). zsh and bash get a line that loads the script inside the `# >>> wso2 cli >>>` block of `~/.zshrc` or `~/.bashrc` (`~/.bash_profile` when that is the one there, or on macOS when neither is), the block added when there is none; zsh also gets a `compinit` that runs only when nothing has run one. fish gets `~/.config/fish/completions/<name>.fish` (under `$XDG_CONFIG_HOME` when set), and PowerShell a line in the block of `$PROFILE`, refused with `shell.completion_profile_blocked` under a `Restricted` or `AllSigned` execution policy. `--profile <file>` edits that file instead. The lines name the command as it was invoked. A second run changes nothing and says so. Refusals: an unsupported shell (`shell.completion_shell_unsupported`), no `$SHELL` (`shell.completion_shell_unknown`), a profile that cannot be written (`shell.completion_profile_unwritable`), a block with no end marker (`shell.completion_profile_unreadable`), and a fish file it did not write (`shell.completion_file_exists`). `--output json` reports `shell`, `file` and `changed`. |
 | `ws completion <shell>` | Writes the tab-completion script for `bash`, `zsh`, `fish` or `powershell` to standard output when it is piped or redirected, exactly as Cobra generates it. At a terminal it prints how to set completion up instead, naming `ws completion install`; `--print` writes the script anyway. |
-| `ws login` | Establishes the login session, then one session per further product the context records, each through the same browser sign-on. `--only <namespace>` authorizes just that product — both of its records when it holds a gateway record, or one record alone as `--only <namespace>/gateway` — refused with `shell.invalid_argument` when the context records no such namespace; `--no-products` authorizes the login session alone, leaving product and gateway sessions unestablished; the two together are refused with `shell.conflicting_arguments`. The report lists every session this run established, naming the strategy that reached it (`direct`, `sibling`, `derived`, or `federated`) as `<strategy>, established`; a gateway record is its own line under its key, as `apim/gateway  sibling, established`. When a later product fails after earlier ones already succeeded, the failure names what was established and points at `ws login --only <namespace>` (or `--only <namespace>/gateway`) to retry only the one that was not, keeping the sessions already stored. Without `--context` and `--url`, in a terminal, login asks `Log in to:` an existing context (listed, the selected one as the default) or a new one; a new one runs the `ws context create` wizard (below), without its closing offer to log in, and then logs in to the context it wrote; a client-credentials context ends there, reporting that it needs no login. With no contexts it goes straight to a new one. A `--context` naming no context runs the same wizard, taking that name, in a terminal and is refused with `shell.missing_required_flag` otherwise, naming `--url` and `--client-id`. Under `--no-input`, `WSO2_NO_INPUT`, `WSO2_CONTEXT`, or a standard input that is not a terminal, nothing is asked and the selected context is used. |
-| `ws login --url <issuer> --client-id <id>` | Logs in against a named issuer and creates the context it authenticated, reporting its name. `--context <name>` names it. Without it, a context that already logs in against that issuer with that client ID is reused; otherwise login asks `Context name [context-1]:`, offering the next free `context-N`, where Enter accepts the default and a name that is not legal or is already taken is asked again. When standard input is not a terminal the default is taken without asking, and the report says the name was assigned, naming `--context <name>` and `ws context rename`. A context named by `--context` whose issuer and client ID both match is reused; one that differs in either is refused with `contexts.context_exists` and never replaced. The first context created becomes the selected one. Nothing is written unless the login succeeded. Omitting `--client-id` prompts in an interactive terminal and is refused with `shell.missing_required_flag` under `--no-input`. A ThunderID issuer binds every login to a product, so there a login that creates its context is refused with `auth.product_not_configured`, naming `ws context create <name> --login-product identity --url <url>`. |
+| `ws login` | Establishes the login session, then one session per further product the context records, each through the same browser sign-on. `--only <namespace>` authorizes just that product — both of its records when it holds a gateway record, or one record alone as `--only <namespace>/gateway` — refused with `shell.invalid_argument` when the context records no such namespace; `--no-products` authorizes the login session alone, leaving product and gateway sessions unestablished; the two together are refused with `shell.conflicting_arguments`. The report is three rows: `Context`, the context logged in to; `Email`, the signed-in person as the identity token named them (the email, else the display name, else the subject, else `-` when a device login verified none); and `Status`, `logged in`. Each browser sign-on prints its authorization URL on standard error, `If the browser does not open, visit: <url>`, whether or not a browser opened. What reached each product is `ws whoami -o json`'s to say. When a later product fails after earlier ones already succeeded, the failure names what was established and points at `ws login --only <namespace>` (or `--only <namespace>/gateway`) to retry only the one that was not, keeping the sessions already stored. Without `--context` and `--url`, in a terminal, login asks `Log in to:` an existing context (listed, the selected one as the default) or a new one; a new one runs the `ws context create` wizard (below), without its closing offer to log in, and then logs in to the context it wrote; a client-credentials context ends there, reporting that it needs no login. With no contexts it goes straight to a new one. A `--context` naming no context runs the same wizard, taking that name, in a terminal and is refused with `shell.missing_required_flag` otherwise, naming `--url` and `--client-id`. Under `--no-input`, `WSO2_NO_INPUT`, `WSO2_CONTEXT`, or a standard input that is not a terminal, nothing is asked and the selected context is used. |
+| `ws login --url <issuer> --client-id <id>` | Logs in against a named issuer and creates the context it authenticated, reporting its name. `--context <name>` names it. Without it, a context that already logs in against that issuer with that client ID is reused; otherwise login asks `Context name [context-1]:`, offering the next free `context-N`, where Enter accepts the default and a name that is not legal or is already taken is asked again. When standard input is not a terminal the default is taken without asking, and the report says the name was assigned, naming `--context <name>` and `ws context rename`. A context named by `--context` whose issuer and client ID both match is reused; one that differs in either is refused with `contexts.context_exists` and never replaced. The first context created becomes the selected one. Nothing is written unless the login succeeded. Omitting `--client-id` prompts in an interactive terminal and is refused with `shell.missing_required_flag` under `--no-input`. A ThunderID issuer binds every login to a product, so there a login that creates its context is refused with `auth.product_not_configured`, naming `ws context create <name> --login-product iam --url <url>`. |
 | `ws logout` | Ends every session the selected context holds — the login session and each product's own — asking the identity provider to revoke each refresh token and removing each shell-owned entry. A context's sessions are its own (ADR 0016), so no other context is affected. `Product sessions` in the report names what happened to each session beyond the login one, `<namespace> ended` or `<namespace> none`. A client-credentials context holds no session to end and reports that plainly, exiting 0. Ending the shell's sessions leaves each identity provider's own browser session in place, and a later login would then be silent; so logout also opens each provider's end-session page, once per provider and client, naming the client and the identity token the session recorded, and reports `Browser session` as `sign-out opened`, `sign-out printed` (no browser could be opened; the URLs are on standard error), `kept` (`--keep-browser-session`, `--no-input` or `WSO2_NO_INPUT`), or `unaffected` (nothing was stored). Ending the browser session is best effort like revocation, and some providers end the user's other refresh tokens with it; the report says so rather than claiming either way. |
-| `ws whoami` | Built today: shows the selected context, the issuer it logs in through, the organization when the context names one, the session's subject, and the session's own state, all read from local state with no network call. With no context configured or selected it says so and exits 0. With a context selected but no stored session it says so and names `ws login`. A stored session is reported present with its expiry either as the issuer's disclosed refresh-token lifetime or, when the issuer disclosed none, as not stated — never as the shorter-lived access token's own expiry. A disclosed lifetime that has passed is reported expired. A session stored before this field existed reports its subject as unknown rather than blank. It also lists every record the context holds, each with the strategy that reaches it (`direct`, `sibling`, `derived`, `federated`, `exchanged`, or `inline` for a client-credentials context) and whether that record's own session is stored: every product under its namespace, and a product's gateway record under its key, as `apim/gateway: sibling, present` beside `apim: federated, present`. An exchanged or inline record holds no session of its own, so it is written once: an inline one as its strategy, and an exchanged one as `api: by exchange (not checked)`, since whoami makes no call and cannot tell whether the issuer will grant the exchange. JSON keeps `exchanged` in both `strategy` and `session`. A client-credentials context reports its own state as `inline` too, with no recovery text, since it holds nothing to recover. |
+| `ws whoami` | Shows the selected context, who is signed in to it, and whether they are logged in, all read from local state with no network call. The table is three rows: `Context`; `Email`, named as `ws login` names it; and `Status`, which is `logged in`, `session expired`, `machine credentials, no login needed` for a client-credentials context, or `not logged in`. When there is a way back it follows as the next step: `ws login` for a context with no stored session, a session whose disclosed lifetime has passed, or one established against another issuer; `ws context use <name>` when contexts exist but none is selected. With no context configured it says so and exits 0. `-o json` carries the rest: `issuer`, `organization`, `subject` (`unknown` for a session stored before the field existed), `email` and `name` when the session recorded them, `session` (`none`, `present`, `expired`, or `inline`), and `sessionExpiry`, the issuer's disclosed refresh-token lifetime or `not stated by the issuer`, never the shorter-lived access token's own expiry. Its `products` lists every record the context holds, each with the `strategy` that reaches it (`direct`, `sibling`, `derived`, `federated`, `exchanged`, or `inline`) and its own `session`, a product's gateway record under its key, such as `apim/gateway`. An exchanged record holds no session of its own and reports `exchanged` as its session, since whoami makes no call and cannot tell whether the issuer will grant the exchange; an inline one reports `inline`. |
 | `ws org` | With no subcommand, prints this family's help on standard output and exits 0: naming a family without a subcommand is an incomplete command, not a failed one, and every subcommand it names works. The help names `current` and `use`. A subcommand the family does not have is a different case and is still refused with `shell.unknown_command` and the usage exit class (#133), so a typo is never reported to a script as success. |
 | `ws org list` | Deferred (#112): no control-plane endpoint for enumerating organizations exists yet, and listing would need an access token before an organization is chosen, which the auth broker refuses. Typing it is refused as an unknown `ws org` subcommand, naming `current` and `use` as what the family supports. |
 | `ws org use <organization>` | Built today: sets the `Organization` field on the selected context through `contexts.Update`, and names which context it edited. The auth broker binds a minted token to a context's `Organization` and refuses when it is empty, so a session already signed in under the previous organization no longer matches — the command warns about that on standard error, in both renderings. It writes nothing, and does not migrate, invalidate, or re-mint a session. Refused with `shell.no_context_configured` when no context exists to edit, and with `auth.organization_switch_unsupported`, naming the provider, when the selected context logs in against ThunderID or Identity Server, which have no organization to switch to: the auth broker would refuse every later command with the same code, so the value is refused at the flag instead. An empty value is allowed on those providers, because it clears the field rather than switching to an organization, and this command is the only writer of it: refusing that too would leave a context that already carries an organization unrepairable. |
 | `ws org current` | Built today: shows the organization the selected context runs within, read from `contexts.Context.Organization`. With no context configured it reports that state and exits 0, worded exactly as `ws context current`. A configured context with no organization set says so distinctly, rather than reporting the same blank field either state would otherwise share. |
 | `ws context` | With no subcommand, prints this family's help on standard output and exits 0: naming a family without a subcommand is an incomplete command, not a failed one, and every subcommand it names works. The help names `create`, `product`, `apply`, `use`, `list`, `current`, `show`, `rename`, `delete`, `edit` and `export`. A subcommand the family does not have is a different case and is still refused with `shell.unknown_command` and the usage exit class (#133), so a typo is never reported to a script as success. |
-| `ws context create [<name>]` | With neither `--login-product` nor `--issuer`, in a terminal, asks for the setup instead (#189): `Sign in with:` the WSO2 identity product, one of `Thunder`, `Asgardeo`, `WSO2 Identity Server (coming soon)`, or `WSO2 Cloud (coming soon)`, the two marked coming soon of which are refused where they are picked, each saying so. Thunder logs in through the installed product whose descriptor names Thunder, or `identity`, installed first, and asks its URL, plus a client ID or audience only when the descriptor names none. Asgardeo asks the organization URL (`https://api.asgardeo.io/t/<organization>`) and writes it with `/oauth2/token` added as the issuer, with the matching `provider`, and asks the client ID. Then `Sign in using:` a browser, a device code, or client credentials, whose secret variable is asked by name; `Add a product this context reaches:` each installed product that is not a login provider, with its URL, its gateway URL when it has one, and its client ID when its grant needs one the descriptor does not name; the name, unless given; then a summary, `Create the "<name>" context?`, `Select "<name>" as the current context?` unless `--use`, and `Log in now?`. Flags given are not asked. Every answer goes through the same checks and descriptor resolution as the flags, and nothing is written before the last question, so the result is what the equivalent command lines write. A name that is taken or illegal is refused before any question. Answering no at the summary, or cancelling with Ctrl+C, is `shell.cancelled` and writes nothing; input that ends before a required answer is `shell.missing_required_flag`. With `--output json` it asks only for the context and writes one result. Under `--no-input`, `WSO2_NO_INPUT`, or a standard input that is not a terminal, nothing is asked: a missing name is `shell.missing_argument`, and the flag rules below apply. |
-| `ws context create <name> --login-product <product> --url <url>` | Creates a context that logs in through an installed product that is a login provider (a descriptor naming a `provider`, such as `identity`). The descriptor fills in the issuer (the URL plus its `issuerPath`), the client (`--client-id` overrides), the provider (`--provider` overrides), and the login product's audience and scopes (`--audience`, `--scopes` override), and the complete record is written (frozen defaults, ADR 0016). A product that is not installed is installed first, reported on standard error; `--no-install` refuses instead with `shell.product_not_installed`. A product that is not a login provider is refused with `shell.invalid_argument`. `--device` makes it an `oauth-device` context and `--client-id <id> --client-secret-variable <VAR>` a `client-credentials` one, refused when the descriptor's `machine` list does not allow `inline`. `--organization` and `--project` set those members. The context's `credentialRef` is its name, or the name with a numeric suffix when another context already holds that reference. Nothing is selected unless `--use` is given. A name already declared is refused with `contexts.context_exists`, and an illegal one with `shell.invalid_argument` before anything is read. |
-| `ws context create <name> --issuer <url> --client-id <id>` | Creates a context that logs in through any OpenID provider directly, with no product installed and no product recorded yet: add them with `ws context product add`. `--provider` accepts `asgardeo` or `identity-server`; `--provider thunder` is refused with `shell.conflicting_arguments`, because a ThunderID login is bound to a product and this form records none. `--url` without `--login-product` is refused with `shell.missing_required_flag`: a URL alone does not say which product's defaults apply, and the shell does not guess. Neither form, or both, is refused the same way. No network call is made besides an install. |
+| `ws context create [<name>]` | With neither `--login-product` nor `--issuer`, in a terminal, asks for the setup instead (#189): `Sign in with:` the WSO2 identity product, one of `Thunder`, `Asgardeo`, `WSO2 Identity Server (coming soon)`, or `WSO2 Cloud (coming soon)`, the two marked coming soon of which are refused where they are picked, each saying so. Thunder logs in through the installed product whose descriptor names Thunder, or `iam`, installed first, and asks its URL, plus a client ID or audience only when the descriptor names none. Asgardeo asks the organization URL (`https://api.asgardeo.io/t/<organization>`) and writes it with `/oauth2/token` added as the issuer, with the matching `provider`, and asks the client ID. Then `Sign in using:` a browser, a device code, or client credentials, whose secret variable is asked by name; `Add a product this context reaches:` each installed product that is not a login provider, with its URL, its gateway URL when it has one, and its client ID when its grant needs one the descriptor does not name; the name, unless given; then a summary, `Create the "<name>" context?`, `Select "<name>" as the current context?` unless `--use`, and `Log in now?`. Flags given are not asked. Every answer goes through the same checks and descriptor resolution as the flags, and nothing is written before the last question, so the result is what the equivalent command lines write. A name that is taken or illegal is refused before any question. Answering no at the summary, or cancelling with Ctrl+C, is `shell.cancelled` and writes nothing; input that ends before a required answer is `shell.missing_required_flag`. With `--output json` it asks only for the context and writes one result. Under `--no-input`, `WSO2_NO_INPUT`, or a standard input that is not a terminal, nothing is asked: a missing name is `shell.missing_argument`, and the flag rules below apply. |
+| `ws context create <name> [--login-product <product>] --url <url>` | Creates a context that logs in through an installed product that is a login provider (a descriptor naming a `provider`, such as `iam`). Without `--login-product` it is the one installed login provider, or `iam` when none is installed; with more than one installed, `--url` alone is refused with `shell.missing_required_flag`, since the URL could be either's. The descriptor fills in the issuer (the URL plus its `issuerPath`), the client (`--client-id` overrides), the provider (`--provider` overrides), and the login product's audience and scopes (`--audience`, `--scopes` override), and the complete record is written (frozen defaults, ADR 0016). A product that is not installed is installed first, reported on standard error; `--no-install` refuses instead with `shell.product_not_installed`. A product that is not a login provider is refused with `shell.invalid_argument`. `--device` makes it an `oauth-device` context and `--client-id <id> --client-secret-variable <VAR>` a `client-credentials` one, refused when the descriptor's `machine` list does not allow `inline`. `--organization` and `--project` set those members. The context's `credentialRef` is its name, or the name with a numeric suffix when another context already holds that reference. Nothing is selected unless `--use` is given. A name already declared is refused with `contexts.context_exists`, and an illegal one with `shell.invalid_argument` before anything is read. |
+| `ws context create <name> --issuer <url> --client-id <id>` | Creates a context that logs in through any OpenID provider directly, with no product installed and no product recorded yet: add them with `ws context product add`. `--provider asgardeo|identity-server` names the provider; `--provider thunder` is refused with `shell.conflicting_arguments`, because a ThunderID login is bound to a product and this form records none. Neither form, or both, is refused the same way. No network call is made besides an install. |
 | `ws context product add [<product>]` | Without `--url`, in a terminal, asks `Product:` (installed products the context does not record and that are not login providers, when no product is named), its URL, its gateway URL when it has one, and its client ID when its grant needs one; then shows the `--dry-run` report and asks `Add the <product> product?` before writing. With `--dry-run` or `--output json` the report is the only result and nothing more is asked. Declining is `shell.cancelled`. Under `--no-input`, `WSO2_NO_INPUT`, or a standard input that is not a terminal, nothing is asked: a missing product is `shell.missing_argument` and a missing `--url` `shell.missing_required_flag`. |
-| `ws context product add <product> --url <url>` | Records a product on the selected context, or the one `--context` names (the one `context` subcommand that takes the flag). The installed product's descriptor fills in the audience, scopes and grant; `--audience`, `--scopes` and `--client-id` override them, and a product whose module declares no descriptor is recorded exactly as given. `--url` and `--gateway` must be `https`, or plain `http` on a loopback host (`localhost`, `127.0.0.0/8`, `::1`); any other is refused with `shell.invalid_argument`, because the product's access token is sent there. `--gateway <url>` records the product's gateway beside it, its audience defaulting to the gateway URL for a product reached by exchange (`--gateway-audience` and `--gateway-scopes` override). A login provider whose issuer is not the context's is refused, naming `ws context create`. On a client-credentials context the descriptor's `machine` list decides whether the product is reached from the context's own client or needs `--client-id-variable`/`--client-secret-variable`. The login product is frozen before the product goes in, so a product that sorts earlier never moves the login. A product already recorded is refused with `contexts.product_exists` unless `--replace`, which replaces the whole record and first ends every session the new record no longer matches (its URL, audience or grant changed), with revocation best effort as ADR 0010 decides. `--dry-run` shows the record and the sessions that would end and writes nothing; for a product not installed yet it says what would be installed. A missing product is installed first unless `--no-install`. |
+| `ws context product add <product> --url <url>` | Records a product on the selected context, or the one `--context` names (the one `context` subcommand that takes the flag). The installed product's descriptor fills in the audience, scopes and grant; `--audience`, `--scopes` and `--client-id` override them, and a product whose module declares no descriptor is recorded exactly as given. `--gateway <url>` records the product's gateway beside it, its audience defaulting to the gateway URL for a product reached by exchange (`--gateway-audience` and `--gateway-scopes` override). A login provider whose issuer is not the context's is refused, naming `ws context create`. On a client-credentials context the descriptor's `machine` list decides whether the product is reached from the context's own client or needs `--client-id-variable`/`--client-secret-variable`. The login product is frozen before the product goes in, so a product that sorts earlier never moves the login. A product already recorded is refused with `contexts.product_exists` unless `--replace`, which replaces the whole record and first ends every session the new record no longer matches (its URL, audience or grant changed), with revocation best effort as ADR 0010 decides. `--dry-run` shows the record and the sessions that would end and writes nothing; for a product not installed yet it says what would be installed. A missing product is installed first unless `--no-install`. |
 | `ws context product remove <product>` | Stops the selected context (or `--context`) reaching a product. It drops the product's record, and the product's gateway record with it; `<product>/gateway` drops the gateway record alone. Every session the removal leaves nothing to reach is ended first, the way `ws logout` ends one, because the secure store cannot be listed and a session whose record is gone could never be ended again. Removing the login product is refused with `contexts.login_product`; a record the context does not hold with `contexts.unknown_product`, naming every record it does. `--dry-run` names what would be removed and ended. |
-| `ws context apply -f <file>` | Writes each context in a shared **input file** (`-f -` reads standard input). The file lists contexts only, each as short as the installed descriptors allow; it never names a `credentialRef` or a `defaultContext`, and unknown members are refused, all with `shell.input_malformed`. In order: the whole file is validated; the plan is made (products to install, products installed at a version other than a pinned `"version"`, and for each context create, replace with a field-by-field diff, or unchanged, plus the sessions that would end); `--dry-run` stops there; missing products are installed; defaults are resolved from the installed descriptors; the sessions whose bindings change are ended; and the document is written under its lock. A context in the file replaces the one of the same name whole, keeping its `credentialRef`; contexts the file does not name are kept. The selection changes only with `--use <name>`, which must name a context in the file. A product installed at another version than its pin is left as it is and reported, unless `--update-products`. `--no-install` installs nothing, and needs each product installed or stated in full. When an install fails after another succeeded, the successful ones stay installed and `contexts.json` is untouched; running the command again continues. |
+| `ws context apply -f <file>` | Writes each context in a shared **input file**, YAML or JSON (`-f -` reads standard input). The file lists contexts only, each as short as the installed descriptors allow; it never names a `credentialRef` or a `defaultContext`, and unknown members are refused, all with `shell.input_malformed`. In order: the whole file is validated; the plan is made (products to install, products installed at a version other than a pinned `"version"`, and for each context create, replace with a field-by-field diff, or unchanged, plus the sessions that would end); `--dry-run` stops there; missing products are installed; defaults are resolved from the installed descriptors; the sessions whose bindings change are ended; and the document is written under its lock. A context in the file replaces the one of the same name whole, keeping its `credentialRef`; contexts the file does not name are kept. The selection changes only with `--use <name>`, which must name a context in the file. A product installed at another version than its pin is left as it is and reported, unless `--update-products`. `--no-install` installs nothing, and needs each product installed or stated in full. When an install fails after another succeeded, the successful ones stay installed and `contexts.yaml` is untouched; running the command again continues. |
 | `ws context use <context>` | Selects the context used by default for later commands. |
 | `ws context list` | Lists the configured contexts with their type, issuer and products, marking the selected one, and says so when none is selected. |
 | `ws context current` | Shows the selected context. |
@@ -43,15 +43,16 @@ and how each refusal is reported.
 | `ws context rename <name> <new-name>` | Renames a context and keeps it selected if it was. Its `credentialRef` is a stable identifier that does not follow the name, so no session moves and no login is needed. |
 | `ws context delete <name>` | Deletes a context after ending every session under its `credentialRef` — the login session, each product's and each gateway's — so no secret is left in the secure store that no document names. Deleting the selected context leaves nothing selected. `--dry-run` names what would be ended. |
 | `ws context edit` | Opens the complete document in `$VISUAL` or `$EDITOR`, validates the result as a whole, refuses an invalid one (asking whether to edit again at a terminal) and leaves the file as it was, and ends the sessions a changed record no longer matches before writing. It takes complete records only; `ws context apply` is the way to write short ones. Refused with `shell.not_interactive` under `--no-input` or without a terminal, naming the file to edit directly. |
-| `ws context export [<name>]` | Prints contexts in the input-file form: complete records, so the file applies the same whatever product versions another machine has installed, with every `credentialRef` and the selection removed. |
-| Removed commands | `ws <product> connect …` and the `ws account` family were removed (ADR 0016). Typing one prints the exact replacement, built from the line typed, and exits in the usage class with `shell.command_moved`: `ws identity connect <url> --account demo` names `ws context create demo --login-product identity --url <url> --use`; `ws api connect <url> --gateway --account demo` names `ws context product add api --url <api-url> --gateway <url> --replace --context demo`, with the product's own URL left as a placeholder because the old line never named it; `ws account add-product <a> <p> --endpoint <u>` names `ws context product add <p> --url <u> --context <a>`; `ws account list` names `ws context show`. A redirect fires only after normal dispatch has declined the words, so a module that declares a `connect` command of its own is reached as usual. |
+| `ws context export [<name>]` | Prints contexts in the input-file form, as YAML (`--output json` for JSON): complete records, so the file applies the same whatever product versions another machine has installed, with every `credentialRef` and the selection removed. |
+| Removed commands | `ws <product> connect …` and the `ws account` family were removed (ADR 0016). Typing one prints the exact replacement, built from the line typed, and exits in the usage class with `shell.command_moved`: `ws identity connect <url> --account demo` names `ws context create demo --login-product iam --url <url> --use`; `ws api connect <url> --gateway --account demo` names `ws context product add apim --url <apim-url> --gateway <url> --replace --context demo`, with the product's own URL left as a placeholder because the old line never named it, and each retired product word (`api`, `identity`) answered with the namespace that replaced it (`apim`, `iam`); `ws account add-product <a> <p> --endpoint <u>` names `ws context product add <p> --url <u> --context <a>`; `ws account list` names `ws context show`; and `ws identity create`, `add-product` and `list`, the family's spelling before ADR 0016, are answered as the `ws account` verbs they were. A redirect fires only after normal dispatch has declined the words, so a module that declares a `connect` command of its own is reached as usual. |
 | `ws config` | With no subcommand, prints this family's help on standard output and exits 0: naming a family without a subcommand is an incomplete command, not a failed one, and every subcommand it names works. The help names `list`, `get`, `set` and `unset`. A subcommand the family does not have is a different case and is still refused with `shell.unknown_command` and the usage exit class (#133), so a typo is never reported to a script as success. |
 | `ws config list` | Built today: shows every key in the closed set of shell preferences — the default output mode and the catalog origin override — and whether each is currently configured. |
 | `ws config get <key>` | Built today: shows one shell preference. `key` must be one of `output`, `catalog-origin`; any other value is refused with `config.unknown_key`, naming the valid keys. |
 | `ws config set <key> <value>` | Built today: changes one shell preference. An unknown key is refused the same way `config get` refuses one; a value a key does not accept is refused with `config.invalid_value`, naming what is acceptable (`table` or `json` for `output`; an absolute http or https URL for `catalog-origin`). Each preference is the lowest-precedence source for what it governs: `--output` wins over a configured output mode, and `WSO2_CLI_CATALOG_ORIGIN` wins over a configured catalog origin — a saved preference can never override either. `output` governs exactly the commands that accept `--output`: `ws whoami`, `ws doctor`, `ws logout`, and the `context`, `config` and `org` families. It does not reach `ws version` or the `product` family, which render fixed prose and refuse `--output` with `shell.unsupported_flag`; a preference that silently did nothing for them would be a worse contract than a flag refused out loud. A colour preference is not in this set: `output.ColorEnabled` has no production caller yet, so a key that claimed to govern colour would change nothing observable; it is the obvious first key to add once something renders in colour. |
 | `ws config unset <key>` | Built today: removes one preference, so its built-in default governs again. Unsetting a key that was never set succeeds and reports the default that governs, since the config family already treats "unset" as a fact rather than an error. |
 | `ws product available` | Deprecated spelling of `ws product list`, which ADR 0015 merged it into. It is hidden from help, runs the merged list, and names `ws product list` on standard error. |
-| `ws product install <product>` | Installs the latest compatible stable release of a module. |
+| `ws module …` | Deprecated spelling of the `ws product` family, kept by ADR 0015. It is hidden from help, runs the same subcommand, and names `ws product` on standard error. |
+| `ws product install <product>` | Installs the latest compatible stable release of a module, or the latest on the channel `--channel <channel>` names, and records that channel as the one the module follows. |
 | `ws product install <product>@<version>` | Installs an exact compatible module version. |
 | `ws product list` | Lists every product the module catalog publishes or this machine has installed, in one table: the installed version or `—`, the channel, and the update available or the version an install would take. When the catalog cannot be reached, it lists the installed products with update `unknown`, warns on standard error that the updates and the installable products are unknown, and exits 0. |
 | `ws product update <product>` | Updates one product module. Naming a module is already an explicit target, so this does not prompt; `--dry-run` still reports what it would do without changing anything. A module the catalog publishes no version of on its followed channel — withdrawn, renamed, or moved to a channel this install no longer follows — is reported by name rather than called current, since the catalog cannot say whether the installed version is current when it does not publish the module at all; this does not change the exit status. |
@@ -110,11 +111,11 @@ parsing any output.
 An unrecognized problem category is reported as a module process failure, `70`,
 rather than as success.
 
-One command opts out of the `77` class on purpose: `ws reference status`
+One command opts out of the `77` class on purpose: `ws example status`
 reports a broker refusal as fields of its result and exits `0`, because
 whether access was granted is the question it exists to answer, and a report
 that cannot say "no" cannot answer it. A gate that must fail without access
-runs `ws reference call` or `ws reference whoami`, which keep the `77`
+runs `ws example call` or `ws example whoami`, which keep the `77`
 class for the same refusal.
 
 ## Non-interactive use
@@ -211,35 +212,35 @@ empty variable is not passed at all.
 
 ```text
 $ ws version
-WSO2 CLI          v0.1.0
-Protocol          v2, v1
-Platform          darwin/arm64
+WSO2 CLI   v0.1.0
+Protocol   v2, v1
+Platform   darwin/arm64
 
 Installed modules
-NAME          VERSION
-api           v0.9.0
-agent         v1.2.0
-integration   v0.4.0
+NAME   VERSION   PLATFORM
+am     v1.2.0    darwin/arm64
+apim   v0.9.0    darwin/arm64
+intg   v0.4.0    darwin/arm64
 ```
 
 ### Active context
 
 ```text
 $ ws whoami
-Context          cloud-us
-Issuer           https://api.asgardeo.io/t/acme/oauth2/token
-Organization     acme
-User ID          jane@example.com
-Session          present
-Session expiry   2026-11-15T09:00:00Z
+Context   cloud-us
+Email     jane@example.com
+Status    logged in
 ```
 
-`Session expiry` reads `not stated by the issuer` when the identity provider
-discloses no refresh-token lifetime, which is the common case and not an
-error; it is never the access token's own, much shorter, expiry. With no
-context selected, `ws whoami` says so and exits 0. With a context selected
-but no stored session, it names `ws login` instead of a `Session expiry`
-row. `--output json` renders the same facts as a JSON object.
+`Status` is `logged in`, `not logged in`, `session expired`, or `machine
+credentials, no login needed` for a client-credentials context. With no context
+selected, `ws whoami` says so and exits 0; with no stored session, it names
+`ws login` as the next step. `--output json` carries the detail the table
+leaves out: the issuer, organization, subject, session expiry, and each
+product's access and session. `sessionExpiry` reads `not stated by the issuer`
+when the identity provider discloses no refresh-token lifetime, which is the
+common case and not an error; it is never the access token's own, much shorter,
+expiry.
 
 ### First login against a self-hosted issuer
 
@@ -247,10 +248,9 @@ row. `--output json` renders the same facts as a JSON object.
 $ ws login --url https://idp.customer.example --client-id wso2-cli \
     --context customer
 
-Logged in to the "customer" context.
-User ID    ops
-Email      ops@customer.example
-Products   none configured
+Context   customer
+Email     ops@customer.example
+Status    logged in
 
 Created context "customer".
 It is the first context, so it is now the selected one.
@@ -260,9 +260,14 @@ No products are configured for this context. A self-hosted deployment is not dis
   ws context product add <product> --url <url> --context customer
 ```
 
-The authorization URL is written to the diagnostic stream, not to this one: it
-is an instruction to act on rather than the command's result, so a caller
-redirecting standard output still sees it.
+The login opens the browser and says so on the diagnostic stream, followed by
+`If the browser does not open, visit: <url>` with the authorization URL. The URL
+is printed every time, because an opener that starts cleanly may still show
+nothing (over SSH, on a headless machine, or under `WSO2_NO_BROWSER`); when no
+browser could be opened at all, the URL follows `Open this URL to log in:`
+instead. Either way the login can be finished from another machine. It is an
+instruction to act on rather than the command's result, so a caller redirecting
+standard output still sees it.
 
 ### Ending a session
 
@@ -279,6 +284,8 @@ Browser session    sign-out opened at https://api.asgardeo.io/t/acme/oauth2/toke
 The identity provider accepted the request to revoke this session's refresh token.
 
 Each identity provider's sign-out page was opened in the browser, so the next login prompts for credentials again.
+
+Only this context's sessions were ended. Ending the browser sign-on may also end other sessions the identity provider issued to you, depending on the provider.
 ```
 
 `Revocation` is `confirmed` when the identity provider accepted the request,
@@ -293,7 +300,7 @@ three happened. See
 ### Context
 
 ```text
-$ ws context apply -f team-context.json --use local
+$ ws context apply -f team-context.yaml --use local
 
 Applied the context file.
 
@@ -305,10 +312,10 @@ Sessions ending: none
 Next  Run `ws login`.
 
 $ ws context list
-CURRENT   CONTEXT   TYPE     ISSUER                  PRODUCTS       ORGANIZATION   PROJECT
-*         local     onprem   http://localhost:8501   api,identity
+CURRENT   CONTEXT   TYPE     ISSUER                  PRODUCTS   ORGANIZATION   PROJECT
+*         local     onprem   http://localhost:8501   apim,iam
 
-$ ws context create staging --login-product identity --url https://idp.staging.example
+$ ws context create staging --login-product iam --url https://idp.staging.example
 
 Created the "staging" context.
 
@@ -317,8 +324,8 @@ Type            onprem
 Login           oauth-browser
 Issuer          https://idp.staging.example
 Client ID       wso2-cli
-Login product   identity
-Products        identity
+Login product   iam
+Products        iam
 Organization
 Project
 Selected        no
@@ -330,7 +337,7 @@ Next  Run `ws context use staging`, then `ws login`. Add more products with `ws 
 
 ```text
 $ ws context show
-Path      /home/alex/.wso2/cli/contexts.json
+Path      /home/alex/.wso2/cli/contexts.yaml
 Written   yes
 
 Schema version: 4
@@ -338,13 +345,13 @@ Selected context: local
 
 Contexts
 CURRENT   NAME    TYPE     KIND            ISSUER                  LOGIN PRODUCT   CREDENTIAL SOURCE     ORGANIZATION   PROJECT
-*         local   onprem   oauth-browser   http://localhost:8501   identity        secure store: local
+*         local   onprem   oauth-browser   http://localhost:8501   iam             secure store: local
 
 Products
-LOGIN   CONTEXT   RECORD        URL                     AUDIENCE                     SCOPES   GRANT
-        local     api           http://localhost:9251   http://localhost:9251                 exchange
-        local     api/gateway   http://localhost:9091   http://localhost:9091
-*       local     identity      http://localhost:8501   https://localhost:8090/mcp   system
+LOGIN   CONTEXT   RECORD         URL                     AUDIENCE                     SCOPES   GRANT
+        local     apim           http://localhost:9251   http://localhost:9251                 exchange
+        local     apim/gateway   http://localhost:9091   http://localhost:9091
+*       local     iam            http://localhost:8501   https://localhost:8090/mcp   system
 ```
 
 On a machine nothing is set up on yet, the path is still reported, naming
@@ -352,7 +359,7 @@ what would need to change (`WSO2_HOME`) to point somewhere else:
 
 ```text
 $ ws context show
-Path      /home/alex/.wso2/cli/contexts.json
+Path      /home/alex/.wso2/cli/contexts.yaml
 Written   no
 
 No context document has been written yet.
@@ -364,19 +371,19 @@ Run ws context apply -f <file> --use <name> with the file your platform team sha
 
 ```text
 $ ws product list
-PRODUCT       INSTALLED   CHANNEL   UPDATE
-agent         v1.2.0      stable    v1.3.0 available
-api           v0.9.0      stable    current
-integration   v0.4.0      —         pinned to v0.4.0
-reference     —           stable    v0.1.0 to install
+PRODUCT     INSTALLED   CHANNEL   UPDATE
+am          v1.2.0      stable    v1.3.0 available
+apim        v0.9.0      stable    current
+intg        v0.4.0      —         pinned to v0.4.0
+iam         —           stable    v0.1.0 to install
 
 1 product has an update available. Run ws product update --all to take it.
 1 product is current.
 1 product is pinned and will not be updated.
-1 product is not installed. Run ws product install reference to install it.
+1 product is not installed. Run ws product install iam to install it.
 ```
 
-A product the catalog publishes that is not installed, such as `reference`
+A product the catalog publishes that is not installed, such as `iam`
 above, is a row of its own: INSTALLED shows `—`, CHANNEL the channel a plain
 install would follow, and UPDATE the version that install would take. A product
 published only on prerelease names that channel, and the install command
@@ -385,11 +392,11 @@ stable.
 
 CHANNEL names the channel a module follows for updates; it shows `—` for a
 module installed at an exact version with no channel chosen, such as
-`integration` above. A pin overrides the channel — it is what makes a pinned
+`intg` above. A pin overrides the channel — it is what makes a pinned
 prerelease installable without putting the module on that channel — so there
 is no channel to name while the pin holds, and the blank cell is not a
 prediction that the module would move to stable once unpinned: `ws product
-install integration` without `@<version>` records whatever channel that
+install intg` without `@<version>` records whatever channel that
 command names, stable by default, which need not be the channel the pinned
 version actually came from.
 

@@ -24,6 +24,8 @@ Short task documents.
   [ThunderID](guides/setup-thunder.md).
 - [Build a module](guides/build-module-quickstart.md): create, install, run,
   and release a product module.
+- [Design a CLI command](guides/command-design.md): command paths, naming,
+  help, and review checks for contributors.
 - [Set up the example module](guides/setup-example-module.md) locally.
 - [Troubleshoot a module](guides/troubleshoot-module.md).
 

@@ -47,8 +47,8 @@ The namespace is four things at once: the command users type (`ws abc`), the
 tag prefix (`abc/v1.0.0`), the program name (`wso2-module-abc`), and the
 environment variable prefix (`WSO2_ABC_*`). Renaming it later is a migration.
 The generator refuses names a shell command already owns, names another module
-declares, `example`, and anything that isn't lowercase letters and digits
-starting with a letter.
+declares, reserved or retired demonstration namespaces including `example`,
+and anything that isn't lowercase letters and digits starting with a letter.
 
 Checkpoint:
 

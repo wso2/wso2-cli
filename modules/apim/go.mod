@@ -1,10 +1,11 @@
-module github.com/wso2/wso2-cli/modules/reference
+module github.com/wso2/wso2-cli/modules/apim
 
-go 1.25.13
+go 1.25.0
 
 require (
 	github.com/spf13/cobra v1.10.2
 	github.com/wso2/wso2-cli/sdk v0.3.0
+	go.yaml.in/yaml/v3 v3.0.4
 )
 
 require (

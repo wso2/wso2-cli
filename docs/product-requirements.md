@@ -45,10 +45,10 @@ ws <product> <resource> <action> [flags]
 For example:
 
 ```shell
-ws api gateway list
-ws identity apps list
-ws integration component deploy --file integration.yaml
-ws agent projects list
+ws apim api list
+ws iam app list
+ws intg component deploy --file integration.yaml
+ws am project list
 ```
 
 Root commands manage capabilities shared across products:
@@ -160,7 +160,7 @@ Requirements are classified as:
 - **P1:** The shell can suggest installation when a known official namespace is
   not installed.
 
-The product namespaces are `identity`, `api`, `agent`, and `integration`
+The product namespaces are `iam`, `apim`, `am`, and `intg`
 ([ADR 0015](adr/0015-one-word-per-concept-in-the-command-surface.md)).
 
 ### 7.2 Authentication and credentials
@@ -354,11 +354,11 @@ Command surface:
 
 ```shell
 ws product list
-ws product install identity
-ws product install identity@0.2.0   # installs and pins
-ws product update identity
+ws product install iam
+ws product install iam@0.2.0   # installs and pins
+ws product update iam
 ws product update --all
-ws product remove identity
+ws product remove iam
 ```
 
 ### 7.7 Versions
@@ -470,7 +470,7 @@ tracked in [GitHub issues](https://github.com/wso2/wso2-cli/issues).
   optional conventions.
 - Artifacts are integrity-checked, not signed; process separation is not
   treated as a sandbox.
-- Product namespaces are `identity`, `api`, `agent`, and `integration`; the
+- Product namespaces are `iam`, `apim`, `am`, and `intg`; the
   shell's module commands are `ws product`, and one `ws product list`
   reports installed versions and available updates
   ([ADR 0015](adr/0015-one-word-per-concept-in-the-command-surface.md)).

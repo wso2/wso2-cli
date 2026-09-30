@@ -9,7 +9,9 @@ The commands below use `ws`, the default name of a released CLI.
 Install the example module from this checkout with the
 [local setup guide](setup-example-module.md). From the repository root, run
 `export PATH="$PWD/bin:$PATH"` in the same terminal so the `ws` commands below
-use that build. Keep the `WSO2_HOME` value from the local setup guide.
+use that build. The local setup guide removes its temporary store when it finishes. For these
+steps, set `WSO2_HOME` to a directory you want to keep and run
+`make install-module NAMESPACE=example` from the repository root.
 
 The linked Asgardeo documentation now uses WSO2 Identity Platform branding.
 Console labels may differ from those shown below.
@@ -82,31 +84,27 @@ The issuer must match the `issuer` value in
 `https://api.asgardeo.io/t/acme/oauth2/token/.well-known/openid-configuration`
 exactly.
 
-`ws context show` prints what was written. The stored context looks like
-this:
+`ws context show` summarizes what was written. In `contexts.yaml` the
+context looks like this:
 
-```json
-{
-  "name": "acme",
-  "type": "cloud",
-  "credentialRef": "acme",
-  "login": {
-    "kind": "oauth-browser",
-    "issuer": "https://api.asgardeo.io/t/acme/oauth2/token",
-    "clientId": "REPLACE_WITH_YOUR_CLIENT_ID",
-    "tenant": "acme",
-    "provider": "asgardeo",
-    "product": "example"
-  },
-  "organization": "acme",
-  "products": {
-    "example": {
-      "url": "https://api.asgardeo.io",
-      "audience": "REPLACE_WITH_YOUR_CLIENT_ID",
-      "scopes": ["example:status:read"]
-    }
-  }
-}
+```yaml
+name: acme
+type: cloud
+credentialRef: acme
+login:
+  kind: oauth-browser
+  issuer: https://api.asgardeo.io/t/acme/oauth2/token
+  clientId: REPLACE_WITH_YOUR_CLIENT_ID
+  tenant: acme
+  provider: asgardeo
+  product: example
+organization: acme
+products:
+  example:
+    url: https://api.asgardeo.io
+    audience: REPLACE_WITH_YOUR_CLIENT_ID
+    scopes:
+      - example:status:read
 ```
 
 ## 5. Log in and check
@@ -117,8 +115,9 @@ ws whoami
 ws example status
 ```
 
-`ws login` opens the browser. `ws whoami` shows `Session  present` once
-you're logged in. `ws logout` ends the session.
+`ws login` opens the browser and prints the authorization URL on standard
+error, so you can open it by hand if no browser appears. `ws whoami` shows
+`Status  logged in` once you're logged in. `ws logout` ends the session.
 
 To log in from a machine with no browser, enable the **Device Code** grant
 (step 1) and create the context with `--device`. `ws login` then prints a
@@ -147,8 +146,8 @@ CI uses a client-credentials context and doesn't run `ws login`.
    `WSO2_ACME_CI_SECRET` from your CI secret store, then run product commands
    directly.
 
-To share the context, `ws context export acme-ci > context.json` writes a
-file the job applies with `ws context apply -f context.json --use acme-ci`.
+To share the context, `ws context export acme-ci > context.yaml` writes a
+file the job applies with `ws context apply -f context.yaml --use acme-ci`.
 
 ## If login fails
 

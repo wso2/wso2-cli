@@ -61,7 +61,7 @@ func decodeLegacy(data []byte) (Document, error) {
 	var legacy legacyDocument
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	if err := decoder.Decode(&legacy); err != nil {
-		return Document{}, malformed("is not valid JSON")
+		return Document{}, malformed(notReadable)
 	}
 	if _, err := decoder.Token(); !errors.Is(err, io.EOF) {
 		return Document{}, malformed("contains more than one JSON document")
@@ -85,7 +85,7 @@ func decodeLegacy(data []byte) (Document, error) {
 		}
 		if candidate.Endpoint != "" {
 			context.Products = map[string]Product{
-				"reference": {Endpoint: candidate.Endpoint},
+				"example": {Endpoint: candidate.Endpoint},
 			}
 		}
 		document.Contexts = append(document.Contexts, context)

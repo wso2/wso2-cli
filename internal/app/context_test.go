@@ -219,12 +219,26 @@ func TestContextCreateWithAClientSecretVariableIsAMachineContext(t *testing.T) {
 	}
 }
 
+// A URL alone logs in through the one installed login product, so a person
+// setting up a Thunder context names where it runs and the client, and not a
+// product namespace they have no reason to know yet.
+func TestContextCreateWithAURLAloneLogsInThroughTheLoginProduct(t *testing.T) {
+	shell, _, _ := newContextShell(t)
+	mustRun(t, shell, "context", "create", "local", "--url", thunderURL, "--client-id", "demo-cli")
+
+	local := contextNamed(t, loadDocument(t, shell), "local")
+	want := contexts.Login{Kind: contexts.KindOAuthBrowser, Issuer: thunderURL, ClientID: "demo-cli",
+		Provider: contexts.ProviderThunder, Product: "iam"}
+	if local.Login != want {
+		t.Errorf("login = %+v, want %+v", local.Login, want)
+	}
+}
+
 func TestContextCreateRefusals(t *testing.T) {
 	cases := map[string]struct {
 		args []string
 		code string
 	}{
-		"a url alone":           {[]string{"--url", thunderURL}, "shell.missing_required_flag"},
 		"a login product alone": {[]string{"--login-product", "iam"}, "shell.missing_required_flag"},
 		"neither form":          {nil, "shell.missing_required_flag"},
 		"both forms": {[]string{"--login-product", "iam", "--url", thunderURL, "--issuer", thunderURL,
@@ -600,7 +614,7 @@ func TestEditWritesAValidChangeAndRefusesAnInvalidOne(t *testing.T) {
 	localSetup(t, shell)
 	shell.RunEditor = func(path string) error {
 		data, _ := os.ReadFile(path)
-		edited := strings.Replace(string(data), `"name": "local",`, `"name": "local", "project": "retail",`, 1)
+		edited := strings.Replace(string(data), "- name: local\n", "- name: local\n    project: retail\n", 1)
 		return os.WriteFile(path, []byte(edited), 0o600)
 	}
 	mustRun(t, shell, "context", "edit")
@@ -610,7 +624,7 @@ func TestEditWritesAValidChangeAndRefusesAnInvalidOne(t *testing.T) {
 	before, _ := os.ReadFile(contexts.Path(shell.StateRoot))
 	shell.RunEditor = func(path string) error {
 		data, _ := os.ReadFile(path)
-		return os.WriteFile(path, []byte(strings.Replace(string(data), `"kind": "oauth-browser"`, `"kind": "password"`, 1)), 0o600)
+		return os.WriteFile(path, []byte(strings.Replace(string(data), "kind: oauth-browser", "kind: password", 1)), 0o600)
 	}
 	code, _, errOut := run(t, shell, "context", "edit")
 	if code != exit.Usage {
@@ -645,10 +659,18 @@ func TestRemovedCommandsNameTheirReplacement(t *testing.T) {
 		"account rename":         {[]string{"account", "rename", "demo", "local"}, "wso2 context rename demo local"},
 		"login provider connect": {[]string{"iam", "connect", thunderURL, "--account", "demo"},
 			"wso2 context create demo --login-product iam --url " + thunderURL + " --use"},
+		"the retired identity namespace's connect": {[]string{"identity", "connect", thunderURL, "--account", "demo"},
+			"wso2 context create demo --login-product iam --url " + thunderURL + " --use"},
 		"product connect": {[]string{"api", "connect", apiURL, "--account", "demo"},
-			"wso2 context product add api --url " + apiURL + " --context demo"},
+			"wso2 context product add apim --url " + apiURL + " --context demo"},
 		"gateway connect": {[]string{"api", "connect", apiGatewayURL, "--gateway", "--account", "demo"},
-			"wso2 context product add api --url <api-url> --gateway " + apiGatewayURL + " --replace --context demo"},
+			"wso2 context product add apim --url <apim-url> --gateway " + apiGatewayURL + " --replace --context demo"},
+		"connect under the current namespace": {[]string{"apim", "connect", apiURL},
+			"wso2 context product add apim --url " + apiURL},
+		"account create under the retired identity product": {[]string{"account", "create", "demo", "--product", "identity", "--endpoint", thunderURL},
+			"wso2 context create demo --login-product iam --url " + thunderURL},
+		"account add-product of the retired api product": {[]string{"account", "add-product", "demo", "api", "--endpoint", apiURL},
+			"wso2 context product add apim --url " + apiURL + " --context demo"},
 		"connect under an uninstalled namespace": {[]string{"orders", "connect", "https://o.example"},
 			"wso2 context product add orders --url https://o.example"},
 		"the identity verbs ADR 0015 moved": {[]string{"identity", "list"}, "wso2 context show"},
@@ -798,7 +820,7 @@ func TestEveryContextSubcommandRendersJSON(t *testing.T) {
 		"delete":         {"context", "delete", "beta", "--output", "json"},
 		"product add":    {"context", "product", "add", "reference", "--url", "https://r.example", "--output", "json"},
 		"product remove": {"context", "product", "remove", "orders", "--output", "json"},
-		"export":         {"context", "export"},
+		"export":         {"context", "export", "--output", "json"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			shell, out, errOut := newContextShell(t)
@@ -1128,7 +1150,7 @@ func TestAnEarlierDocumentIsUpgradedOnceWithANoticeWhenSessionsMove(t *testing.T
 	if strings.Contains(errOut, "Upgraded") {
 		t.Errorf("the upgrade was reported twice:\n%s", errOut)
 	}
-	if !strings.Contains(string(mustReadFile(t, path)), `"schemaVersion": 4`) {
+	if !strings.Contains(string(mustReadFile(t, contexts.Path(shell.StateRoot))), "schemaVersion: 4\n") {
 		t.Error("the document was not rewritten")
 	}
 }

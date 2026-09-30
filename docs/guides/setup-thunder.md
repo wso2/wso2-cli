@@ -9,14 +9,16 @@ The commands below use `ws`, the default name of a released CLI.
 Install the example module from this checkout with the
 [local setup guide](setup-example-module.md). From the repository root, run
 `export PATH="$PWD/bin:$PATH"` in the same terminal so the `ws` commands below
-use that build. Keep the `WSO2_HOME` value from the local setup guide.
+use that build. The local setup guide removes its temporary store when it finishes. For these
+steps, set `WSO2_HOME` to a directory you want to keep and run
+`make install-module NAMESPACE=example` from the repository root.
 
 ThunderID differs from Asgardeo and Identity Server in three ways:
 
 - The issuer is the bare origin, `https://localhost:8090`.
 - A product's audience is a resource server identifier, which must be an
   absolute URI.
-- The context must set `"provider": "thunder"`. There is no device-code login.
+- The context must set `provider: thunder`. There is no device-code login.
 
 ## 1. Run a server
 
@@ -81,45 +83,38 @@ Without the role, login works but every token is refused.
 
 ## 6. Create the context
 
-Save this as `thunder-local.json`, then apply it with the command below:
+Save this as `thunder-local.yaml`, then apply it with the command below:
 
-```json
-{
-  "contexts": [
-    {
-      "name": "thunder-local",
-      "type": "onprem",
-      "login": {
-        "kind": "oauth-browser",
-        "provider": "thunder",
-        "issuer": "https://localhost:8090",
-        "clientId": "REPLACE_WITH_YOUR_CLIENT_ID",
-        "product": "example"
-      },
-      "products": {
-        "example": {
-          "url": "https://localhost:8090",
-          "audience": "https://localhost:8090/example-status",
-          "scopes": ["example:status:read"]
-        }
-      }
-    }
-  ]
-}
+```yaml
+contexts:
+  - name: thunder-local
+    type: onprem
+    login:
+      kind: oauth-browser
+      provider: thunder
+      issuer: https://localhost:8090
+      clientId: REPLACE_WITH_YOUR_CLIENT_ID
+      product: example
+    products:
+      example:
+        url: https://localhost:8090
+        audience: https://localhost:8090/example-status
+        scopes:
+          - example:status:read
 ```
 
 ```sh
-ws context apply -f thunder-local.json --no-install --use thunder-local
+ws context apply -f thunder-local.yaml --no-install --use thunder-local
 ```
 
-The CLI stores it with `"credentialRef": "thunder-local"`; `ws context show`
-prints it.
+The CLI stores it with `credentialRef: thunder-local`; `ws context show`
+summarizes it.
 
-If the `identity` product is installed, `ws context create` can build the
+If the `iam` product is installed, `ws context create` can build the
 login from its descriptor instead:
 
 ```sh
-ws context create thunder-local --login-product identity \
+ws context create thunder-local --login-product iam \
   --url https://localhost:8090 --use
 ws context product add example --url https://localhost:8090 \
   --audience https://localhost:8090/example-status \
@@ -139,8 +134,9 @@ ws whoami
 ws example status
 ```
 
-`ws whoami` shows `Session  present` once you're logged in.
-`ws logout` ends the session.
+`ws login` opens the browser and prints the authorization URL on standard
+error, so you can open it by hand if no browser appears. `ws whoami` shows
+`Status  logged in` once you're logged in. `ws logout` ends the session.
 
 ## CI
 
@@ -148,37 +144,30 @@ ws example status
    **Grant Types** to `client_credentials`, turn **Public Client** off, set
    **Client Authentication Method** to `client_secret_basic`, and record the
    client ID and secret.
-2. Save and apply this context file. Keep `"provider": "thunder"`, because
+2. Save and apply this context file. Keep `provider: thunder`, because
    ThunderID refuses a client-credentials grant that names no resource server.
 
-   ```json
-   {
-     "contexts": [
-       {
-         "name": "thunder-ci",
-         "type": "onprem",
-         "login": {
-           "kind": "client-credentials",
-           "provider": "thunder",
-           "issuer": "https://localhost:8090",
-           "clientId": "REPLACE_WITH_YOUR_CI_CLIENT_ID",
-           "clientSecretVariable": "WSO2_THUNDER_CI_SECRET"
-         },
-         "products": {
-           "example": {
-             "url": "https://localhost:8090",
-             "audience": "https://localhost:8090/example-status",
-             "scopes": ["example:status:read"]
-           }
-         }
-       }
-     ]
-   }
+   ```yaml
+   contexts:
+     - name: thunder-ci
+       type: onprem
+       login:
+         kind: client-credentials
+         provider: thunder
+         issuer: https://localhost:8090
+         clientId: REPLACE_WITH_YOUR_CI_CLIENT_ID
+         clientSecretVariable: WSO2_THUNDER_CI_SECRET
+       products:
+         example:
+           url: https://localhost:8090
+           audience: https://localhost:8090/example-status
+           scopes:
+             - example:status:read
    ```
 
 3. In the job, set `WSO2_NO_INPUT=1`, `WSO2_CA_FILE`, and
    `WSO2_THUNDER_CI_SECRET`, run
-   `ws context apply -f thunder-ci.json --use thunder-ci`, then run product
+   `ws context apply -f thunder-ci.yaml --use thunder-ci`, then run product
    commands. Don't run `ws login`.
 
 ## If login fails
@@ -187,7 +176,7 @@ ws example status
 | --- | --- |
 | `auth.certificate_untrusted` | Set `WSO2_CA_FILE` (step 2). |
 | `auth.discovery_failed` | The issuer must be the bare origin, and the port must match what the server advertises. |
-| `auth.narrowing_unavailable` about a protected resource | Add `"provider": "thunder"` to the context's `login` block (`ws context edit`). |
+| `auth.narrowing_unavailable` about a protected resource | Add `provider: thunder` to the context's `login` block (`ws context edit`). |
 | `auth.narrowing_unavailable` about permissions | The user has no role with the permissions (step 5). |
 | `auth.product_not_configured` with `invalid_target` | The audience isn't a registered resource server identifier (step 3). |
 | `shell.invalid_argument` or `contexts.document_malformed` about the audience | The audience must be an absolute URI. |

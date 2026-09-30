@@ -10,7 +10,9 @@ The commands below use `ws`, the default name of a released CLI.
 Install the example module from this checkout with the
 [local setup guide](setup-example-module.md). From the repository root, run
 `export PATH="$PWD/bin:$PATH"` in the same terminal so the `ws` commands below
-use that build. Keep the `WSO2_HOME` value from the local setup guide.
+use that build. The local setup guide removes its temporary store when it finishes. For these
+steps, set `WSO2_HOME` to a directory you want to keep and run
+`make install-module NAMESPACE=example` from the repository root.
 
 ## 1. Run a server
 
@@ -103,29 +105,25 @@ ws context product add example --url https://localhost:9443 \
 The issuer must match the `issuer` value in
 `https://localhost:9443/oauth2/token/.well-known/openid-configuration` exactly.
 
-`ws context show` prints what was written. The stored context looks like
-this:
+`ws context show` summarizes what was written. In `contexts.yaml` the
+context looks like this:
 
-```json
-{
-  "name": "is-local",
-  "type": "onprem",
-  "credentialRef": "is-local",
-  "login": {
-    "kind": "oauth-browser",
-    "issuer": "https://localhost:9443/oauth2/token",
-    "clientId": "REPLACE_WITH_YOUR_CLIENT_ID",
-    "provider": "identity-server",
-    "product": "example"
-  },
-  "products": {
-    "example": {
-      "url": "https://localhost:9443",
-      "audience": "example-status",
-      "scopes": ["example:status:read"]
-    }
-  }
-}
+```yaml
+name: is-local
+type: onprem
+credentialRef: is-local
+login:
+  kind: oauth-browser
+  issuer: https://localhost:9443/oauth2/token
+  clientId: REPLACE_WITH_YOUR_CLIENT_ID
+  provider: identity-server
+  product: example
+products:
+  example:
+    url: https://localhost:9443
+    audience: example-status
+    scopes:
+      - example:status:read
 ```
 
 ## 7. Log in and check
@@ -136,8 +134,9 @@ ws whoami
 ws example status
 ```
 
-`ws login` opens the browser. `ws whoami` shows `Session  present` once
-you're logged in. `ws logout` ends the session.
+`ws login` opens the browser and prints the authorization URL on standard
+error, so you can open it by hand if no browser appears. `ws whoami` shows
+`Status  logged in` once you're logged in. `ws logout` ends the session.
 
 To log in from a machine with no browser, enable the **Device Code** grant
 (step 3) and create the context with `--device`.

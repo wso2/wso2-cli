@@ -19,15 +19,15 @@ one means and what refuses when it is wrong.
 ```json
 {
   "schemaVersion": 1,
-  "namespace": "api",
-  "title": "API Platform",
+  "namespace": "iam",
+  "title": "Identity",
   "compatibility": {
     "shell": ">=0.1.0 <2.0.0",
     "protocolVersions": [2]
   },
   "capabilities": {
-    "authAudiences": ["api.example.com"],
-    "authScopes": ["api:read"],
+    "authAudiences": ["identity-management"],
+    "authScopes": ["system"],
     "product": {
       "provider": "thunder",
       "clientId": "wso2-cli",
@@ -68,9 +68,9 @@ letters, digits, or hyphens.
 The same rule is applied by the shell and by catalog generation, so a namespace
 the shell would refuse cannot be published. `make new-module` applies a
 deliberately tighter one, refusing hyphens, and also refuses a namespace another
-module declares, a namespace a shell command owns, and the reserved `reference`
-namespace. Those extra refusals belong to the generator rather than to the
-format: a hyphenated namespace in a hand-written manifest is valid here.
+module declares, a namespace a shell command owns, and reserved or retired
+demonstration namespaces, including `example`. Those extra refusals belong
+to the generator rather than to the format: a hyphenated namespace in a hand-written manifest is valid here.
 
 The namespace appears in five places and must agree in all of them: this field,
 `module.Options`, the executable name, the directory under `modules/`, and the
@@ -79,7 +79,7 @@ release tag prefix.
 ## `title`
 
 The product's short name, printed beside the namespace on the shell's root help
-page: `API Platform` for `api`. It is optional, and `make new-module` writes the
+page: `API Platform` for `apim`. It is optional, and `make new-module` writes the
 namespace with an initial capital as a placeholder.
 
 Catalog generation copies it into `index.json`, and each shell release carries a
@@ -106,8 +106,9 @@ a new module is expected to support, not because anything measured it.
 The shell checks this on **every launch**, against its own version, and refuses
 with `modules.incompatible_shell` when it does not hold. Catalog selection does
 not check it, so a module can install successfully and then refuse to launch.
-That gap is why a shell built from a checkout, which reports `0.0.0-dev`, cannot
-launch a module declaring `>=0.1.0`: a prerelease sorts below its own release.
+That gap is why a shell built from a checkout with a plain `go build`, which
+reports `0.0.0-dev`, cannot launch a module declaring `>=0.1.0`: a prerelease
+sorts below its own release. `make build` injects `1.0.0-dev` to avoid it.
 See [troubleshooting](../guides/troubleshoot-module.md).
 
 The release gate refuses a range it cannot parse, naming the module, rather than
