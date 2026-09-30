@@ -1322,5 +1322,25 @@
    {
       "id": "you do not have access to organization %s",
       "translation": "you do not have access to organization %s"
+   },
+   {
+      "id": "Create a new integration in your project. Supported types: Automation, API, AI Agent, MCP Server, Event Integration, File Integration. Buildpacks: ballerina, microintegrator.",
+      "translation": "Create a new integration in your project. Supported types: Automation, API, AI Agent, MCP Server, Event Integration, File Integration. Buildpacks: ballerina, microintegrator."
+   },
+   {
+      "id": "invalid integration type '%s'. It must be one of: %s",
+      "translation": "invalid integration type '%s'. It must be one of: %s"
+   },
+   {
+      "id": "Note: type \"%s\" is deprecated, use \"%s\" instead.\n",
+      "translation": "Note: type \"%s\" is deprecated, use \"%s\" instead.\n"
+   },
+   {
+      "id": "start the JSON-RPC server",
+      "translation": "start the JSON-RPC server"
+   },
+   {
+      "id": "Start the JSON-RPC bridge the editor extensions drive the CLI through.",
+      "translation": "Start the JSON-RPC bridge the editor extensions drive the CLI through."
    }
 ]

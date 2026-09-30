@@ -223,15 +223,22 @@ func HandleComponentCreate(params *CreateComponentParams, buildFlagsGiven bool, 
 		return err
 	}
 
-	// get the component type input
+	// get the integration type input
 	if params.ComponentType == "" {
 		err := prompt.NewPromptSelectMessage(
-			prompt.PromptSelectOpts[string]{Message: "Type:", Values: component.ComponentTypes},
+			prompt.PromptSelectOpts[string]{Message: "Type:", Values: component.IntegrationTypes},
 			&params.ComponentType,
 		).Prompt()
 		if err != nil {
 			return err
 		}
+	}
+
+	// Everything from here on -- the build-pack listing, the config keys, the
+	// create request -- speaks the platform's component vocabulary, so the
+	// integration type is translated once, here.
+	if err = resolveIntegrationType(params); err != nil {
+		return err
 	}
 
 	selectedBuildPack, err := resolveBuildPackInput(org, params)

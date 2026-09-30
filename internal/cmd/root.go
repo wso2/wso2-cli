@@ -23,6 +23,7 @@ import (
 	i18n "github.com/wso2/integration-platform-tools/i18n/impl"
 	"github.com/wso2/integration-platform-tools/internal/clirpc"
 	"github.com/wso2/integration-platform-tools/internal/cmd/auth"
+	"github.com/wso2/integration-platform-tools/internal/cmd/common"
 	connect "github.com/wso2/integration-platform-tools/internal/cmd/connect"
 	ctxCmd "github.com/wso2/integration-platform-tools/internal/cmd/context/set"
 	envCmd "github.com/wso2/integration-platform-tools/internal/cmd/env"
@@ -181,4 +182,15 @@ func init() {
 
 	// Please update the help template manually whenever adding/removing root level commands
 	rootCmd.SetHelpTemplate(getHelpTemplate(rootCmd))
+
+	// The root help template is inherited by every subcommand that does not set
+	// its own help func, which would make `completion --help` print the root
+	// help instead of the shell-script usage. Realise the command now so it can
+	// be given one.
+	rootCmd.InitDefaultCompletionCmd()
+	for _, c := range rootCmd.Commands() {
+		if c.Name() == "completion" {
+			common.AddGenericHelper(c)
+		}
+	}
 }

@@ -99,6 +99,42 @@ func verifyConfigList(configList []string, params *CreateComponentParams) error 
 	return nil
 }
 
+// resolveIntegrationType turns the user-facing integration type held in
+// params.ComponentType into the platform component type and component subtype
+// the rest of the create path works with. An AI Agent and an MCP Server are
+// both `service` components, and a File Integration is an `eventHandler`, so
+// the type alone is not enough to identify what to create.
+//
+// The platform component types the --type flag took before (service,
+// scheduleTask, eventHandler) still resolve, with a notice, so existing
+// scripts keep working.
+func resolveIntegrationType(params *CreateComponentParams) error {
+	integrationType, ok := component.MatchIntegrationType(params.ComponentType)
+	if !ok {
+		return fmt.Errorf(
+			i18n.T("invalid integration type '%s'. It must be one of: %s"),
+			params.ComponentType, strings.Join(component.IntegrationTypes, ", "),
+		)
+	}
+
+	if component.IsLegacyComponentTypeSpelling(params.ComponentType) {
+		utils.PrintError(
+			i18n.T("Note: type \"%s\" is deprecated, use \"%s\" instead.\n"),
+			params.ComponentType, integrationType,
+		)
+	}
+
+	componentType, componentSubType, err := component.ResolveIntegrationType(integrationType)
+	if err != nil {
+		return err
+	}
+
+	params.ComponentType = componentType
+	params.ComponentSubType = componentSubType
+
+	return nil
+}
+
 func promptToSelectBuildPack(buildPacks []devops.BuildPack) (string, error) {
 	var selectedBuildPackName string
 	var buildPackNames []string
@@ -413,7 +449,7 @@ func GetComponentKindForCreate(
 	}
 
 	subType := params.ComponentSubType
-	if subType == "fileIntegration" {
+	if subType == component.ComponentSubTypeFileIntegration {
 		if params.BuildPack == component.ComponentBuildPackBallerina && displayType == component.DisplayTypeBallerinaEventHandler {
 			subType = "ballerinaFileIntegration"
 		} else if params.BuildPack == component.ComponentBuildPackMI && displayType == component.DisplayTypeMiEventHandler {

@@ -21,6 +21,65 @@ const (
 	MountTypeEnv        = "env variable"
 )
 
+// The wire values for a config's type and mount type read as prose -- "env
+// variable" carries a space -- which is awkward to type behind a flag. These
+// matchers take what a person actually writes ("env-variables", "file-mount",
+// "ConfigMap") and return the value the API expects, so the flag and the
+// prompt agree on what counts as a valid answer.
+var configTypeAliases = map[string]string{
+	"configmap": ConfigTypeConfigMap,
+	"map":       ConfigTypeConfigMap,
+	"secret":    ConfigTypeSecret,
+}
+
+var mountTypeAliases = map[string]string{
+	"envvariable":  MountTypeEnv,
+	"envvariables": MountTypeEnv,
+	"envvars":      MountTypeEnv,
+	"env":          MountTypeEnv,
+	"filemount":    MountTypeFile,
+	"filemounts":   MountTypeFile,
+	"file":         MountTypeFile,
+}
+
+// MatchConfigType canonicalizes a --type value onto ConfigTypes.
+func MatchConfigType(input string) (string, bool) {
+	return matchOption(input, ConfigTypes, configTypeAliases)
+}
+
+// MatchMountType canonicalizes a --mount-type value onto MountTypes.
+func MatchMountType(input string) (string, bool) {
+	return matchOption(input, MountTypes, mountTypeAliases)
+}
+
+func matchOption(input string, options []string, aliases map[string]string) (string, bool) {
+	normalized := normalizeOption(input)
+	if normalized == "" {
+		return "", false
+	}
+	for _, option := range options {
+		if normalizeOption(option) == normalized {
+			return option, true
+		}
+	}
+	if canonical, ok := aliases[normalized]; ok {
+		return canonical, true
+	}
+	return "", false
+}
+
+// normalizeOption reduces a value to its letters and digits, lowercased, so
+// that spacing, casing and separators do not matter on input.
+func normalizeOption(value string) string {
+	var b strings.Builder
+	for _, r := range strings.ToLower(value) {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') {
+			b.WriteRune(r)
+		}
+	}
+	return b.String()
+}
+
 func AddEnvVarsFlag(cmdFlags *pflag.FlagSet) {
 	cmdFlags.String("env-vars", "", i18n.T(`list of env variables (eg: --env-vars="key1=val1,key2=val2")`))
 }

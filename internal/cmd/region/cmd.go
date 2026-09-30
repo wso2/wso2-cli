@@ -2,6 +2,7 @@ package region
 
 import (
 	"fmt"
+	"github.com/wso2/integration-platform-tools/internal/cmd/common"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/spf13/cobra"
@@ -53,4 +54,8 @@ var RegionCommand = &cobra.Command{
 
 		fmt.Printf("Successfully switched to %s region\n", newRegion)
 	},
+}
+
+func init() {
+	common.AddGenericHelper(RegionCommand)
 }

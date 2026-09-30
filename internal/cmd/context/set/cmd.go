@@ -114,6 +114,7 @@ func HandleSetCtx(params CtxSetOpts) error {
 }
 
 func init() {
+	common.AddGenericHelper(SetCtxCmd)
 	common.AddOrgFlag(SetCtxCmd.Flags(), &ctxSetOpts.Org)
 	common.AddProjectFlag(SetCtxCmd.Flags(), &ctxSetOpts.Project)
 }

@@ -71,33 +71,28 @@ func validateConfigMountPath(pathStr string) error {
 }
 
 func resolveMountType(mountType *string) error {
-	if *mountType == "" || !strings.Contains(strings.Join(common.MountTypes, ","), *mountType) {
-		err := prompt.NewPromptSelectMessage[string](
-			prompt.PromptSelectOpts[string]{Message: i18n.T("Mount Type:"), Values: common.MountTypes},
-			mountType,
-		).Prompt()
-
-		if err != nil {
-			return err
-		}
+	if canonical, ok := common.MatchMountType(*mountType); ok {
+		*mountType = canonical
+		return nil
 	}
 
-	return nil
+	// Unset, or something that names no mount type: ask rather than guess.
+	return prompt.NewPromptSelectMessage[string](
+		prompt.PromptSelectOpts[string]{Message: i18n.T("Mount Type:"), Values: common.MountTypes},
+		mountType,
+	).Prompt()
 }
 
 func resolveConfigType(configType *string) error {
-	if *configType == "" || !strings.Contains(strings.Join(common.ConfigTypes, ","), *configType) {
-		err := prompt.NewPromptSelectMessage[string](
-			prompt.PromptSelectOpts[string]{Message: i18n.T("Config type:"), Values: common.ConfigTypes},
-			configType,
-		).Prompt()
-
-		if err != nil {
-			return err
-		}
+	if canonical, ok := common.MatchConfigType(*configType); ok {
+		*configType = canonical
+		return nil
 	}
 
-	return nil
+	return prompt.NewPromptSelectMessage[string](
+		prompt.PromptSelectOpts[string]{Message: i18n.T("Config type:"), Values: common.ConfigTypes},
+		configType,
+	).Prompt()
 }
 
 func resolveConfigMountPath(configMountPath *string) error {

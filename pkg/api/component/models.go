@@ -464,6 +464,10 @@ const (
 	// ComponentSubTypeAiAgent refines a service into an AI Agent. It affects the
 	// reported kind only — membership already comes from the service displayType.
 	ComponentSubTypeAiAgent = "aiAgent"
+	// ComponentSubTypeFileIntegration refines an event handler into a File
+	// Integration. It is sent on create and resolved to the buildpack-specific
+	// ballerinaFileIntegration / miFileIntegration before the request goes out.
+	ComponentSubTypeFileIntegration = "fileIntegration"
 )
 
 // IsIntegrationComponent reports whether a component is an integration.
@@ -488,22 +492,22 @@ func IsIntegrationComponent(displayType, componentSubType string) bool {
 func IntegrationKind(displayType, componentSubType string) string {
 	switch componentSubType {
 	case ComponentSubTypeAiAgent:
-		return "AI Agent"
+		return IntegrationTypeAIAgent
 	case ComponentSubTypeMCP:
-		return "MCP Server"
+		return IntegrationTypeMCPServer
 	case DisplayTypeBallerinaFileIntegration, DisplayTypeMiFileIntegration:
-		return "File Integration"
+		return IntegrationTypeFileIntegration
 	}
 	switch displayType {
 	case DisplayTypeBallerinaFileIntegration, DisplayTypeMiFileIntegration:
-		return "File Integration"
+		return IntegrationTypeFileIntegration
 	case DisplayTypeScheduledTask, DisplayTypeMiCronjob, DisplayTypeManualTrigger, DisplayTypeMiJob:
-		return "Automation"
+		return IntegrationTypeAutomation
 	case DisplayTypeMiEventHandler, DisplayTypeBallerinaEventHandler,
 		DisplayTypeWebhook, DisplayTypeMiWebhook, DisplayTypeBallerinaWebhook:
-		return "Event Integration"
+		return IntegrationTypeEventIntegration
 	}
-	return "API"
+	return IntegrationTypeAPI
 }
 
 type ComponentKindSource struct {

@@ -1,56 +1,31 @@
 package integration
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/wso2/integration-platform-tools/pkg/api/component"
 )
 
-// Integration subtypes exposed by the MCP server. Each maps to an underlying
-// Platform component type (and, where the same component type is shared by
-// multiple subtypes, a component subtype) so that callers only ever see
-// integration vocabulary.
+// Integration subtypes exposed by the MCP server. They are the platform's
+// integration types, defined once in pkg/api/component and shared with the CLI
+// so both surfaces offer the same six and map them the same way.
 const (
-	SubtypeAutomation       = "Automation"
-	SubtypeAPI              = "API"
-	SubtypeAIAgent          = "AI Agent"
-	SubtypeMCPServer        = "MCP Server"
-	SubtypeEventIntegration = "Event Integration"
-	SubtypeFileIntegration  = "File Integration"
+	SubtypeAutomation       = component.IntegrationTypeAutomation
+	SubtypeAPI              = component.IntegrationTypeAPI
+	SubtypeAIAgent          = component.IntegrationTypeAIAgent
+	SubtypeMCPServer        = component.IntegrationTypeMCPServer
+	SubtypeEventIntegration = component.IntegrationTypeEventIntegration
+	SubtypeFileIntegration  = component.IntegrationTypeFileIntegration
 )
 
 // Subtypes is the exhaustive, ordered list of integration subtypes the MCP
 // server can create. No other platform component type is reachable through it.
-var Subtypes = []string{
-	SubtypeAutomation,
-	SubtypeAPI,
-	SubtypeAIAgent,
-	SubtypeMCPServer,
-	SubtypeEventIntegration,
-	SubtypeFileIntegration,
-}
+var Subtypes = component.IntegrationTypes
 
-type subtypeMapping struct {
-	componentType    string
-	componentSubType string
-}
-
-var subtypeMappings = map[string]subtypeMapping{
-	SubtypeAutomation:       {component.ComponentTypeScheduledTask, ""},
-	SubtypeAPI:              {component.ComponentTypeService, ""},
-	SubtypeAIAgent:          {component.ComponentTypeService, "aiAgent"},
-	SubtypeMCPServer:        {component.ComponentTypeService, "MCP"},
-	SubtypeEventIntegration: {component.ComponentTypeEventHandler, ""},
-	SubtypeFileIntegration:  {component.ComponentTypeEventHandler, "fileIntegration"},
-}
+var subtypeMappings = component.IntegrationTypeMappings
 
 // ResolveSubtype maps an integration subtype to the underlying platform
-// component type and component subtype to send on create.
+// component type and component subtype to send on create. The match is exact:
+// an agent passing an unrecognized or mis-cased value is told what the six are
+// rather than having one guessed for it.
 func ResolveSubtype(subtype string) (componentType string, componentSubType string, err error) {
-	mapping, ok := subtypeMappings[subtype]
-	if !ok {
-		return "", "", fmt.Errorf("unsupported integration subtype %q: must be one of %s", subtype, strings.Join(Subtypes, ", "))
-	}
-	return mapping.componentType, mapping.componentSubType, nil
+	return component.ResolveIntegrationType(subtype)
 }

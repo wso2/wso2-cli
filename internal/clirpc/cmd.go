@@ -2,6 +2,8 @@ package clirpc
 
 import (
 	"github.com/spf13/cobra"
+	i18n "github.com/wso2/integration-platform-tools/i18n/impl"
+	"github.com/wso2/integration-platform-tools/internal/cmd/common"
 	// load the project handlers
 	_ "github.com/wso2/integration-platform-tools/internal/clirpc/api/apim"
 	_ "github.com/wso2/integration-platform-tools/internal/clirpc/api/auth"
@@ -22,7 +24,9 @@ var cmdOpts = struct {
 }{}
 
 var RPCCmd = &cobra.Command{
-	Use: "start-rpc-server",
+	Use:   "start-rpc-server",
+	Short: i18n.T("start the JSON-RPC server"),
+	Long:  i18n.T("Start the JSON-RPC bridge the editor extensions drive the CLI through."),
 	Run: func(cmd *cobra.Command, args []string) {
 		// Start the RPC server
 		if v := cmd.Parent().Version; v != "" {
@@ -40,6 +44,7 @@ var RPCCmd = &cobra.Command{
 }
 
 func init() {
+	common.AddGenericHelper(RPCCmd)
 	RPCCmd.Flags().StringVar(&cmdOpts.method, "method", "", "Method to call")
 	RPCCmd.Flags().StringVar(&cmdOpts.params, "params", "", "Parameters to pass to the method")
 	RPCCmd.Flags().MarkHidden("method")

@@ -70,3 +70,74 @@ func TestParseKeyValStrPair(t *testing.T) {
 		})
 	}
 }
+
+// The wire values carry a space ("env variable"), which nobody types behind a
+// flag, and the command's own examples use the hyphenated plural. Both must
+// land on the value the API accepts.
+func TestMatchMountType(t *testing.T) {
+	for _, tc := range []struct {
+		input string
+		want  string
+	}{
+		{MountTypeEnv, MountTypeEnv},
+		{"env variable", MountTypeEnv},
+		{"env-variables", MountTypeEnv},
+		{"ENV_VARIABLE", MountTypeEnv},
+		{"env", MountTypeEnv},
+		{MountTypeFile, MountTypeFile},
+		{"file-mount", MountTypeFile},
+		{"File Mount", MountTypeFile},
+	} {
+		t.Run(tc.input, func(t *testing.T) {
+			got, ok := MatchMountType(tc.input)
+			if !ok {
+				t.Fatalf("MatchMountType(%q) did not match", tc.input)
+			}
+			if got != tc.want {
+				t.Errorf("MatchMountType(%q) = %q, want %q", tc.input, got, tc.want)
+			}
+		})
+	}
+
+	for _, input := range []string{"", "   ", "volume", "configmap"} {
+		t.Run("reject "+input, func(t *testing.T) {
+			if got, ok := MatchMountType(input); ok {
+				t.Errorf("MatchMountType(%q) matched %q, want no match", input, got)
+			}
+		})
+	}
+}
+
+func TestMatchConfigType(t *testing.T) {
+	for _, tc := range []struct {
+		input string
+		want  string
+	}{
+		{ConfigTypeConfigMap, ConfigTypeConfigMap},
+		{"config-map", ConfigTypeConfigMap},
+		{"ConfigMap", ConfigTypeConfigMap},
+		{"config_map", ConfigTypeConfigMap},
+		{ConfigTypeSecret, ConfigTypeSecret},
+		{"Secret", ConfigTypeSecret},
+	} {
+		t.Run(tc.input, func(t *testing.T) {
+			got, ok := MatchConfigType(tc.input)
+			if !ok {
+				t.Fatalf("MatchConfigType(%q) did not match", tc.input)
+			}
+			if got != tc.want {
+				t.Errorf("MatchConfigType(%q) = %q, want %q", tc.input, got, tc.want)
+			}
+		})
+	}
+
+	// The old check was a substring test against the joined list, so "config"
+	// and "ret" passed as valid types and were sent on unchanged.
+	for _, input := range []string{"", "config", "ret", "map-config"} {
+		t.Run("reject "+input, func(t *testing.T) {
+			if got, ok := MatchConfigType(input); ok {
+				t.Errorf("MatchConfigType(%q) matched %q, want no match", input, got)
+			}
+		})
+	}
+}

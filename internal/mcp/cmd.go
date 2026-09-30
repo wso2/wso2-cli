@@ -2,6 +2,7 @@ package mcp
 
 import (
 	"fmt"
+	"github.com/wso2/integration-platform-tools/internal/cmd/common"
 
 	"github.com/mark3labs/mcp-go/server"
 	"github.com/spf13/cobra"
@@ -80,6 +81,7 @@ var MCPCommand = &cobra.Command{
 }
 
 func init() {
+	common.AddGenericHelper(MCPCommand)
 	MCPCommand.Flags().BoolVar(&httpMode, "http", false, "Start MCP server in HTTP mode")
 	MCPCommand.Flags().IntVar(&port, "port", 8080, "Port to run HTTP MCP server on")
 }

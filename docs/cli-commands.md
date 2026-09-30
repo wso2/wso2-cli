@@ -136,14 +136,28 @@ wso2-integration-platform create project <project-name> --description <descripti
 
 ### `create integration [integration-name]` (alias: `integrations`)
 
-Create a new integration. Supported types: `service` (API, AI Agent,
-MCP Server), `scheduleTask` (Automation), `eventHandler` (Event Integration,
-File Integration). Buildpacks: `ballerina`, `microintegrator`.
+Create a new integration. `--type` takes an integration type; omit it and the
+command prompts with the same six. Buildpacks: `ballerina`, `microintegrator`.
+
+| `--type` | What it creates |
+|----------|-----------------|
+| `Automation` | A scheduled (cron) task |
+| `API` | An HTTP service |
+| `AI Agent` | An LLM-backed service |
+| `MCP Server` | A Model Context Protocol server |
+| `Event Integration` | An event-driven integration |
+| `File Integration` | A file-triggered integration |
+
+The six are a flat, mutually exclusive set. Casing and separators are ignored,
+so `--type='AI Agent'`, `--type=ai-agent` and `--type=aiagent` are the same
+value. The platform component types this flag took previously — `service`,
+`scheduleTask` and `eventHandler` — still resolve, to `API`, `Automation` and
+`Event Integration` respectively, and print a deprecation notice on stderr.
 
 | Flag | Description |
 |------|-------------|
 | `-n`, `--name` | Name of the new integration. |
-| `-t`, `--type` | `service`, `scheduleTask`, or `eventHandler`. |
+| `-t`, `--type` | One of the six integration types above. |
 | `--build-pack` | `ballerina` or `microintegrator`. |
 | `-r`, `--repo` | Git repository URL (multi-repo projects only). |
 | `-b`, `--repo-branch` | Git branch (multi-repo projects only). |
@@ -156,7 +170,7 @@ File Integration). Buildpacks: `ballerina`, `microintegrator`.
 
 ```bash
 wso2-integration-platform create integration <name> --project='Default Project' \
-  --type=service --build-pack='ballerina' --repo=<repo-url> --repo-branch=main
+  --type='API' --build-pack='ballerina' --repo=<repo-url> --repo-branch=main
 ```
 
 ### `create build [integration-name]`
@@ -196,7 +210,7 @@ Create a config-map or secret for an integration.
 |------|-------------|
 | `-n`, `--name` | Name of the new config. |
 | `-t`, `--type` | `config-map` or `secret`. |
-| `--mount-type` | `env-variables` or `file-mount`. |
+| `--mount-type` | `env variable` or `file mount`. Casing and separators are ignored, so `env-variables` and `file-mount` work too. |
 | `--env-vars` | Environment variables, e.g. `--env-vars="key1=val1,key2=val2"`. |
 | `--mount-path` | Mount path of the config file. |
 | `--mount-content` | Content of the file to be mounted. |
@@ -322,7 +336,8 @@ Alias: `log`.
 | `logs build` | Logs for a specific build run | `--build-id`, `--step`, `-d`/`--deployment-track` |
 | `logs executions` (`execution`) | Logs of a scheduled/manual task execution | `--id`, `--attempt`, `-e`/`--env`, `-d`/`--deployment-track` |
 
-All four also take `--org`, `-p`/`--project` and `-i`/`--integration`.
+All four also take `--org`, `-p`/`--project` and `-i`/`--integration`. Run
+`logs` with no subcommand and it prompts for the log type.
 
 ```bash
 wso2-integration-platform logs application --integration=<integration> --project=<project> --follow
@@ -360,9 +375,22 @@ These are not listed in `--help`; they exist for tooling integrations.
 |---------|---------|-------|
 | `start-mcp-server` | Start the MCP server exposing CLI operations as tools for AI assistants | `--http` (HTTP mode), `--port` (default `8080`) |
 | `start-rpc-server` | JSON-RPC bridge used by editor extensions | `--method`, `--params` (both hidden) |
+| `completion <shell>` | Print a shell completion script (`bash`, `zsh`, `fish`, `powershell`) | — |
 
 See the [MCP Server](../README.md#mcp-server) section of the README for client
 configuration.
+
+### Deprecated spellings
+
+These still work and print a one-line notice on stderr. They are hidden from
+help, and new scripts should use the current spelling.
+
+| Deprecated | Use instead |
+|------------|-------------|
+| `create`/`list`/`describe`/`delete` `component`, `components` | `integration`, `integrations` |
+| `--component`, `-c` (on commands that target an integration) | `--integration`, `-i` |
+| `--component-name`, `-c` (on `create integration`) | `--name`, `-n` |
+| `--type=service`, `--type=scheduleTask`, `--type=eventHandler` | `--type=API`, `--type=Automation`, `--type='Event Integration'` |
 
 ---
 
@@ -385,4 +413,10 @@ Also read by the CLI, but not listed by `env`:
 | `CLOUD_STS_TOKEN` | Bootstrap a session from a VS Code/cloud extension STS token. |
 | `CLOUD_INITIAL_ORG_ID` | Pre-select an organization on first launch (cloud extension context). |
 | `CLOUD_INITIAL_PROJECT_ID` | Pre-select a project on first launch (cloud extension context). |
-| `WSO2IP_ENV` | Target `dev` or `stage` instead of production. Requires `WSO2IP_ENV_CONFIG`; for CLI development only. |
+| `WSO2IP_ENV` | Target `dev` or `stage` instead of production. For CLI development only. |
+| `WSO2IP_ENV_CONFIG` | Path to the JSON file describing the non-production endpoints. Required by `WSO2IP_ENV`. |
+| `SKIP_KEYRING` | When `true`, keep encryption keys off the system keyring — for containers and CI where no keyring is available. |
+| `LOG_MODE` | Set to `file` to write the `TRACE_ENABLED` HTTP log to a file instead of the terminal. |
+| `MCP_DEBUG` | When `true`, the MCP server writes diagnostic lines to stderr. |
+| `BASE_URL` | Set by remote VS Code/cloud editors; makes the OAuth callback use the port-forwarded URL. |
+| `WSO2IP_SHELL` | Set by `connect` inside the sub-shell it starts. `connect` refuses to nest when it is `true`. |

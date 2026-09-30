@@ -182,6 +182,39 @@ matching entry in `i18n/translations/all.en_US.json` (id and translation both);
 a missing entry falls back to the English source string, so a stale file is not
 a build failure, just drift.
 
+### Integration types
+
+What a user creates is an Automation, an API, an AI Agent, an MCP Server, an
+Event Integration or a File Integration. What the platform stores is a
+component type plus, for the three that share one, a component subtype:
+
+| Integration type | componentType | componentSubType |
+|---|---|---|
+| Automation | `scheduleTask` | — |
+| API | `service` | — |
+| AI Agent | `service` | `aiAgent` |
+| MCP Server | `service` | `MCP` |
+| Event Integration | `eventHandler` | — |
+| File Integration | `eventHandler` | `fileIntegration` |
+
+The table lives once, in `pkg/api/component/integration_types.go`, and both
+user-facing surfaces resolve through it: `create integration --type` and the
+MCP `create_integration` tool's `subtype`. `IntegrationKind` reports the same
+six names back for a component that already exists, so listing and creating
+share one vocabulary.
+
+Two resolvers, deliberately: `ResolveIntegrationType` matches exactly and is
+what the MCP server calls, because an agent passing `automation` should be told
+the six rather than have one guessed for it. `MatchIntegrationType` ignores
+casing and separators and additionally accepts `service`, `scheduleTask` and
+`eventHandler`, because a person typing a flag writes `ai-agent`, and because
+those three were what `--type` took before. The CLI is the only caller of the
+lenient one.
+
+`fileIntegration` is resolved once more before the request goes out, into
+`ballerinaFileIntegration` or `miFileIntegration` depending on the buildpack —
+that is the value the platform matches on.
+
 ## Brand and Identifier Policy
 
 This codebase is open-sourced as the **WSO2 Integration Platform CLI**. Go identifiers
@@ -270,12 +303,12 @@ Run with `make test`. Located alongside source files (not in a separate director
 | Package | What's tested |
 |---------|--------------|
 | `internal/auth` | Org/token/user keyring stores; OAuth callback server; PAT env var (invalid/missing); `parseSTSTokenClaims` (7 cases) |
-| `internal/cmd/common` | `ValidateNameText`, `ParseKeyValStrPair`, `ParseOutputFormat`, `IsStructured`, `RenderStructured` |
-| `internal/cmd/component/create` | `GetComponentKindForCreate` auto-build/deploy defaults |
+| `internal/cmd/common` | `ValidateNameText`, `ParseKeyValStrPair`, `ParseOutputFormat`, `IsStructured`, `RenderStructured`, `MatchConfigType`/`MatchMountType` |
+| `internal/cmd/component/create` | `GetComponentKindForCreate` auto-build/deploy defaults; `resolveIntegrationType` all 6 types, legacy spellings, buildpack-specific file-integration subtype |
 | `internal/mcp/integration` | `ResolveSubtype` all 6 types; rejection of unsupported values |
 | `internal/mcp/utils` | `NewMCPResponse`, `NewMCPErrorResponse` structure and IsError flag |
 | `internal/region` | `GetCurrentRegion` env/keyring/default; `SetCurrentRegion` valid/invalid; `GetConfigByRegion` prod/dev/stage |
-| `pkg/api/component` | `IsIntegrationDisplayType` all display type variants |
+| `pkg/api/component` | `IsIntegrationDisplayType` all display type variants; `ResolveIntegrationType`/`MatchIntegrationType` and the kind/type vocabulary agreeing |
 
 **Not yet covered by unit tests (needs live credentials or complex mocking):**
 - `LoginWithToken`, `LoginWithSTSToken` (require real API)

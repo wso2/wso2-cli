@@ -24,8 +24,8 @@ var ComponentCreateCommand = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Short:   i18n.T("create an integration"),
 	Long: i18n.T(
-		"Create a new integration in your project. Supported types: service (API, AI Agent, MCP Server), " +
-			"scheduleTask (Automation), eventHandler (Event Integration, File Integration). " +
+		"Create a new integration in your project. Supported types: Automation, API, AI Agent, " +
+			"MCP Server, Event Integration, File Integration. " +
 			"Buildpacks: ballerina, microintegrator.",
 	),
 	PreRun: common.VerifyIsUserLoggedIn,
@@ -52,8 +52,8 @@ var ComponentCreateCommand = &cobra.Command{
 		To create a WSO2 MI automation integration in your default project :
 			%s
 	`),
-		"$ wso2-integration-platform create integration <name> --project='Default Project' --type=service --build-pack='ballerina' --repo=<repo-url> --repo-branch=main",
-		"$ wso2-integration-platform create integration <name> --project='Default Project' --type=scheduleTask --build-pack='microintegrator' --repo=<repo-url> --repo-branch=main",
+		"$ wso2-integration-platform create integration <name> --project='Default Project' --type='API' --build-pack='ballerina' --repo=<repo-url> --repo-branch=main",
+		"$ wso2-integration-platform create integration <name> --project='Default Project' --type='Automation' --build-pack='microintegrator' --repo=<repo-url> --repo-branch=main",
 	),
 }
 
@@ -67,7 +67,7 @@ func init() {
 	if err := ComponentCreateCommand.Flags().MarkDeprecated("component-name", "use --name instead"); err != nil {
 		panic(err)
 	}
-	ComponentCreateCommand.Flags().StringVarP(&createParams.ComponentType, "type", "t", "", fmt.Sprintf("type of the integration (%s)", strings.Join(component.ComponentTypes, ", ")))
+	ComponentCreateCommand.Flags().StringVarP(&createParams.ComponentType, "type", "t", "", fmt.Sprintf("type of the integration (%s)", strings.Join(component.IntegrationTypes, ", ")))
 	ComponentCreateCommand.Flags().StringVar(&createParams.BuildPack, "build-pack", "", "build pack used by the integration (ballerina, microintegrator)")
 	ComponentCreateCommand.Flags().StringVar(&createParams.Subpath, "dir", "", "subpath of the directory containing the integration")
 	ComponentCreateCommand.Flags().StringVarP(&createParams.Repo, "repo", "r", "", "git repository url (only for integration with multi repo project)")

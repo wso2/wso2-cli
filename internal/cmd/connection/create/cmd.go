@@ -36,7 +36,7 @@ func init() {
 	common.AddOrgFlag(ConnectionCreateCommand.Flags(), &params.orgFlag)
 	common.AddProjectFlag(ConnectionCreateCommand.Flags(), &params.projectFlag)
 	common.AddComponentFlag(ConnectionCreateCommand.Flags(), &params.componentFlag)
-	ConnectionCreateCommand.Flags().StringVarP(&params.nameFlag, "service", "s", "", "name of service for which the connection needs to be created for")
+	ConnectionCreateCommand.Flags().StringVarP(&params.serviceFlag, "service", "s", "", "name of service for which the connection needs to be created for")
 	ConnectionCreateCommand.Flags().StringVarP(&params.nameFlag, "name", "n", "", "name of the new connection")
 	common.AddGenericHelper(ConnectionCreateCommand)
 }
