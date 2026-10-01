@@ -5,6 +5,11 @@ name: Integration Platform CLI Build
 # default branch because that is the only place GitHub offers a "Run workflow"
 # button from; it builds whatever ref you point it at, using that ref's own
 # Makefile and manifests. Nothing here reads the default branch's source.
+#
+# Dispatch inputs are attacker-shaped values: they are strings a person types,
+# and ${{ }} is substituted into the shell source before bash parses it, so an
+# input embedded directly in a run: block is executed, not quoted. Every input
+# below reaches the shell through env: and is read as a quoted variable.
 on:
   workflow_dispatch:
     inputs:
@@ -46,17 +51,18 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
     steps:
       - name: Check the version is plain semver
+        env:
+          VERSION: ${{ inputs.version }}
         run: |
-          version='${{ inputs.version }}'
-          if ! [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::'$version' is not plain semver. Use v1.2.3, optionally with -prerelease and +build metadata."
+          if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$VERSION' is not plain semver. Use v1.2.3, optionally with -prerelease and +build metadata."
             exit 1
           fi
           # The pre-reset scheme concatenated a version and a timestamp
           # (v1.2.21 + 2606121500), which parses as a patch number large enough
           # to outrank any v1.x and would show every user a bogus update. The
           # separated form (v1.2.3+2606121500) is the supported way to carry one.
-          core="${version%%[-+]*}"
+          core="${VERSION%%[-+]*}"
           patch="${core##*.}"
           if [ "${#patch}" -gt 6 ]; then
             echo "::error::patch number '$patch' looks like a concatenated version+timestamp. Use v1.2.3+2606121500 instead."
@@ -71,6 +77,10 @@ jobs:
 
       - name: Resolve the ref to a commit
         id: resolve
+        env:
+          REF: ${{ inputs.ref }}
+          VERSION: ${{ inputs.version }}
+          PUBLISH: ${{ inputs.publish }}
         run: |
           sha=$(git rev-parse HEAD)
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
@@ -79,17 +89,19 @@ jobs:
             echo
             echo "| | |"
             echo "|---|---|"
-            echo "| ref | \`${{ inputs.ref }}\` |"
-            echo "| commit | \`$sha\` |"
-            echo "| version | \`${{ inputs.version }}\` |"
-            echo "| publish | \`${{ inputs.publish }}\` |"
+            printf '| ref | `%s` |\n' "$REF"
+            printf '| commit | `%s` |\n' "$sha"
+            printf '| version | `%s` |\n' "$VERSION"
+            printf '| publish | `%s` |\n' "$PUBLISH"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check the ref can build this
+        env:
+          REF: ${{ inputs.ref }}
         run: |
           for required in Makefile cmd/main.go mcpb/manifest.json; do
             if [ ! -e "$required" ]; then
-              echo "::error::${{ inputs.ref }} has no $required — this ref is not the Integration Platform CLI."
+              echo "::error::$REF has no $required — this ref is not the Integration Platform CLI."
               exit 1
             fi
           done
@@ -122,6 +134,11 @@ jobs:
             arch: amd64
             archive: zip
             mcpb: true
+    env:
+      BUILD_OS: ${{ matrix.os }}
+      BUILD_ARCH: ${{ matrix.arch }}
+      ARCHIVE_EXT: ${{ matrix.archive }}
+      VERSION: ${{ inputs.version }}
 
     steps:
       - name: Check out the ref being built
@@ -149,7 +166,7 @@ jobs:
         run: sudo apt-get install -y --no-install-recommends zip
 
       - name: Build the CLI
-        run: make compile_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ inputs.version }}
+        run: make compile_ip OS="$BUILD_OS" ARCH="$BUILD_ARCH" VERSION="$VERSION"
 
       # A binary around 5 MB means the wrong entry point was built, and a
       # --version of DEV means the ldflags were dropped or the -X symbol path no
@@ -157,55 +174,59 @@ jobs:
       # produce a plausible-looking release that is wrong.
       - name: Check the build is stamped
         run: |
-          binary=bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform
-          [ "${{ matrix.os }}" = "windows" ] && binary="$binary.exe"
+          binary="bin/$BUILD_OS-$BUILD_ARCH/wso2-integration-platform"
+          [ "$BUILD_OS" = "windows" ] && binary="$binary.exe"
           size=$(stat -c %s "$binary")
           echo "$binary is $((size / 1024 / 1024)) MB"
           if [ "$size" -lt 10000000 ]; then
             echo "::error::$binary is only $size bytes — the wrong entry point was built."
             exit 1
           fi
-          if [ "${{ matrix.os }}-${{ matrix.arch }}" = "linux-amd64" ]; then
-            reported=$("$binary" --version)
+          if [ "$BUILD_OS-$BUILD_ARCH" = "linux-amd64" ]; then
+            # The update notice goes to stderr, but take the first line anyway.
+            reported=$("$binary" --version | head -1)
             echo "$reported"
-            case "$reported" in
-              *DEV*) echo "::error::--version reports DEV — the version was not stamped."; exit 1 ;;
-              *${{ inputs.version }}*) ;;
-              *) echo "::error::--version does not report ${{ inputs.version }}."; exit 1 ;;
-            esac
+            if [ "$reported" != "wso2-integration-platform version $VERSION" ]; then
+              echo "::error::--version reports '$reported', expected 'wso2-integration-platform version $VERSION'."
+              exit 1
+            fi
           fi
 
       - name: Archive the CLI
-        run: make dist_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }}
+        run: make dist_ip OS="$BUILD_OS" ARCH="$BUILD_ARCH"
 
       - name: Bundle the Claude connector
         if: matrix.mcpb
-        run: make bundle_mcpb OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ inputs.version }}
+        run: make bundle_mcpb OS="$BUILD_OS" ARCH="$BUILD_ARCH" VERSION="$VERSION"
 
       # The mcpb manifest is what the MCP host compares against to offer an
-      # update, and the checked-in value is a placeholder.
+      # update, and the checked-in value is a placeholder. Compared as parsed
+      # JSON and by equality: a substring or regex match passes a manifest that
+      # merely contains the version, which is not what this is proving.
       - name: Check the manifest carries the version
         if: matrix.mcpb
         run: |
-          bundle=bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.mcpb
-          stamped=$(unzip -p "$bundle" manifest.json | grep -o '"version": *"[^"]*"' | head -1)
-          echo "$stamped"
-          expected='${{ inputs.version }}'
-          if ! echo "$stamped" | grep -q "\"${expected#v}\""; then
-            echo "::error::manifest version is $stamped, expected ${expected#v}."
+          bundle="bin/$BUILD_OS-$BUILD_ARCH/wso2-integration-platform-$BUILD_OS-$BUILD_ARCH.mcpb"
+          stamped=$(unzip -p "$bundle" manifest.json | jq -r '.version')
+          expected="${VERSION#v}"
+          echo "manifest version: $stamped"
+          if [ "$stamped" != "$expected" ]; then
+            echo "::error::manifest version is '$stamped', expected '$expected'."
             exit 1
           fi
 
       # Named the way the release page names them, so the download is
       # self-describing whether it comes from this run or from a release.
       - name: Collect the artifacts
+        env:
+          HAS_MCPB: ${{ matrix.mcpb }}
         run: |
           mkdir -p dist
-          name=wso2-integration-platform-${{ inputs.version }}-${{ matrix.os }}-${{ matrix.arch }}
-          cp "bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}" \
-             "dist/$name.${{ matrix.archive }}"
-          if [ "${{ matrix.mcpb }}" = "true" ]; then
-            cp "bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.mcpb" \
+          name="wso2-integration-platform-$VERSION-$BUILD_OS-$BUILD_ARCH"
+          cp "bin/$BUILD_OS-$BUILD_ARCH/wso2-integration-platform-$BUILD_OS-$BUILD_ARCH.$ARCHIVE_EXT" \
+             "dist/$name.$ARCHIVE_EXT"
+          if [ "$HAS_MCPB" = "true" ]; then
+            cp "bin/$BUILD_OS-$BUILD_ARCH/wso2-integration-platform-$BUILD_OS-$BUILD_ARCH.mcpb" \
                "dist/$name.mcpb"
           fi
           ls -lh dist
@@ -222,6 +243,12 @@ jobs:
   # release event until someone clicks Publish. That keeps this workflow from
   # starting the branch's own release.yml -- which rebuilds from the tag and
   # publishes to npm -- while still giving a page to hand people a build from.
+  #
+  # The draft carries only what that release.yml rebuilds on publish: the
+  # linux-amd64 CLI archive and the three mcpb bundles. The other CLI archives
+  # this workflow produces would survive publication as assets nothing
+  # reproduced -- hand-built binaries on an official release page, indisting-
+  # uishable from the rebuilt ones -- so they stay on the run instead.
   draft-release:
     name: Draft release
     if: inputs.publish == 'draft-release'
@@ -229,6 +256,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      VERSION: ${{ inputs.version }}
+      REF: ${{ inputs.ref }}
+      SHA: ${{ needs.validate.outputs.sha }}
+      REPO: ${{ github.repository }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
     steps:
       - name: Download every build
         uses: actions/download-artifact@v4
@@ -236,27 +269,31 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Checksum them
+      - name: Select the assets publication reproduces
         run: |
-          cd dist
-          sha256sum * > SHA256SUMS
+          mkdir -p release
+          cp dist/*.mcpb release/
+          cp "dist/wso2-integration-platform-$VERSION-linux-amd64.tar.gz" release/
+          cd release
+          sha256sum ./* > SHA256SUMS
           cat SHA256SUMS
 
       - name: Open the draft release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create '${{ inputs.version }}' \
-            --repo '${{ github.repository }}' \
-            --target '${{ needs.validate.outputs.sha }}' \
-            --title '${{ inputs.version }}' \
+          {
+            printf 'Built from `%s` at `%s` by the Integration Platform CLI Build workflow.\n\n' "$REF" "$SHA"
+            printf '**This is a draft.** Publishing it creates the tag and fires the `release` event, which runs `release.yml` from the tagged commit — that rebuilds every asset here and publishes the npm package. Delete the draft instead if you only wanted the downloads.\n\n'
+            printf 'The darwin and linux-arm64 CLI archives are not attached: `release.yml` does not rebuild them, so publishing would leave assets on this page that nothing reproduced. They are on the run that built this draft: %s\n' "$RUN_URL"
+          } > notes.md
+          gh release create "$VERSION" \
+            --repo "$REPO" \
+            --target "$SHA" \
+            --title "$VERSION" \
             --draft \
             --prerelease \
-            --notes "$(cat <<'NOTES'
-          Built from `${{ inputs.ref }}` at `${{ needs.validate.outputs.sha }}` by the Integration Platform CLI Build workflow.
-
-          **This is a draft.** Publishing it creates the tag and fires the `release` event, which runs the `release.yml` on the tagged commit — that rebuilds the same artifacts and publishes the npm package. Delete the draft instead if you only wanted the downloads.
-          NOTES
-          )" \
-            dist/*
-          gh release view '${{ inputs.version }}' --repo '${{ github.repository }}' --json url -q .url >> "$GITHUB_STEP_SUMMARY"
+            --notes-file notes.md \
+            release/*
+          url=$(gh release view "$VERSION" --repo "$REPO" --json url -q .url)
+          printf '\nDraft release: %s\n' "$url" >> "$GITHUB_STEP_SUMMARY"
