@@ -1,0 +1,262 @@
+name: Integration Platform CLI Build
+
+# The Integration Platform CLI lives on its own branch (preview/*), not on the
+# default branch, and no workflow there runs on push. This file exists on the
+# default branch because that is the only place GitHub offers a "Run workflow"
+# button from; it builds whatever ref you point it at, using that ref's own
+# Makefile and manifests. Nothing here reads the default branch's source.
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or SHA to build (e.g. preview/integration-platform-cli)'
+        required: true
+        type: string
+        default: 'preview/integration-platform-cli'
+      version:
+        description: 'Version to stamp, e.g. v1.0.1 or v1.0.1-preview.1 (plain semver, leading v)'
+        required: true
+        type: string
+      publish:
+        description: 'artifacts = downloads on this run only; draft-release = also open a draft release'
+        required: true
+        type: choice
+        default: artifacts
+        options:
+          - artifacts
+          - draft-release
+
+# Read-only by default. Only the job that opens the draft release is granted
+# write access to repository contents, and nothing here is granted anything else.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # The version is stamped into the binaries and into the mcpb manifest the MCP
+  # host reads to detect connector updates, so a malformed one ships and is hard
+  # to take back. Checking it before anything builds costs seconds.
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+    steps:
+      - name: Check the version is plain semver
+        run: |
+          version='${{ inputs.version }}'
+          if ! [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$version' is not plain semver. Use v1.2.3, optionally with -prerelease and +build metadata."
+            exit 1
+          fi
+          # The pre-reset scheme concatenated a version and a timestamp
+          # (v1.2.21 + 2606121500), which parses as a patch number large enough
+          # to outrank any v1.x and would show every user a bogus update. The
+          # separated form (v1.2.3+2606121500) is the supported way to carry one.
+          core="${version%%[-+]*}"
+          patch="${core##*.}"
+          if [ "${#patch}" -gt 6 ]; then
+            echo "::error::patch number '$patch' looks like a concatenated version+timestamp. Use v1.2.3+2606121500 instead."
+            exit 1
+          fi
+
+      - name: Check out the ref being built
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
+          persist-credentials: false
+
+      - name: Resolve the ref to a commit
+        id: resolve
+        run: |
+          sha=$(git rev-parse HEAD)
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Integration Platform CLI build"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| ref | \`${{ inputs.ref }}\` |"
+            echo "| commit | \`$sha\` |"
+            echo "| version | \`${{ inputs.version }}\` |"
+            echo "| publish | \`${{ inputs.publish }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check the ref can build this
+        run: |
+          for required in Makefile cmd/main.go mcpb/manifest.json; do
+            if [ ! -e "$required" ]; then
+              echo "::error::${{ inputs.ref }} has no $required — this ref is not the Integration Platform CLI."
+              exit 1
+            fi
+          done
+
+  build:
+    name: ${{ matrix.os }}-${{ matrix.arch }}
+    needs: validate
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            archive: tar.gz
+            mcpb: true
+          - os: linux
+            arch: arm64
+            archive: tar.gz
+            mcpb: false
+          - os: darwin
+            arch: arm64
+            archive: zip
+            mcpb: true
+          - os: darwin
+            arch: amd64
+            archive: zip
+            mcpb: false
+          - os: windows
+            arch: amd64
+            archive: zip
+            mcpb: true
+
+    steps:
+      - name: Check out the ref being built
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+          persist-credentials: false
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.mod
+
+      # package_translations runs as a prerequisite of compile_ip and shells out
+      # to go-bindata, which must be on PATH for the embedded translations to
+      # regenerate.
+      - name: Install go-bindata
+        run: |
+          go install github.com/go-bindata/go-bindata/...@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Install zip
+        if: matrix.archive == 'zip' || matrix.mcpb
+        run: sudo apt-get install -y --no-install-recommends zip
+
+      - name: Build the CLI
+        run: make compile_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ inputs.version }}
+
+      # A binary around 5 MB means the wrong entry point was built, and a
+      # --version of DEV means the ldflags were dropped or the -X symbol path no
+      # longer matches the module path, which go build ignores silently. Both
+      # produce a plausible-looking release that is wrong.
+      - name: Check the build is stamped
+        run: |
+          binary=bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform
+          [ "${{ matrix.os }}" = "windows" ] && binary="$binary.exe"
+          size=$(stat -c %s "$binary")
+          echo "$binary is $((size / 1024 / 1024)) MB"
+          if [ "$size" -lt 10000000 ]; then
+            echo "::error::$binary is only $size bytes — the wrong entry point was built."
+            exit 1
+          fi
+          if [ "${{ matrix.os }}-${{ matrix.arch }}" = "linux-amd64" ]; then
+            reported=$("$binary" --version)
+            echo "$reported"
+            case "$reported" in
+              *DEV*) echo "::error::--version reports DEV — the version was not stamped."; exit 1 ;;
+              *${{ inputs.version }}*) ;;
+              *) echo "::error::--version does not report ${{ inputs.version }}."; exit 1 ;;
+            esac
+          fi
+
+      - name: Archive the CLI
+        run: make dist_ip OS=${{ matrix.os }} ARCH=${{ matrix.arch }}
+
+      - name: Bundle the Claude connector
+        if: matrix.mcpb
+        run: make bundle_mcpb OS=${{ matrix.os }} ARCH=${{ matrix.arch }} VERSION=${{ inputs.version }}
+
+      # The mcpb manifest is what the MCP host compares against to offer an
+      # update, and the checked-in value is a placeholder.
+      - name: Check the manifest carries the version
+        if: matrix.mcpb
+        run: |
+          bundle=bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.mcpb
+          stamped=$(unzip -p "$bundle" manifest.json | grep -o '"version": *"[^"]*"' | head -1)
+          echo "$stamped"
+          expected='${{ inputs.version }}'
+          if ! echo "$stamped" | grep -q "\"${expected#v}\""; then
+            echo "::error::manifest version is $stamped, expected ${expected#v}."
+            exit 1
+          fi
+
+      # Named the way the release page names them, so the download is
+      # self-describing whether it comes from this run or from a release.
+      - name: Collect the artifacts
+        run: |
+          mkdir -p dist
+          name=wso2-integration-platform-${{ inputs.version }}-${{ matrix.os }}-${{ matrix.arch }}
+          cp "bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.${{ matrix.archive }}" \
+             "dist/$name.${{ matrix.archive }}"
+          if [ "${{ matrix.mcpb }}" = "true" ]; then
+            cp "bin/${{ matrix.os }}-${{ matrix.arch }}/wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}.mcpb" \
+               "dist/$name.mcpb"
+          fi
+          ls -lh dist
+
+      - name: Upload the artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wso2-integration-platform-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+  # A draft release is not a published one: GitHub creates no tag and fires no
+  # release event until someone clicks Publish. That keeps this workflow from
+  # starting the branch's own release.yml -- which rebuilds from the tag and
+  # publishes to npm -- while still giving a page to hand people a build from.
+  draft-release:
+    name: Draft release
+    if: inputs.publish == 'draft-release'
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download every build
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksum them
+        run: |
+          cd dist
+          sha256sum * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Open the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create '${{ inputs.version }}' \
+            --repo '${{ github.repository }}' \
+            --target '${{ needs.validate.outputs.sha }}' \
+            --title '${{ inputs.version }}' \
+            --draft \
+            --prerelease \
+            --notes "$(cat <<'NOTES'
+          Built from `${{ inputs.ref }}` at `${{ needs.validate.outputs.sha }}` by the Integration Platform CLI Build workflow.
+
+          **This is a draft.** Publishing it creates the tag and fires the `release` event, which runs the `release.yml` on the tagged commit — that rebuilds the same artifacts and publishes the npm package. Delete the draft instead if you only wanted the downloads.
+          NOTES
+          )" \
+            dist/*
+          gh release view '${{ inputs.version }}' --repo '${{ github.repository }}' --json url -q .url >> "$GITHUB_STEP_SUMMARY"
