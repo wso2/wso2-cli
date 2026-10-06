@@ -33,9 +33,9 @@ temporary state directory and clears any ambient `WSO2_` variable first, so it
 never reads or writes real WSO2 state, and it needs no network catalog, no
 credentials, and no product service.
 
-CI also checks formatting, vet, and lint. To run those checks before every
-push instead of first finding out on the pull request, enable the checked-in
-git hooks once per clone:
+CI also checks formatting, vet, and lint. To run most of those checks before
+every push instead of first finding out on the pull request, enable the
+checked-in git hooks once per clone:
 
 ```shell
 make hooks

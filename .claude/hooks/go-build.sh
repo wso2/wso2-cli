@@ -22,8 +22,9 @@
 # Edit and Write name the file they touched. A Bash command can touch any file,
 # so for it the Go files modified since the previous run are found by
 # timestamp. Each affected module is built with `go build ./...`; the SDK with
-# GOWORK=off, as CI builds it. A test file is not compiled by go build, so its
-# package is vetted as well, which type-checks the tests.
+# GOWORK=off, as CI builds it. go build compiles neither test files nor the
+# smoke-tagged live runs, so the package of such a file is vetted as well, which
+# type-checks it.
 #
 # Silent when everything compiles. On failure the compiler output goes to
 # stderr and the exit status is 2, which Claude Code hands back to the agent.
@@ -56,7 +57,8 @@ Bash)
 		touch "$stamp"
 		exit 0
 	fi
-	changed=$(find "$root" \( -name .git -o -name bin -o -name dist -o -name node_modules \) -prune \
+	changed=$(find "$root" \( -name .git -o -name bin -o -name dist -o -name node_modules \
+		-o -path "$root/.claude/worktrees" \) -prune \
 		-o -name '*.go' -newer "$stamp" -print)
 	;;
 *)
@@ -65,7 +67,7 @@ Bash)
 esac
 touch "$stamp"
 
-# One line per module directory, and one per test package directory.
+# One line per module directory, and one per package directory to vet.
 modules=
 tests=
 for file in $changed; do
@@ -81,7 +83,7 @@ for file in $changed; do
 	[ -f "$module/go.mod" ] || continue
 	modules=$(printf '%s\n%s' "$modules" "$module")
 	case $file in
-	*_test.go) tests=$(printf '%s\n%s' "$tests" "$module $dir") ;;
+	*_test.go | "$root"/test/smoke/*) tests=$(printf '%s\n%s' "$tests" "$module $dir") ;;
 	esac
 done
 
@@ -118,17 +120,19 @@ for module in $(printf '%s\n' "$modules" | sort -u); do
 	fi
 done
 
-printf '%s\n' "$tests" | sort -u | while read -r module dir; do
+while read -r module dir; do
 	[ -n "$module" ] || continue
 	tags=
 	case $dir in
 	"$root"/test/smoke | "$root"/test/smoke/*) tags=-tags=smoke ;;
 	esac
-	if ! out=$(go_in "$module" vet $tags ".${dir#"$module"}" 2>&1); then
-		echo "go vet failed for the tests in $(label "$dir"):" >&2
+	if ! out=$(go_in "$module" vet $tags ".${dir#"$module"}" 2>&1 </dev/null); then
+		echo "go vet failed in $(label "$dir"):" >&2
 		echo "$out" >&2
-		exit 1
+		failed=1
 	fi
-done || failed=1
+done <<EOF
+$(printf '%s\n' "$tests" | sort -u)
+EOF
 
 [ "$failed" -eq 0 ] || exit 2

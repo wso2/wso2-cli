@@ -89,7 +89,7 @@ help:
 	@echo '  make vet                  Vet the shell, including the build-tagged live runs.'
 	@echo '  make lint                 Lint the shell, including the build-tagged live runs.'
 	@echo '  make acceptance           Run the full architecture-proof acceptance gate.'
-	@echo '  make hooks                Run gofmt, vet, and lint before every git push.'
+	@echo '  make hooks                Enable the pre-push gofmt, vet, and lint hook.'
 	@echo '  make smoke-build          Compile the live runs without executing them.'
 	@echo '  make release-check        Validate the release configuration.'
 	@echo '  make release-snapshot     Build every release artifact into dist/, publishing nothing.'

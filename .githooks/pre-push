@@ -15,9 +15,10 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Runs the static checks CI's Static Checks job runs, before anything is pushed:
-# gofmt over each module's tracked Go files, then `make vet lint`. A failure
-# here is one CI would report minutes later, on a pull request.
+# Runs the bulk of CI's Static Checks job before anything is pushed: gofmt over
+# each module's tracked Go files, then `make vet lint`, which covers the shell.
+# A failure here is one CI would report minutes later, on a pull request. The
+# SDK's own vet, lint, and `go mod tidy -diff` remain CI's.
 #
 # Enable it once per clone with `make hooks`. It checks the working tree, not
 # the commits being pushed, so uncommitted edits count. `git push --no-verify`
@@ -34,6 +35,7 @@ failed=0
 check_gofmt() {
 	label=$1
 	shift
+	[ -n "$(git ls-files -- "$@")" ] || return 0
 	unformatted=$(git ls-files -z -- "$@" | xargs -0 gofmt -l)
 	if [ -n "$unformatted" ]; then
 		echo "pre-push: the following $label files require gofmt:" >&2
