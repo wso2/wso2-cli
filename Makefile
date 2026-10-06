@@ -89,6 +89,7 @@ help:
 	@echo '  make vet                  Vet the shell, including the build-tagged live runs.'
 	@echo '  make lint                 Lint the shell, including the build-tagged live runs.'
 	@echo '  make acceptance           Run the full architecture-proof acceptance gate.'
+	@echo '  make hooks                Run gofmt, vet, and lint before every git push.'
 	@echo '  make smoke-build          Compile the live runs without executing them.'
 	@echo '  make release-check        Validate the release configuration.'
 	@echo '  make release-snapshot     Build every release artifact into dist/, publishing nothing.'
@@ -278,6 +279,13 @@ vet:
 lint:
 	$(GOLANGCI_LINT) run
 	$(GOLANGCI_LINT) run --build-tags=smoke $(SMOKE_PACKAGE)...
+
+# Points git at the checked-in hooks, so gofmt, vet, and lint run before every
+# push rather than first in CI. See .githooks/pre-push.
+.PHONY: hooks
+hooks:
+	git config core.hooksPath .githooks
+	@echo 'Enabled .githooks; git push now runs gofmt, make vet, and make lint first.'
 
 .PHONY: acceptance
 acceptance:
