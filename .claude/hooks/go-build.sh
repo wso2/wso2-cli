@@ -49,6 +49,7 @@ print(value if isinstance(value, str) else "")
 
 project=${CLAUDE_PROJECT_DIR:-$(field .cwd)}
 root=$(git -C "$project" rev-parse --show-toplevel 2>/dev/null) || exit 0
+command -v go >/dev/null 2>&1 || exit 0
 stamp="$(git -C "$root" rev-parse --absolute-git-dir)/claude-go-build.stamp"
 
 case $(field .tool_name) in
@@ -67,10 +68,13 @@ Bash)
 esac
 touch "$stamp"
 
-# One line per module directory, and one per package directory to vet.
+# One line per module directory, and one tab-separated module and package
+# directory per package to vet. Paths are read a line at a time so that spaces
+# survive.
+tab=$(printf '\t')
 modules=
 tests=
-for file in $changed; do
+while IFS= read -r file; do
 	case $file in
 	"$root"/*.go) ;;
 	*) continue ;;
@@ -83,9 +87,11 @@ for file in $changed; do
 	[ -f "$module/go.mod" ] || continue
 	modules=$(printf '%s\n%s' "$modules" "$module")
 	case $file in
-	*_test.go | "$root"/test/smoke/*) tests=$(printf '%s\n%s' "$tests" "$module $dir") ;;
+	*_test.go | "$root"/test/smoke/*) tests=$(printf '%s\n%s\t%s' "$tests" "$module" "$dir") ;;
 	esac
-done
+done <<EOF
+$changed
+EOF
 
 [ -n "$modules" ] || exit 0
 
@@ -112,15 +118,18 @@ label() {
 	fi
 }
 
-for module in $(printf '%s\n' "$modules" | sort -u); do
-	if ! out=$(go_in "$module" build -o /dev/null ./... 2>&1); then
+while IFS= read -r module; do
+	[ -n "$module" ] || continue
+	if ! out=$(go_in "$module" build -o /dev/null ./... 2>&1 </dev/null); then
 		echo "go build failed in $(label "$module"):" >&2
 		echo "$out" >&2
 		failed=1
 	fi
-done
+done <<EOF
+$(printf '%s\n' "$modules" | sort -u)
+EOF
 
-while read -r module dir; do
+while IFS="$tab" read -r module dir; do
 	[ -n "$module" ] || continue
 	tags=
 	case $dir in
