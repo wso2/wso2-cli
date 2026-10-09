@@ -20,9 +20,9 @@
 # rather than at push or in CI. Registered in .claude/settings.json.
 #
 # Edit and Write name the file they touched. A Bash command can touch any file,
-# so for it the Go files modified since the previous run are found by
-# timestamp. Each affected module is built with `go build ./...`; the SDK with
-# GOWORK=off, as CI builds it. go build compiles neither test files nor the
+# so for it a PreToolUse run stamps the time before the command, and the Go
+# files modified since then are found by timestamp. Each affected module is
+# built with `go build ./...`; the SDK with GOWORK=off, as CI builds it. go build compiles neither test files nor the
 # smoke-tagged live runs, so the package of such a file is vetted as well, which
 # type-checks it.
 #
@@ -47,17 +47,29 @@ print(value if isinstance(value, str) else "")
 	fi
 }
 
-project=${CLAUDE_PROJECT_DIR:-$(field .cwd)}
+tool=$(field .tool_name)
+
+# A Bash command runs in the shell's current directory, which can be another
+# checkout than the one the session started in.
+if [ "$tool" = Bash ]; then
+	project=$(field .cwd)
+	project=${project:-${CLAUDE_PROJECT_DIR:-}}
+else
+	project=${CLAUDE_PROJECT_DIR:-$(field .cwd)}
+fi
 root=$(git -C "$project" rev-parse --show-toplevel 2>/dev/null) || exit 0
-command -v go >/dev/null 2>&1 || exit 0
 stamp="$(git -C "$root" rev-parse --absolute-git-dir)/claude-go-build.stamp"
 
-case $(field .tool_name) in
+if [ "$(field .hook_event_name)" = PreToolUse ]; then
+	touch "$stamp"
+	exit 0
+fi
+
+command -v go >/dev/null 2>&1 || exit 0
+
+case $tool in
 Bash)
-	if [ ! -f "$stamp" ]; then
-		touch "$stamp"
-		exit 0
-	fi
+	[ -f "$stamp" ] || exit 0
 	changed=$(find "$root" \( -name .git -o -name bin -o -name dist -o -name node_modules \
 		-o -path "$root/.claude/worktrees" \) -prune \
 		-o -name '*.go' -newer "$stamp" -print)

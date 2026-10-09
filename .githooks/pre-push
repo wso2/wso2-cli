@@ -30,13 +30,16 @@ cd "$(git rev-parse --show-toplevel)"
 
 failed=0
 
-# check_gofmt <label> <pathspec>... lists the tracked files gofmt would change.
-# The file selection mirrors .github/workflows/pr-checks.yml.
+# check_gofmt <label> <pathspec>... lists the tracked files gofmt would change,
+# skipping those deleted from the working tree. The file selection mirrors
+# .github/workflows/pr-checks.yml.
 check_gofmt() {
 	label=$1
 	shift
 	[ -n "$(git ls-files -- "$@")" ] || return 0
-	unformatted=$(git ls-files -z -- "$@" | xargs -0 gofmt -l)
+	unformatted=$(git ls-files -z -- "$@" |
+		xargs -0 sh -c 'for f; do [ ! -f "$f" ] || printf "%s\0" "$f"; done' sh |
+		xargs -0 gofmt -l)
 	if [ -n "$unformatted" ]; then
 		echo "pre-push: the following $label files require gofmt:" >&2
 		echo "$unformatted" | sed 's/^/  /' >&2
