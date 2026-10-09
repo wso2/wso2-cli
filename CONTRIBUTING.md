@@ -33,6 +33,24 @@ temporary state directory and clears any ambient `WSO2_` variable first, so it
 never reads or writes real WSO2 state, and it needs no network catalog, no
 credentials, and no product service.
 
+CI also checks formatting, vet, and lint. To run most of those checks before
+every push instead of first finding out on the pull request, enable the
+checked-in git hooks once per clone:
+
+```shell
+make hooks
+```
+
+That sets `core.hooksPath` to `.githooks`, whose `pre-push` hook runs `gofmt -l`
+over the tracked Go files of the shell, the SDK, and the example module, then
+`make vet lint`. It needs `golangci-lint`, the version CI pins in
+`.github/workflows/pr-checks.yml`. It checks the working tree rather than the
+commits being pushed, and `git push --no-verify` skips it.
+
+Claude Code sessions in this repository also run `.claude/hooks/go-build.sh`
+after each edit, registered in `.claude/settings.json`: it builds the Go module
+the edited file belongs to and reports compile errors back to the session.
+
 A second gate proves the older half of the protocol window:
 
 ```shell
