@@ -344,6 +344,7 @@ $WSO2_HOME (default ~/.wso2)/
     preferences.json       shell preferences (ws config)
     locks/<ref>.lock       per-context session rotation locks
     modules/
+      <namespace>.lock     module activation lock
       <namespace>/
         active.json        exact active version and receipt digest
         policy.json        channel and pin
@@ -354,7 +355,7 @@ $WSO2_HOME (default ~/.wso2)/
 ```
 
 `active.json` is a state file rather than a symlink so behavior matches on
-Windows. Session rotation takes an OS advisory lock
+Windows. Session rotation and module activation take OS advisory locks
 ([ADR 0007](adr/0007-os-advisory-lock-for-session-rotation.md)). No
 credential is stored in this tree; sessions live in the OS secure store under
 the context's credential reference.
