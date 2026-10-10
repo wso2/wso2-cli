@@ -223,11 +223,11 @@ func verify(namespace string, selection catalog.Selection, archive []byte) error
 const corruptedRecovery = "The download was corrupted or substituted. Try again; if it keeps failing, report it to the module's maintainers."
 
 // lockDeadline bounds how long an activation waits for another invocation to
-// finish activating the same module namespace. The critical section performs
-// local extraction, staging, and state file updates with no network calls, so
-// 10 seconds is well above any healthy file operation while bounding delay under
-// contention.
-const lockDeadline = 10 * time.Second
+// finish activating the same module namespace. The critical section runs the
+// installed executable to fetch its declaration tree, taking up to
+// declarationTimeout, so this deadline sits above that limit plus a margin
+// to allow healthy concurrent installs to succeed.
+const lockDeadline = 15 * time.Second
 
 // activate stages the verified archive, moves it into its immutable version
 // directory, writes the receipt and the version policy, and points the
