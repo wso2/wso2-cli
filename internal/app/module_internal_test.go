@@ -132,6 +132,14 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 	incompatible := install.Status{
 		Namespace: "reference", Installed: "0.1.0", Channel: "stable", Available: "0.1.0", Incompatible: true,
 	}
+	incompatiblePinned := install.Status{
+		Namespace: "reference", Installed: "0.1.0",
+		Pinned: true, PinnedVersion: "0.1.0", Incompatible: true,
+	}
+	incompatibleUpdatable := install.Status{
+		Namespace: "apim", Installed: "1.0.0", Channel: "stable",
+		Available: "1.1.0", Update: true, Incompatible: true,
+	}
 	current := install.Status{
 		Namespace: "gateway", Installed: "2.0.0", Channel: "stable", Available: "2.0.0",
 	}
@@ -155,6 +163,14 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 		"an incompatible module alone": {
 			statuses: []install.Status{incompatible},
 			mustName: []string{"incompatible with this shell and cannot be launched"},
+		},
+		"an incompatible pinned module alone": {
+			statuses: []install.Status{incompatiblePinned},
+			mustName: []string{"incompatible with this shell and cannot be launched"},
+		},
+		"an incompatible module with an update available": {
+			statuses: []install.Status{incompatibleUpdatable},
+			mustName: []string{"update available", "wso2 product update --all"},
 		},
 		"an incompatible module beside a current one": {
 			statuses: []install.Status{incompatible, current},
@@ -213,12 +229,14 @@ func TestTheListSummaryNeverCallsANonCurrentModuleCurrent(t *testing.T) {
 // above and still drift the next time a state is added.
 func TestTheListSummaryAndTheUpdateColumnCannotDisagree(t *testing.T) {
 	for name, status := range map[string]install.Status{
-		"pinned":        {Namespace: "a", Installed: "1.0.0", Pinned: true, PinnedVersion: "1.0.0"},
-		"incompatible":  {Namespace: "f", Installed: "1.0.0", Incompatible: true},
-		"unpublished":   {Namespace: "b", Installed: "1.0.0", Channel: "stable"},
-		"updatable":     {Namespace: "c", Installed: "1.0.0", Channel: "stable", Available: "1.1.0", Update: true},
-		"current":       {Namespace: "d", Installed: "1.0.0", Channel: "stable", Available: "1.0.0"},
-		"not installed": {Namespace: "e", Channel: "stable", Available: "1.0.0"},
+		"pinned":                 {Namespace: "a", Installed: "1.0.0", Pinned: true, PinnedVersion: "1.0.0"},
+		"incompatible":           {Namespace: "f", Installed: "1.0.0", Incompatible: true},
+		"incompatible pinned":    {Namespace: "g", Installed: "1.0.0", Pinned: true, PinnedVersion: "1.0.0", Incompatible: true},
+		"incompatible updatable": {Namespace: "h", Installed: "1.0.0", Channel: "stable", Available: "1.1.0", Update: true, Incompatible: true},
+		"unpublished":            {Namespace: "b", Installed: "1.0.0", Channel: "stable"},
+		"updatable":              {Namespace: "c", Installed: "1.0.0", Channel: "stable", Available: "1.1.0", Update: true},
+		"current":                {Namespace: "d", Installed: "1.0.0", Channel: "stable", Available: "1.0.0"},
+		"not installed":          {Namespace: "e", Channel: "stable", Available: "1.0.0"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			column := updateColumn(status)
@@ -233,6 +251,42 @@ func TestTheListSummaryAndTheUpdateColumnCannotDisagree(t *testing.T) {
 					column, summary)
 			}
 		})
+	}
+}
+
+// TestStateOfPrioritizesUpdateAndReportsPinnedIncompatible pins that update
+// availability takes precedence over incompatibility (since updating can move
+// the module to a version this shell can launch), while an incompatible pinned
+// module is reported as incompatible rather than pinned (since it cannot be
+// launched or updated).
+func TestStateOfPrioritizesUpdateAndReportsPinnedIncompatible(t *testing.T) {
+	incompatiblePinned := install.Status{
+		Namespace:     "reference",
+		Installed:     "0.1.0",
+		Pinned:        true,
+		PinnedVersion: "0.1.0",
+		Incompatible:  true,
+	}
+	if got := stateOf(incompatiblePinned); got != stateIncompatible {
+		t.Errorf("stateOf(incompatiblePinned) = %v, want stateIncompatible", got)
+	}
+	if col := updateColumn(incompatiblePinned); col != "incompatible" {
+		t.Errorf("updateColumn(incompatiblePinned) = %q, want %q", col, "incompatible")
+	}
+
+	incompatibleUpdatable := install.Status{
+		Namespace:    "apim",
+		Installed:    "1.0.0",
+		Channel:      "stable",
+		Available:    "1.1.0",
+		Update:       true,
+		Incompatible: true,
+	}
+	if got := stateOf(incompatibleUpdatable); got != stateUpdatable {
+		t.Errorf("stateOf(incompatibleUpdatable) = %v, want stateUpdatable", got)
+	}
+	if col := updateColumn(incompatibleUpdatable); col != "v1.1.0 available" {
+		t.Errorf("updateColumn(incompatibleUpdatable) = %q, want %q", col, "v1.1.0 available")
 	}
 }
 

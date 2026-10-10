@@ -305,7 +305,8 @@ unpublished module through a local development origin
 
 1. reads the catalog index, then the namespace file;
 2. selects the newest version the channel or pin permits whose protocol
-   versions intersect the shell's and which publishes an artifact for this
+   versions intersect the shell's, whose declared shell compatibility range
+   contains the shell's version, and which publishes an artifact for this
    platform;
 3. downloads the archive and checks its size and SHA-256;
 4. extracts it into a staging directory, rejecting absolute paths,
@@ -441,11 +442,12 @@ it. The `previous-protocol` pull-request check builds the example module
 against the published SDK for the older protocol and launches it under the
 branch's shell.
 
-The launch gate is the protocol window intersected with the platform, plus
-the module's own declared shell range. **The shell never compares a module's
-version with its own.** Module versions follow their products' schemes, so
-the comparison would be meaningless and would refuse modules that work.
-Reintroducing it is not defensive tightening.
+The gate (enforced during catalog selection and on launch) is the protocol
+window intersected with the platform, plus the module's own declared shell
+range. **The shell never compares a module's version with its own.** Module
+versions follow their products' schemes, so the comparison would be
+meaningless and would refuse modules that work. Reintroducing it is not
+defensive tightening.
 
 ```text
 $ ws version

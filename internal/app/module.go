@@ -616,20 +616,22 @@ const (
 )
 
 // stateOf classifies one module. The order matters: a module that is not
-// installed has no pin or installed version for the rest to be about, an
-// incompatible module cannot be launched regardless of channel or pin, and a
-// pin overrides the channel (catalog.Policy documents that), so those are
-// asked about first.
+// installed has no pin or installed version for the rest to be about.
+// An update takes precedence when one is available, since updating can move
+// the module to a version this shell can launch. Otherwise, an incompatible
+// module cannot be launched regardless of channel or pin, and a pin
+// overrides the channel (catalog.Policy documents that), so those are asked
+// about next.
 func stateOf(status install.Status) moduleState {
 	switch {
 	case status.Installed == "":
 		return stateNotInstalled
-	case status.Pinned:
-		return statePinned
 	case status.Update:
 		return stateUpdatable
 	case status.Incompatible:
 		return stateIncompatible
+	case status.Pinned:
+		return statePinned
 	case status.Available == "":
 		return stateUnpublished
 	default:

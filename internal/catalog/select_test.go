@@ -159,8 +159,8 @@ func TestSelectRefusesWhenNoSpeakableVersionPublishesThisPlatform(t *testing.T) 
 	file := NamespaceFile{
 		Namespace: "reference",
 		Versions: []Version{{
-			Version:       "1.0.0",
-			Channel:       ChannelStable,
+			Version: "1.0.0",
+			Channel: ChannelStable,
 			Compatibility: modules.Compatibility{
 				Shell:            ">=0.1.0 <2.0.0",
 				ProtocolVersions: []int{1},
