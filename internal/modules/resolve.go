@@ -269,6 +269,21 @@ func checkPlatform(receipt Receipt, shell ShellIdentity) error {
 	return nil
 }
 
+// CheckCompatibility reports whether this receipt is compatible with the shell:
+// protocol version, shell version range, and platform must all hold.
+func (r Receipt) CheckCompatibility(shell ShellIdentity) error {
+	if _, err := negotiateProtocol(r, shell); err != nil {
+		return err
+	}
+	if err := checkShellCompatibility(r, shell); err != nil {
+		return err
+	}
+	if err := checkPlatform(r, shell); err != nil {
+		return err
+	}
+	return nil
+}
+
 // containedExecutablePath joins a receipt's relative executable path to its
 // version directory and proves the result stays inside that directory, after
 // symbolic links are resolved.

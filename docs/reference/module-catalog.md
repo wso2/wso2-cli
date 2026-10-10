@@ -23,8 +23,8 @@ A product module's tags are prefixed by the namespace it owns, which separates
 them from the shell's plain `v*` tags and from the SDK's `sdk/v*` tags. The
 version is otherwise the product's own: a module is free to carry the version
 its users already know, and the shell never compares a module's version against
-its own. The launch gate is the protocol range intersected with the platform,
-and nothing else.
+its own. The gate is the protocol range intersected with the shell range and the
+platform, and nothing else.
 
 The one constraint is that the version is a semantic version, which is the
 constraint the module receipt already imposes on an installed module: a version

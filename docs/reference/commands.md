@@ -375,11 +375,13 @@ PRODUCT     INSTALLED   CHANNEL   UPDATE
 am          v1.2.0      stable    v1.3.0 available
 apim        v0.9.0      stable    current
 intg        v0.4.0      —         pinned to v0.4.0
+legacy      v0.2.0      stable    incompatible
 iam         —           stable    v0.1.0 to install
 
 1 product has an update available. Run ws product update --all to take it.
 1 product is current.
 1 product is pinned and will not be updated.
+1 product is incompatible with this shell and cannot be launched. Update the WSO2 CLI so the shell version is supported.
 1 product is not installed. Run ws product install iam to install it.
 ```
 
@@ -389,6 +391,13 @@ install would follow, and UPDATE the version that install would take. A product
 published only on prerelease names that channel, and the install command
 beneath the table adds `--channel prerelease`, since a plain install follows
 stable.
+
+UPDATE also reports `incompatible` when an installed product's declared shell
+range is not satisfied by the running shell, such as `legacy` above. An
+incompatible product cannot be launched, is counted on its own summary line
+(`N product(s) incompatible with this shell and cannot be launched.`), and
+prevents the list summary from reporting that every installed product is
+current until the shell or the module is updated.
 
 CHANNEL names the channel a module follows for updates; it shows `—` for a
 module installed at an exact version with no channel chosen, such as
