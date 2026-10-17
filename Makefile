@@ -176,10 +176,10 @@ export CLI_NAME
 # An uninjected build reports 0.0.0-dev, and a module's declared shell range
 # does not contain it: a prerelease sorts below its own release, so the
 # ">=0.1.0" a scaffolded module declares excludes the very shell a contributor
-# builds by hand. Such a shell installs a module and then refuses to launch it,
-# which is the confusion this target exists to remove. The default names a
-# development build in the 1.x line, which every scaffolded module's range
-# contains. SHELL_VERSION names another one.
+# builds by hand. Such a shell is refused when installing a module, which is the
+# confusion this target exists to remove. The default names a development build
+# in the 1.x line, which every scaffolded module's range contains. SHELL_VERSION
+# names another one.
 #
 # This is a development build and says so in its version. It is not how a
 # release is built; see .goreleaser.yaml for that.
@@ -214,10 +214,10 @@ build-shell:
 # truth because build-shell above compiled that shell from this checkout. A
 # released wso2 is a different shell and has to say what it speaks. A module's
 # declared shell range does not contain the 0.0.0-dev an uninjected build
-# reports, so a shell built the ordinary way installs a module and then refuses
-# to launch it. SHELL_VERSION names another version, for a released wso2 you
-# intend to run instead; the install is still refused up front when that version
-# could not launch the module.
+# reports, so a shell built the ordinary way is refused when installing a module
+# rather than letting it install and fail later. SHELL_VERSION names another version,
+# for a released wso2 you intend to run instead; the install is still refused up
+# front when that version could not launch the module.
 .PHONY: install-module
 install-module: build-shell
 ifndef NAMESPACE

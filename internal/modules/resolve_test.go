@@ -451,3 +451,42 @@ func absoluteProbePath() string {
 	}
 	return "/bin/sh"
 }
+
+func TestReceiptCheckCompatibility(t *testing.T) {
+	shell := shellIdentity()
+	baseReceipt := modules.Receipt{
+		Namespace:     "reference",
+		ModuleVersion: "0.1.0",
+		Platform:      shell.Platform,
+		Compatibility: modules.Compatibility{
+			Shell:            ">=0.1.0 <2.0.0",
+			ProtocolVersions: []int{1},
+		},
+	}
+
+	if err := baseReceipt.CheckCompatibility(shell); err != nil {
+		t.Fatalf("CheckCompatibility returned %v, want nil", err)
+	}
+
+	shellMismatch := baseReceipt
+	shellMismatch.Compatibility.Shell = ">=2.0.0 <3.0.0"
+	err := shellMismatch.CheckCompatibility(shell)
+	var typed problem.Problem
+	if !errors.As(err, &typed) || typed.Code != "modules.incompatible_shell" {
+		t.Errorf("code = %v, want modules.incompatible_shell", err)
+	}
+
+	protoMismatch := baseReceipt
+	protoMismatch.Compatibility.ProtocolVersions = []int{99}
+	err = protoMismatch.CheckCompatibility(shell)
+	if !errors.As(err, &typed) || typed.Code != "modules.incompatible_protocol" {
+		t.Errorf("code = %v, want modules.incompatible_protocol", err)
+	}
+
+	platMismatch := baseReceipt
+	platMismatch.Platform = modules.Platform{OS: "other", Arch: "arch"}
+	err = platMismatch.CheckCompatibility(shell)
+	if !errors.As(err, &typed) || typed.Code != "modules.incompatible_platform" {
+		t.Errorf("code = %v, want modules.incompatible_platform", err)
+	}
+}
