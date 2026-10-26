@@ -23,8 +23,8 @@ A product module's tags are prefixed by the namespace it owns, which separates
 them from the shell's plain `v*` tags and from the SDK's `sdk/v*` tags. The
 version is otherwise the product's own: a module is free to carry the version
 its users already know, and the shell never compares a module's version against
-its own. The launch gate is the protocol range intersected with the platform,
-and nothing else.
+its own. The gate is the protocol range intersected with the shell range and the
+platform, and nothing else.
 
 The one constraint is that the version is a semantic version, which is the
 constraint the module receipt already imposes on an installed module: a version
@@ -173,9 +173,10 @@ The full history for one namespace, newest version first.
 
 Ordering the file newest first is a presentation choice and not a selection
 one. Among the versions its channel and pin policy permit, a shell selects the
-newest whose protocol range intersects what it speaks and which publishes an
-artifact for its platform. The numerically newest release is not assumed
-usable.
+newest whose protocol range intersects what it speaks, whose declared shell
+range contains its version, and which publishes an artifact for its platform.
+The numerically newest release is not assumed usable.
+
 
 ## Installing from the catalog
 
