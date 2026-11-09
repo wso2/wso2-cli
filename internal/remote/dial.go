@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
 
@@ -45,6 +46,8 @@ type AgentDialer struct {
 	Token func(ctx context.Context) (string, error)
 	// UserAgent is sent to the bridge, as wso2-cli/<version>.
 	UserAgent string
+	// HTTPClient carries the WebSocket upgrade; nil means the default client.
+	HTTPClient *http.Client
 }
 
 // Dial opens one tunnel to one remote-agent. capability is read once per
@@ -64,7 +67,7 @@ func (a AgentDialer) Dial(ctx context.Context, agent remoteconnect.AgentEndpoint
 	ctx, cancel := context.WithTimeout(ctx, dialDeadline)
 	defer cancel()
 	client, err := remoteconnect.DialTunnel(ctx, endpoint, agent.CABundle, agent.ServerName, capability,
-		remoteconnect.DialOptions{BearerToken: token, UserAgent: a.UserAgent})
+		remoteconnect.DialOptions{BearerToken: token, UserAgent: a.UserAgent, HTTPClient: a.HTTPClient})
 	if err != nil {
 		return nil, fmt.Errorf("connect to remote-agent %s (%s): %w", endpoint, agent.ServerName, err)
 	}
