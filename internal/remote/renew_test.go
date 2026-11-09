@@ -334,8 +334,61 @@ func TestRenewStopsOnTerminalRefusal(t *testing.T) {
 	if calls := r.requests(); len(calls) != 1 {
 		t.Errorf("expected exactly one attempt for a terminal refusal, got %d", len(calls))
 	}
-	if got := out.String(); !strings.Contains(got, "ws login") {
-		t.Errorf("a 401 should point at `ws login`, got %q", got)
+	if got := out.String(); !strings.Contains(got, "wso2 login") {
+		t.Errorf("a 401 should point at `wso2 login`, got %q", got)
+	}
+}
+
+// A renewal whose fresh token exchange is refused means the login is gone; retrying
+// until the capability lapses would hide that, so the renewer stops and says to log in.
+func TestRenewStopsWhenTheLoginCanNoLongerBeExchanged(t *testing.T) {
+	out := &syncBuf{}
+	u, _ := unitFixture(t, out)
+	u.renewAfter = time.Millisecond
+
+	mints := 0
+	tokens := &Tokens{Mint: func(context.Context) (Grant, error) {
+		mints++
+		return Grant{}, LoginRequired{Cause: errors.New("the session has expired")}
+	}}
+	resolver := renewalResolver{inner: &Broker{BaseURL: "http://127.0.0.1:1", Token: tokens.Token}, tokens: tokens}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	stopped := make(chan struct{})
+	go func() { u.renew(ctx, resolver); close(stopped) }()
+	select {
+	case <-stopped:
+	case <-ctx.Done():
+		t.Fatal("the renewer kept retrying an expired login")
+	}
+	if mints != 1 {
+		t.Errorf("exchanges = %d, want one attempt before giving up", mints)
+	}
+	got := out.String()
+	if !strings.Contains(got, "wso2 login") || !strings.Contains(got, "session ended") {
+		t.Errorf("an expired login should end the session and name `wso2 login`, got %q", got)
+	}
+}
+
+// A 400 is a defect in the request; sending it again cannot change the answer.
+func TestRenewStopsOnABadRequest(t *testing.T) {
+	out := &syncBuf{}
+	u, _ := unitFixture(t, out)
+	u.renewAfter = time.Millisecond
+
+	r := &scriptedResolver{steps: []resolveStep{
+		{err: &BrokerError{Status: http.StatusBadRequest, Code: "invalid_request", Message: "environment is required"}},
+	}}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	u.renew(ctx, r)
+
+	if calls := r.requests(); len(calls) != 1 {
+		t.Errorf("attempts = %d, want exactly one for a 400", len(calls))
+	}
+	if got := out.String(); !strings.Contains(got, "session ended") {
+		t.Errorf("a 400 should end the session, got %q", got)
 	}
 }
 

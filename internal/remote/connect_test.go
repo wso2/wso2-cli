@@ -335,7 +335,7 @@ func TestRenewalExchangesAfreshAndEndsOnARefusal(t *testing.T) {
 	if u.cap() != "cap-2" {
 		t.Errorf("capability = %q, want the first renewal's", u.cap())
 	}
-	if got := out.String(); !strings.Contains(got, "maximum age") || !strings.Contains(got, "restart `ws remote connect`") {
+	if got := out.String(); !strings.Contains(got, "maximum age") || !strings.Contains(got, "restart `wso2 remote connect`") {
 		t.Errorf("the refusal's remedy is missing: %q", got)
 	}
 }

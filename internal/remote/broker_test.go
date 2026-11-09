@@ -118,12 +118,22 @@ func TestBrokerRefusalsAreTerminalOnlyWhenRetryingCannotHelp(t *testing.T) {
 		status   int
 		body     string
 		terminal bool
-		want     string
+		want     []string
+		absent   []string
 	}{
-		{401, `{"error":"bad audience","code":"unauthorized"}`, true, "ws login"},
-		{403, `{"error":"the session reached its maximum age","code":"session_expired"}`, true, "maximum age"},
-		{403, `{"error":"production","code":"production_environment"}`, true, "production"},
-		{502, `{"error":"an upstream service failed","code":"upstream_error"}`, false, "upstream"},
+		{401, `{"error":"bad audience","code":"unauthorized"}`, true, []string{"wso2 login", "wso2 remote connect"}, nil},
+		// Only an ended session is cured by starting a new one.
+		{403, `{"error":"the session reached its maximum age","code":"session_expired"}`, true,
+			[]string{"maximum age", "restart `wso2 remote connect`"}, nil},
+		{403, `{"error":"you may not connect to this project","code":"permission_denied"}`, true,
+			[]string{"you may not connect to this project", "access"}, []string{"restart"}},
+		{403, `{"error":"production","code":"production_environment"}`, true,
+			[]string{"production", "another environment"}, []string{"restart"}},
+		{403, `{"error":"not migrated","code":"org_needs_migration"}`, true,
+			[]string{"not migrated", "migrated"}, []string{"restart"}},
+		{400, `{"error":"environment is required","code":"invalid_request"}`, true,
+			[]string{"environment is required", "workload file"}, []string{"restart"}},
+		{502, `{"error":"an upstream service failed","code":"upstream_error"}`, false, []string{"upstream"}, nil},
 	}
 	for _, c := range cases {
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
@@ -138,10 +148,17 @@ func TestBrokerRefusalsAreTerminalOnlyWhenRetryingCannotHelp(t *testing.T) {
 			t.Fatalf("%d: err = %v, want a BrokerError", c.status, err)
 		}
 		if refused.Terminal() != c.terminal {
-			t.Errorf("%d: terminal = %v, want %v", c.status, refused.Terminal(), c.terminal)
+			t.Errorf("%d %s: terminal = %v, want %v", c.status, refused.Code, refused.Terminal(), c.terminal)
 		}
-		if !strings.Contains(refused.Reason(), c.want) {
-			t.Errorf("%d: reason %q lacks %q", c.status, refused.Reason(), c.want)
+		for _, want := range c.want {
+			if !strings.Contains(refused.Reason(), want) {
+				t.Errorf("%d %s: reason %q lacks %q", c.status, refused.Code, refused.Reason(), want)
+			}
+		}
+		for _, absent := range c.absent {
+			if strings.Contains(refused.Reason(), absent) {
+				t.Errorf("%d %s: reason %q must not say %q", c.status, refused.Code, refused.Reason(), absent)
+			}
 		}
 	}
 }
