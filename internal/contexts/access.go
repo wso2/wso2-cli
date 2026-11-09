@@ -78,12 +78,25 @@ const RemoteProduct = "remote"
 // own location is the product's url.
 const RemoteConnectAudience = "urn:wso2:cloud"
 
+// RemoteConnectScopes are the permissions the broker checks: what the login
+// asks for and what every remote exchange asks for. The code holds them, not
+// the context record, so the two can never drift apart.
+func RemoteConnectScopes() []string {
+	return []string{"cloud:remote-connect:connect", "cloud:remote-connect:read-secrets"}
+}
+
+// IsRemoteExchange reports whether the product is the one remote connect needs:
+// an exchange at the cloud audience.
+func (p Product) IsRemoteExchange() bool {
+	return p.Grant != nil && p.Grant.Kind == GrantExchange && p.Audience == RemoteConnectAudience
+}
+
 // LoginAccess is the authorization wso2 login runs first: the pinned login
 // product, else the first direct product by namespace, else a bare session
 // when the identity records no direct product.
 //
-// The login also asks for the scopes of the remote product, when the context
-// records it as an exchanged product. An exchange keeps the scopes of the
+// The login also asks for the remote scopes, when the context records the
+// remote product as an exchange at the cloud audience. An exchange keeps the scopes of the
 // session it exchanges and cannot add any, so the permissions the broker checks
 // can only come from the login. Only scopes are added: the login's resource
 // binding is untouched, so every other product's exchange from the same session
@@ -95,10 +108,10 @@ func (i Account) LoginAccess() ProductAccess {
 // withRemoteScopes adds the remote product's scopes to a login-session access.
 func (i Account) withRemoteScopes(access ProductAccess) ProductAccess {
 	remote, recorded := i.Products[RemoteProduct]
-	if !recorded || remote.Grant == nil || remote.Grant.Kind != GrantExchange {
+	if !recorded || !remote.IsRemoteExchange() {
 		return access
 	}
-	access.Scopes = sortedScopes(append(slices.Clone(access.Scopes), remote.Scopes...))
+	access.Scopes = sortedScopes(append(slices.Clone(access.Scopes), RemoteConnectScopes()...))
 	return access
 }
 

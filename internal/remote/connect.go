@@ -34,6 +34,7 @@ import (
 	"strconv"
 
 	"github.com/wso2/wso2-cli/internal/remoteconnect"
+	"github.com/wso2/wso2-cli/sdk/problem"
 )
 
 // ConnectParams are the inputs to ws remote connect.
@@ -90,15 +91,20 @@ func (d *Remote) renewResolver() Resolver {
 // is cancelled.
 func (d *Remote) Connect(ctx context.Context, p ConnectParams, out io.Writer) error {
 	if p.Environment == "" {
-		return errors.New("--env is required")
+		return problem.New(problem.CategoryUsage, "remote.environment_required", "--env is required").
+			WithRecovery("Run " + connectCommand + " <workload.yaml> --env <environment>.")
 	}
 	data, err := os.ReadFile(p.WorkloadPath)
 	if err != nil {
-		return fmt.Errorf("read the workload file: %w", err)
+		return problem.New(problem.CategoryUsage, "remote.workload_unreadable",
+			fmt.Sprintf("read the workload file: %v", err)).
+			WithRecovery("Check the path to the workload file and that you can read it.")
 	}
 	workload, err := ParseWorkload(data)
 	if err != nil {
-		return fmt.Errorf("%s: %w", p.WorkloadPath, err)
+		return problem.New(problem.CategoryUsage, "remote.workload_invalid",
+			fmt.Sprintf("%s: %v", p.WorkloadPath, err)).
+			WithRecovery("Pass a file holding one OpenChoreo Workload with spec.owner.projectName and spec.owner.componentName.")
 	}
 
 	release, found, err := d.Links.DeployedRelease(ctx, workload.Project, workload.Component, p.Environment)
@@ -119,7 +125,9 @@ func (d *Remote) Connect(ctx context.Context, p ConnectParams, out io.Writer) er
 		SkipSecrets: p.NoSecrets,
 	}
 	if len(req.Endpoints) == 0 && len(req.Resources) == 0 {
-		return errors.New("the workload declares no dependencies, and its deployed release binds none; nothing to connect")
+		return problem.New(problem.CategoryUsage, "remote.nothing_to_connect",
+			"the workload declares no dependencies, and its deployed release binds none; nothing to connect").
+			WithRecovery("Declare spec.dependencies in the workload file, or pick an environment whose release binds some.")
 	}
 
 	s := &session{

@@ -368,3 +368,49 @@ func TestAProductOnTheLoginSessionReportsTheLoginsScopes(t *testing.T) {
 		t.Fatalf("%s = %+v, want direct with the login's scopes %v", login.Namespace, direct, login.Scopes)
 	}
 }
+
+// The permissions the broker checks belong to the code, not to the context
+// record, so the login asks for the same scopes the exchange does.
+func TestTheLoginAsksForTheRemoteScopesWhateverTheRecordLists(t *testing.T) {
+	identity := withRemoteProduct(thunderIdentity())
+	product := identity.Products["remote"]
+	product.Scopes = nil
+	identity.Products["remote"] = product
+
+	base := thunderIdentity().LoginAccess()
+	want := slices.Sorted(slices.Values(append(slices.Clone(base.Scopes), contexts.RemoteConnectScopes()...)))
+	if got := identity.LoginAccess().Scopes; !slices.Equal(got, want) {
+		t.Fatalf("login scopes = %v, want %v", got, want)
+	}
+	if !slices.Equal(contexts.RemoteConnectScopes(), remoteConnectScopes) {
+		t.Fatalf("remote scopes = %v, want %v", contexts.RemoteConnectScopes(), remoteConnectScopes)
+	}
+}
+
+func TestOnlyAnExchangeAtTheCloudAudienceIsTheRemoteProduct(t *testing.T) {
+	exchange := &contexts.Grant{Kind: contexts.GrantExchange}
+	cases := map[string]struct {
+		product contexts.Product
+		want    bool
+	}{
+		"the cloud exchange": {contexts.Product{Audience: contexts.RemoteConnectAudience, Grant: exchange}, true},
+		"another audience":   {contexts.Product{Audience: "https://elsewhere.example", Grant: exchange}, false},
+		"no grant":           {contexts.Product{Audience: contexts.RemoteConnectAudience}, false},
+		"a different grant":  {contexts.Product{Audience: contexts.RemoteConnectAudience, Grant: &contexts.Grant{Kind: contexts.GrantJWTBearer}}, false},
+	}
+	for name, c := range cases {
+		if got := c.product.IsRemoteExchange(); got != c.want {
+			t.Errorf("%s: IsRemoteExchange = %v, want %v", name, got, c.want)
+		}
+	}
+}
+
+func TestARemoteRecordAtAnotherAudienceAddsNothingToTheLogin(t *testing.T) {
+	identity := withRemoteProduct(thunderIdentity())
+	product := identity.Products["remote"]
+	product.Audience = "https://elsewhere.example"
+	identity.Products["remote"] = product
+	if got, want := identity.LoginAccess().Scopes, thunderIdentity().LoginAccess().Scopes; !slices.Equal(got, want) {
+		t.Fatalf("login scopes = %v, want %v", got, want)
+	}
+}
