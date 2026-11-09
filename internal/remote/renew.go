@@ -338,7 +338,7 @@ func (u *remoteUnit) adopt(ctx context.Context, resp *remoteconnect.ResolveRespo
 	for key := range newLive {
 		if _, isBound := u.bound[key]; !isBound && !u.warnedUnbound[key] {
 			u.warnedUnbound[key] = true
-			fmt.Fprintf(u.out, "  ! %s is a new dependency; restart `ws remote connect` to open a local port for it\n", key)
+			fmt.Fprintf(u.out, "  ! %s is a new dependency; restart `wso2 remote connect` to open a local port for it\n", key)
 		}
 	}
 
@@ -414,7 +414,7 @@ func (u *remoteUnit) renew(ctx context.Context, resolver Resolver) {
 				u.stopRenewing()
 				return
 			}
-			var refused *ResolveError
+			var refused Terminated
 			if errors.As(err, &refused) && refused.Terminal() {
 				fmt.Fprintf(u.out, "  ! session ended for %s/%s: %s\n",
 					u.req.Project, u.req.Component, refused.Reason())

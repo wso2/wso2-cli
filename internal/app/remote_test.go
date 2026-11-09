@@ -125,3 +125,29 @@ func TestRemoteConnectTakesOneWorkloadAndTheEnvironment(t *testing.T) {
 		}
 	}
 }
+
+// A mistake in the inputs is a usage problem with a way out, not a bare error.
+func TestRemoteConnectReportsAnUnreadableWorkloadAsATypedProblem(t *testing.T) {
+	shell, _, errOut := newLoginShell(t)
+	installLogin(t, shell, remoteDocument(nil))
+
+	missing := filepath.Join(t.TempDir(), "absent.yaml")
+	if code := shell.Run([]string{"remote", "connect", missing, "--env", "development"}); code == exit.OK {
+		t.Fatalf("exit %d for a missing workload file", code)
+	}
+	if got := errOut.String(); !strings.Contains(got, "remote.workload_unreadable") || !strings.Contains(got, "workload file") {
+		t.Errorf("the refusal is not typed with a recovery:\n%s", got)
+	}
+
+	invalid := filepath.Join(t.TempDir(), "workload.yaml")
+	if err := os.WriteFile(invalid, []byte("kind: Service\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	errOut.Reset()
+	if code := shell.Run([]string{"remote", "connect", invalid, "--env", "development"}); code == exit.OK {
+		t.Fatalf("exit %d for a file with no Workload", code)
+	}
+	if got := errOut.String(); !strings.Contains(got, "remote.workload_invalid") {
+		t.Errorf("a file with no Workload is not typed:\n%s", got)
+	}
+}

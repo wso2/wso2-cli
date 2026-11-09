@@ -133,7 +133,7 @@ func (r *streamErrorReporter) report(key string, err error) {
 			return
 		}
 		fmt.Fprintf(r.out, "  ! %s: the session expired at %s and is no longer being renewed — "+
-			"exit and re-run `ws remote connect` to reconnect\n", key, exp.Local().Format(time.Kitchen))
+			"exit and re-run `wso2 remote connect` to reconnect\n", key, exp.Local().Format(time.Kitchen))
 		return
 	}
 	fmt.Fprintf(r.out, "  ! %s: %v\n", key, err)

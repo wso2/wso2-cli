@@ -92,7 +92,7 @@ func TestReportExpiredSessionAfterRenewalStopped(t *testing.T) {
 	reporter.report("res/local-dev-postgres/client", errors.New("stream rejected: not authorized"))
 
 	got := out.String()
-	if !strings.Contains(got, "no longer being renewed") || !strings.Contains(got, "ws remote connect") {
+	if !strings.Contains(got, "no longer being renewed") || !strings.Contains(got, "wso2 remote connect") {
 		t.Errorf("a stopped session must tell the developer to restart, got: %q", got)
 	}
 }

@@ -45,30 +45,10 @@ type workloadDocument struct {
 			ComponentName string `json:"componentName"`
 		} `json:"owner"`
 		Dependencies struct {
-			Endpoints []endpointDependency `json:"endpoints"`
-			Resources []resourceDependency `json:"resources"`
+			Endpoints []remoteconnect.EndpointDep `json:"endpoints"`
+			Resources []remoteconnect.ResourceDep `json:"resources"`
 		} `json:"dependencies"`
 	} `json:"spec"`
-}
-
-type endpointDependency struct {
-	Project     string `json:"project"`
-	Component   string `json:"component"`
-	ReleaseLine string `json:"releaseLine"`
-	Name        string `json:"name"`
-	Visibility  string `json:"visibility"`
-	EnvBindings struct {
-		Address  string `json:"address"`
-		Host     string `json:"host"`
-		Port     string `json:"port"`
-		BasePath string `json:"basePath"`
-	} `json:"envBindings"`
-}
-
-type resourceDependency struct {
-	Ref          string            `json:"ref"`
-	EnvBindings  map[string]string `json:"envBindings"`
-	FileBindings map[string]string `json:"fileBindings"`
 }
 
 // ParseWorkload reads the one Workload a file holds. Documents of any other
@@ -118,21 +98,8 @@ func ParseWorkload(data []byte) (Workload, error) {
 	if owner.ProjectName == "" || owner.ComponentName == "" {
 		return Workload{}, errors.New("the Workload has no spec.owner.projectName or spec.owner.componentName")
 	}
-	workload := Workload{Project: owner.ProjectName, Component: owner.ComponentName}
-	for _, e := range doc.Spec.Dependencies.Endpoints {
-		workload.Endpoints = append(workload.Endpoints, remoteconnect.EndpointDep{
-			Project: e.Project, Component: e.Component, ReleaseLine: e.ReleaseLine,
-			Name: e.Name, Visibility: e.Visibility,
-			EnvBindings: remoteconnect.EndpointEnvBindings{
-				Address: e.EnvBindings.Address, Host: e.EnvBindings.Host,
-				Port: e.EnvBindings.Port, BasePath: e.EnvBindings.BasePath,
-			},
-		})
-	}
-	for _, r := range doc.Spec.Dependencies.Resources {
-		workload.Resources = append(workload.Resources, remoteconnect.ResourceDep{
-			Ref: r.Ref, EnvBindings: r.EnvBindings, FileBindings: r.FileBindings,
-		})
-	}
-	return workload, nil
+	return Workload{
+		Project: owner.ProjectName, Component: owner.ComponentName,
+		Endpoints: doc.Spec.Dependencies.Endpoints, Resources: doc.Spec.Dependencies.Resources,
+	}, nil
 }

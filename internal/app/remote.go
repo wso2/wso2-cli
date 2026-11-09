@@ -23,8 +23,8 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -40,22 +40,11 @@ import (
 const (
 	remoteConnectUsage = "Run wso2 remote connect <workload.yaml> --env <environment> [--print-env] [--no-secrets | --show-secrets]."
 	remoteRecovery     = "Run wso2 remote connect <workload.yaml> --env <environment> to tunnel a workload's dependencies to this machine."
-
-	// remoteConnectScope and remoteReadSecretsScope are the two permissions the
-	// broker checks. The code holds the how; the context holds the where.
-	remoteConnectScope     = "cloud:remote-connect:connect"
-	remoteReadSecretsScope = "cloud:remote-connect:read-secrets"
-
-	// remoteCallTimeout bounds one call to the broker.
-	remoteCallTimeout = 30 * time.Second
 )
-
-// remoteScopes are what every exchange for the remote product asks for.
-func remoteScopes() []string { return []string{remoteConnectScope, remoteReadSecretsScope} }
 
 // remoteCommand builds the wso2 remote tree. It is a verification client for
 // remote connect, not a product module: a module cannot hold a terminal, an
-// open tunnel or a renewing token (docs: research 05, option A).
+// open tunnel or a renewing token.
 func (s Shell) remoteCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:                   "remote <subcommand>",
@@ -85,8 +74,9 @@ func (s Shell) remoteConnectCommand() *cobra.Command {
 			"dependency, and starts a subshell whose environment points at those ports. The session renews itself. " +
 			"The project and component come from the file's spec.owner and the organization from your login.\n\n" +
 			"The context needs a remote product: an exchanged product at the audience " + contexts.RemoteConnectAudience +
-			" with the " + remoteConnectScope + " and " + remoteReadSecretsScope + " scopes, whose url is the broker's base URL. " +
-			"Run wso2 login again after adding it, because the login must ask for those scopes.",
+			" whose url is the broker's base URL. " +
+			"Run wso2 login again after adding it: the login then asks for the scopes the broker checks (" +
+			strings.Join(contexts.RemoteConnectScopes(), ", ") + ").",
 		Args: exactlyOneArgument("one workload file", remoteConnectUsage),
 		RunE: func(command *cobra.Command, args []string) error {
 			params.WorkloadPath = args[0]
@@ -133,12 +123,17 @@ func (s Shell) remoteConnect(contextName string, params remote.ConnectParams) er
 			Namespace: contexts.RemoteProduct,
 			Capabilities: modules.Capabilities{
 				AuthAudiences: []string{contexts.RemoteConnectAudience},
-				AuthScopes:    remoteScopes(),
+				AuthScopes:    contexts.RemoteConnectScopes(),
 			},
 			Selection: selected,
 			StateRoot: root,
 		}
-		grant, err := broker.Acquire(auth.Request{Audience: contexts.RemoteConnectAudience, Scopes: remoteScopes()})
+		grant, err := broker.Acquire(auth.Request{Audience: contexts.RemoteConnectAudience, Scopes: contexts.RemoteConnectScopes()})
+		var denial auth.Denial
+		if errors.As(err, &denial) {
+			// No retry mends a refused exchange; only a new login does.
+			return remote.Grant{}, remote.LoginRequired{Cause: err}
+		}
 		if err != nil {
 			return remote.Grant{}, err
 		}
@@ -147,7 +142,7 @@ func (s Shell) remoteConnect(contextName string, params remote.ConnectParams) er
 	api := &remote.Broker{
 		BaseURL:    product.Endpoint,
 		Token:      tokens.Token,
-		HTTPClient: trustedhttp.Client(&http.Client{Timeout: remoteCallTimeout}),
+		HTTPClient: trustedhttp.Client(&http.Client{Timeout: remote.CallTimeout}),
 	}
 
 	// Tunnels live for the session; Ctrl-C or SIGTERM tears everything down.
@@ -163,14 +158,10 @@ func remoteProduct(selected contexts.Selection) (contexts.Product, error) {
 	product, recorded := selected.Identity.Products[contexts.RemoteProduct]
 	switch {
 	case !recorded:
-		return contexts.Product{}, remoteProductRefusal(selected,
-			"records no remote product")
-	case product.Grant == nil || product.Grant.Kind != contexts.GrantExchange:
-		return contexts.Product{}, remoteProductRefusal(selected,
-			"records its remote product without the exchange grant")
-	case product.Audience != contexts.RemoteConnectAudience:
-		return contexts.Product{}, remoteProductRefusal(selected,
-			fmt.Sprintf("records its remote product at an audience other than %s", contexts.RemoteConnectAudience))
+		return contexts.Product{}, remoteProductRefusal(selected, "records no remote product")
+	case !product.IsRemoteExchange():
+		return contexts.Product{}, remoteProductRefusal(selected, fmt.Sprintf(
+			"records its remote product other than as an exchange at the audience %s", contexts.RemoteConnectAudience))
 	}
 	return product, nil
 }
@@ -179,8 +170,8 @@ func remoteProductRefusal(selected contexts.Selection, what string) error {
 	return problem.New(problem.CategoryUsage, "remote.product_not_configured",
 		fmt.Sprintf("the %q context %s", selected.Context.Name, what)).
 		WithRecovery(fmt.Sprintf("Add products.remote to the context with wso2 context edit: url (the broker's base URL), "+
-			"audience %s, scopes %s and %s, and grant kind exchange. Then run wso2 login again, because the login "+
-			"must ask for those scopes.", contexts.RemoteConnectAudience, remoteConnectScope, remoteReadSecretsScope))
+			"audience %s and grant kind exchange. Then run wso2 login again, because the login must ask for the "+
+			"remote scopes.", contexts.RemoteConnectAudience))
 }
 
 // remoteProblem turns a failure into the typed problem the shell reports: a
@@ -194,10 +185,15 @@ func remoteProblem(err error) error {
 	if errors.As(err, &denial) {
 		return denial.Reported()
 	}
-	var refused *remote.ResolveError
+	var refused *remote.BrokerError
 	if errors.As(err, &refused) {
 		return problem.New(problem.CategoryProductService, "remote.broker_refused", refused.Error()).
 			WithRecovery(refused.Reason())
 	}
-	return err
+	var typed problem.Problem
+	if errors.As(err, &typed) {
+		return typed
+	}
+	return problem.New(problem.CategoryProductService, "remote.connect_failed", err.Error()).
+		WithRecovery(remoteRecovery)
 }
