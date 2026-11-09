@@ -119,6 +119,14 @@ spec:
 	}
 }
 
+func TestParseWorkloadSkipsDocumentsThatAreNotWorkloads(t *testing.T) {
+	doc := "---\nkind: Component\nspec: [not, a, map]\n---\n{{ templated: yaml\n---\nkind: Workload\nspec:\n  owner: {projectName: p, componentName: c}\n"
+	wl, err := ParseWorkload([]byte(doc))
+	if err != nil || wl.Component != "c" {
+		t.Fatalf("workload=%+v err=%v", wl, err)
+	}
+}
+
 func TestParseWorkloadRefusesAFileWithoutOneOwnedWorkload(t *testing.T) {
 	cases := map[string]string{
 		"no workload":   "kind: ConfigMap\nmetadata:\n  name: x\n",

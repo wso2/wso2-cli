@@ -185,8 +185,8 @@ func (s Shell) rootCommand() *cobra.Command {
 	declareOutputFlag(root.Flags())
 
 	root.AddCommand(s.configCommand(), s.contextCommand(), s.doctorCommand(),
-		s.loginCommand(), s.logoutCommand(), s.productCommand(), s.moduleAliasCommand(), s.orgCommand(), s.versionCommand(),
-		s.whoamiCommand())
+		s.loginCommand(), s.logoutCommand(), s.productCommand(), s.moduleAliasCommand(), s.orgCommand(), s.remoteCommand(),
+		s.versionCommand(), s.whoamiCommand())
 
 	// Cobra's generated help command describes itself generically. The shell
 	// published its own summary for it, and that wording is kept. Its body is

@@ -18,13 +18,12 @@ package remote
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-
-	"go.yaml.in/yaml/v3"
 
 	"github.com/wso2/wso2-cli/internal/remoteconnect"
+	"github.com/wso2/wso2-cli/internal/yamldoc"
 )
 
 // Workload is what remote connect reads of a workload file: the owning
@@ -39,57 +38,73 @@ type Workload struct {
 
 // workloadDocument is the decode shape of one Workload document.
 type workloadDocument struct {
-	Kind string `yaml:"kind"`
+	Kind string `json:"kind"`
 	Spec struct {
 		Owner struct {
-			ProjectName   string `yaml:"projectName"`
-			ComponentName string `yaml:"componentName"`
-		} `yaml:"owner"`
+			ProjectName   string `json:"projectName"`
+			ComponentName string `json:"componentName"`
+		} `json:"owner"`
 		Dependencies struct {
-			Endpoints []endpointDependency `yaml:"endpoints"`
-			Resources []resourceDependency `yaml:"resources"`
-		} `yaml:"dependencies"`
-	} `yaml:"spec"`
+			Endpoints []endpointDependency `json:"endpoints"`
+			Resources []resourceDependency `json:"resources"`
+		} `json:"dependencies"`
+	} `json:"spec"`
 }
 
 type endpointDependency struct {
-	Project     string `yaml:"project"`
-	Component   string `yaml:"component"`
-	ReleaseLine string `yaml:"releaseLine"`
-	Name        string `yaml:"name"`
-	Visibility  string `yaml:"visibility"`
+	Project     string `json:"project"`
+	Component   string `json:"component"`
+	ReleaseLine string `json:"releaseLine"`
+	Name        string `json:"name"`
+	Visibility  string `json:"visibility"`
 	EnvBindings struct {
-		Address  string `yaml:"address"`
-		Host     string `yaml:"host"`
-		Port     string `yaml:"port"`
-		BasePath string `yaml:"basePath"`
-	} `yaml:"envBindings"`
+		Address  string `json:"address"`
+		Host     string `json:"host"`
+		Port     string `json:"port"`
+		BasePath string `json:"basePath"`
+	} `json:"envBindings"`
 }
 
 type resourceDependency struct {
-	Ref          string            `yaml:"ref"`
-	EnvBindings  map[string]string `yaml:"envBindings"`
-	FileBindings map[string]string `yaml:"fileBindings"`
+	Ref          string            `json:"ref"`
+	EnvBindings  map[string]string `json:"envBindings"`
+	FileBindings map[string]string `json:"fileBindings"`
 }
 
 // ParseWorkload reads the one Workload a file holds. Documents of any other
 // kind are skipped. A file with no Workload, more than one, or one that names
 // no owner is refused: a session is for one component.
 func ParseWorkload(data []byte) (Workload, error) {
-	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	var found []workloadDocument
-	for {
-		var doc workloadDocument
-		err := decoder.Decode(&doc)
-		if errors.Is(err, io.EOF) {
-			break
+	// A leading separator opens the first document; the prepended newline lets
+	// one split rule cover it.
+	for _, part := range bytes.Split(append([]byte("\n"), data...), []byte("\n---")) {
+		if len(bytes.TrimSpace(part)) == 0 {
+			continue
 		}
+		converted, err := yamldoc.ToJSON(part)
 		if err != nil {
-			return Workload{}, fmt.Errorf("the file is not valid YAML: %w", err)
+			// A document that does not parse is reported only when it means to
+			// be a Workload, which keeps templated YAML beside it from failing
+			// the read.
+			if bytes.Contains(part, []byte("kind: Workload")) {
+				return Workload{}, fmt.Errorf("a Workload document is not readable YAML: %w", err)
+			}
+			continue
 		}
-		if doc.Kind == "Workload" {
-			found = append(found, doc)
+		// Decided on the kind alone, so another kind's shape under spec can
+		// never fail the read.
+		var probe struct {
+			Kind string `json:"kind"`
 		}
+		if json.Unmarshal(converted, &probe) != nil || probe.Kind != "Workload" {
+			continue
+		}
+		var doc workloadDocument
+		if err := json.Unmarshal(converted, &doc); err != nil {
+			return Workload{}, fmt.Errorf("a Workload document is malformed: %w", err)
+		}
+		found = append(found, doc)
 	}
 	switch len(found) {
 	case 0:

@@ -136,18 +136,15 @@ func connectFixture(t *testing.T, broker *fakeBroker) (*Remote, *atomic.Int32, *
 	api := &Broker{BaseURL: server.URL, Token: tokens.Token}
 	echo := startEchoServer(t)
 	agentTunnel := &fakeTunnel{addr: echo.Addr().String(), values: map[string][]byte{"sec/orders-db/password": []byte("s3cret")}}
-	return &Remote{
-		Links:         api,
-		Resolver:      api,
-		RenewResolver: renewalResolver{inner: api, tokens: tokens},
-		DialAgent: func(ctx context.Context, _ remoteconnect.AgentEndpoint, _ func() string) (tunnel, error) {
-			// The dial presents the same token the broker was called with.
-			if _, err := tokens.Token(ctx); err != nil {
-				return nil, err
-			}
-			return agentTunnel, nil
-		},
-	}, mints, agentTunnel
+	remote := New(api, tokens, "wso2-cli/test")
+	remote.DialAgent = func(ctx context.Context, _ remoteconnect.AgentEndpoint, _ func() string) (tunnel, error) {
+		// The dial presents the same token the broker was called with.
+		if _, err := tokens.Token(ctx); err != nil {
+			return nil, err
+		}
+		return agentTunnel, nil
+	}
+	return remote, mints, agentTunnel
 }
 
 func TestConnectMergesTheDeployedReleaseOverTheFileAndTunnels(t *testing.T) {

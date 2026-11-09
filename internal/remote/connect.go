@@ -263,3 +263,18 @@ func (d *Remote) connectRemote(ctx context.Context, req remoteconnect.ResolveReq
 	}
 	return nil
 }
+
+// New wires a Remote the way production runs it: the broker answers the
+// connect and, behind a fresh exchange each time, every renewal; tunnels are
+// dialled with the same token the broker is called with; the subshell is the
+// user's own.
+func New(api *Broker, tokens *Tokens, userAgent string) *Remote {
+	return &Remote{
+		Links:          api,
+		Resolver:       api,
+		RenewResolver:  renewalResolver{inner: api, tokens: tokens},
+		DialAgent:      AgentDialer{Token: tokens.Token, UserAgent: userAgent}.Dial,
+		RunShell:       runInteractiveShell,
+		ConfirmSecrets: confirmShowSecrets,
+	}
+}
