@@ -33,7 +33,7 @@ import (
 )
 
 func TestCommandNamesAreDerivedFromTheShellCommandTree(t *testing.T) {
-	if got, want := app.CommandNames(), []string{"completion", "config", "context", "doctor", "help", "login", "logout", "module", "org", "product", "version", "whoami"}; !slices.Equal(got, want) {
+	if got, want := app.CommandNames(), []string{"completion", "config", "context", "doctor", "help", "login", "logout", "module", "org", "product", "remote", "version", "whoami"}; !slices.Equal(got, want) {
 		t.Errorf("CommandNames() = %v, want %v", got, want)
 	}
 }
@@ -674,6 +674,7 @@ Other commands
    config        Show and change shell preferences.
    doctor        Check the shell's context, secure-store, and session health.
    help          Show the shell command tree.
+   remote        Reach a deployed environment's dependencies from this machine.
    version       Show the shell, protocol, and installed product versions.
 
 Flags
