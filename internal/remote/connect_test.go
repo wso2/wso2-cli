@@ -303,7 +303,7 @@ func TestRenewalExchangesAfreshAndEndsOnARefusal(t *testing.T) {
 			Agents:            map[string]remoteconnect.AgentEndpoint{"dp-a": {ServerName: "dp-a.remote-connect"}},
 			RenewAfterSeconds: 1,
 		}},
-		{err: &ResolveError{Status: http.StatusForbidden, Code: "session_expired", Message: "the session reached its maximum age"}},
+		{err: &BrokerError{Status: http.StatusForbidden, Code: "session_expired", Message: "the session reached its maximum age"}},
 	}}
 	recording := resolverFunc(func(ctx context.Context, req remoteconnect.ResolveRequest) (*remoteconnect.ResolveResponse, error) {
 		token, err := tokens.Token(ctx)

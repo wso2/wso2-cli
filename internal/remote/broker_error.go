@@ -23,16 +23,16 @@ import (
 	"strings"
 )
 
-// ResolveError is a refusal or failure the broker answered with. Its envelope is
+// BrokerError is a refusal or failure the broker answered with. Its envelope is
 // the Resources API's: {"error": text, "code": string}.
-type ResolveError struct {
+type BrokerError struct {
 	Status  int
 	Code    string
 	Message string
 }
 
-func newResolveError(status int, body []byte) *ResolveError {
-	refused := &ResolveError{Status: status}
+func newBrokerError(status int, body []byte) *BrokerError {
+	refused := &BrokerError{Status: status}
 	var envelope struct {
 		Error string `json:"error"`
 		Code  string `json:"code"`
@@ -43,7 +43,7 @@ func newResolveError(status int, body []byte) *ResolveError {
 	return refused
 }
 
-func (e *ResolveError) Error() string {
+func (e *BrokerError) Error() string {
 	switch {
 	case e.Message != "" && e.Code != "":
 		return fmt.Sprintf("the broker answered %d %s: %s", e.Status, e.Code, e.Message)
@@ -57,12 +57,12 @@ func (e *ResolveError) Error() string {
 // Terminal reports whether retrying is pointless: a 401 means the login can no
 // longer be used, a 403 that the broker refused on policy (permission, a
 // production environment, or the session's maximum age).
-func (e *ResolveError) Terminal() bool {
+func (e *BrokerError) Terminal() bool {
 	return e.Status == http.StatusUnauthorized || e.Status == http.StatusForbidden
 }
 
 // Reason turns a terminal refusal into the developer's next step.
-func (e *ResolveError) Reason() string {
+func (e *BrokerError) Reason() string {
 	switch e.Status {
 	case http.StatusUnauthorized:
 		return "your login is no longer valid; run `ws login`, then restart `ws remote connect`"

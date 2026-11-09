@@ -414,7 +414,7 @@ func (u *remoteUnit) renew(ctx context.Context, resolver Resolver) {
 				u.stopRenewing()
 				return
 			}
-			var refused *ResolveError
+			var refused *BrokerError
 			if errors.As(err, &refused) && refused.Terminal() {
 				fmt.Fprintf(u.out, "  ! session ended for %s/%s: %s\n",
 					u.req.Project, u.req.Component, refused.Reason())

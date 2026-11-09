@@ -318,7 +318,7 @@ func TestRenewStopsOnTerminalRefusal(t *testing.T) {
 	u.renewAfter = time.Millisecond // renew promptly; the cadence is not under test here
 
 	r := &scriptedResolver{steps: []resolveStep{
-		{err: &ResolveError{Status: http.StatusUnauthorized, Message: "token expired"}},
+		{err: &BrokerError{Status: http.StatusUnauthorized, Message: "token expired"}},
 	}}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -347,7 +347,7 @@ func TestRenewRequestsDropGrants(t *testing.T) {
 	u.renewAfter = time.Millisecond
 
 	r := &scriptedResolver{steps: []resolveStep{
-		{err: &ResolveError{Status: http.StatusForbidden, Message: "session bound"}},
+		{err: &BrokerError{Status: http.StatusForbidden, Message: "session bound"}},
 	}}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -423,7 +423,7 @@ func TestRenewRejectsEmptyCapability(t *testing.T) {
 
 	r := &scriptedResolver{steps: []resolveStep{
 		{resp: &remoteconnect.ResolveResponse{Capability: ""}},
-		{err: &ResolveError{Status: http.StatusForbidden, Message: "done"}},
+		{err: &BrokerError{Status: http.StatusForbidden, Message: "done"}},
 	}}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
@@ -650,7 +650,7 @@ func TestRenewStopsReportingItselfWhenItGivesUp(t *testing.T) {
 	}
 
 	resolver := &scriptedResolver{
-		steps: []resolveStep{{err: &ResolveError{Status: http.StatusUnauthorized}}},
+		steps: []resolveStep{{err: &BrokerError{Status: http.StatusUnauthorized}}},
 		done:  make(chan struct{}, 1),
 	}
 	u.renew(t.Context(), resolver)

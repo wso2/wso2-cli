@@ -194,7 +194,7 @@ func remoteProblem(err error) error {
 	if errors.As(err, &denial) {
 		return denial.Reported()
 	}
-	var refused *remote.ResolveError
+	var refused *remote.BrokerError
 	if errors.As(err, &refused) {
 		return problem.New(problem.CategoryProductService, "remote.broker_refused", refused.Error()).
 			WithRecovery(refused.Reason())

@@ -133,9 +133,9 @@ func TestBrokerRefusalsAreTerminalOnlyWhenRetryingCannotHelp(t *testing.T) {
 		broker := &Broker{BaseURL: server.URL, Token: staticToken("tok")}
 		_, err := broker.Resolve(context.Background(), remoteconnect.ResolveRequest{Project: "p", Component: "c"})
 		server.Close()
-		var refused *ResolveError
+		var refused *BrokerError
 		if !errors.As(err, &refused) {
-			t.Fatalf("%d: err = %v, want a ResolveError", c.status, err)
+			t.Fatalf("%d: err = %v, want a BrokerError", c.status, err)
 		}
 		if refused.Terminal() != c.terminal {
 			t.Errorf("%d: terminal = %v, want %v", c.status, refused.Terminal(), c.terminal)

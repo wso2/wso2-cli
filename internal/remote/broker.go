@@ -101,7 +101,7 @@ type linksResponse struct {
 func (b *Broker) DeployedRelease(ctx context.Context, project, component, environment string) (LinkTargets, bool, error) {
 	var links linksResponse
 	err := b.call(ctx, http.MethodGet, b.endpoint("links", project, component), nil, &links)
-	var refused *ResolveError
+	var refused *BrokerError
 	if errors.As(err, &refused) && refused.Status == http.StatusNotFound {
 		return LinkTargets{}, false, nil
 	}
@@ -151,7 +151,7 @@ func (b *Broker) call(ctx context.Context, method, target string, payload []byte
 		return fmt.Errorf("read the broker's answer: %w", err)
 	}
 	if response.StatusCode != http.StatusOK {
-		return newResolveError(response.StatusCode, body)
+		return newBrokerError(response.StatusCode, body)
 	}
 	if err := json.Unmarshal(body, into); err != nil {
 		return fmt.Errorf("decode the broker's answer: %w", err)
