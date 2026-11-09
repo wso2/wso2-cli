@@ -68,11 +68,38 @@ func ProductSessionRef(credentialRef, namespace string) string {
 	return credentialRef + "." + namespace
 }
 
+// RemoteProduct is the namespace of the remote-connect product, the one product
+// whose exchange the login session must be able to cover with scopes the login
+// does not otherwise ask for.
+const RemoteProduct = "remote"
+
+// RemoteConnectAudience is the audience the remote-connect broker's tokens are
+// bound to. It is a protocol constant, not a deployment value: the deployment's
+// own location is the product's url.
+const RemoteConnectAudience = "urn:wso2:cloud"
+
 // LoginAccess is the authorization wso2 login runs first: the pinned login
 // product, else the first direct product by namespace, else a bare session
 // when the identity records no direct product.
+//
+// The login also asks for the scopes of the remote product, when the context
+// records it as an exchanged product. An exchange keeps the scopes of the
+// session it exchanges and cannot add any, so the permissions the broker checks
+// can only come from the login. Only scopes are added: the login's resource
+// binding is untouched, so every other product's exchange from the same session
+// is unaffected.
 func (i Account) LoginAccess() ProductAccess {
-	return i.atLoginIssuer(i.loginAccess())
+	return i.atLoginIssuer(i.withRemoteScopes(i.loginAccess()))
+}
+
+// withRemoteScopes adds the remote product's scopes to a login-session access.
+func (i Account) withRemoteScopes(access ProductAccess) ProductAccess {
+	remote, recorded := i.Products[RemoteProduct]
+	if !recorded || remote.Grant == nil || remote.Grant.Kind != GrantExchange {
+		return access
+	}
+	access.Scopes = sortedScopes(append(slices.Clone(access.Scopes), remote.Scopes...))
+	return access
 }
 
 // atLoginIssuer is access with the login's declared issuer identifier when it
@@ -145,6 +172,8 @@ func (i Account) access(namespace string) (ProductAccess, bool) {
 			(slices.Equal(access.Scopes, login.Scopes) && access.Resource == login.Resource) {
 			access.Strategy = StrategyDirect
 			access.SessionRef = login.SessionRef
+			// It is the login session, so it carries the login's scopes.
+			access = i.withRemoteScopes(access)
 		} else {
 			access.Strategy = StrategySibling
 		}
@@ -215,6 +244,7 @@ func (i Account) gatewayAccess(namespace string) (ProductAccess, bool) {
 	if slices.Equal(access.Scopes, login.Scopes) && access.Resource == login.Resource {
 		access.Strategy = StrategyDirect
 		access.SessionRef = login.SessionRef
+		access = i.withRemoteScopes(access)
 	}
 	return access, true
 }
