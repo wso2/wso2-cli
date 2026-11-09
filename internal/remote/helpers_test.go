@@ -29,6 +29,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -151,4 +152,33 @@ func mintExpiredCapability(t *testing.T) string {
 	header := encode(map[string]string{"alg": "EdDSA", "typ": "JWT"})
 	claims := encode(map[string]any{"exp": time.Now().Add(-time.Hour).Unix()})
 	return header + "." + claims + "." + base64.RawURLEncoding.EncodeToString([]byte("signature"))
+}
+
+func envToMap(env []string) map[string]string {
+	m := map[string]string{}
+	for _, kv := range env {
+		if k, v, ok := strings.Cut(kv, "="); ok {
+			m[k] = v
+		}
+	}
+	return m
+}
+
+func tunnelRoundTrip(addr, msg string) error {
+	conn, err := net.DialTimeout("tcp", addr, 5*time.Second)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	if _, err := conn.Write([]byte(msg)); err != nil {
+		return err
+	}
+	buf := make([]byte, len(msg))
+	if _, err := io.ReadFull(conn, buf); err != nil {
+		return err
+	}
+	if string(buf) != msg {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
 }
