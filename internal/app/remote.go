@@ -24,7 +24,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -45,9 +44,6 @@ const (
 	// broker checks. The code holds the how; the context holds the where.
 	remoteConnectScope     = "cloud:remote-connect:connect"
 	remoteReadSecretsScope = "cloud:remote-connect:read-secrets"
-
-	// remoteCallTimeout bounds one call to the broker.
-	remoteCallTimeout = 30 * time.Second
 )
 
 // remoteScopes are what every exchange for the remote product asks for.
@@ -55,7 +51,7 @@ func remoteScopes() []string { return []string{remoteConnectScope, remoteReadSec
 
 // remoteCommand builds the wso2 remote tree. It is a verification client for
 // remote connect, not a product module: a module cannot hold a terminal, an
-// open tunnel or a renewing token (docs: research 05, option A).
+// open tunnel or a renewing token.
 func (s Shell) remoteCommand() *cobra.Command {
 	command := &cobra.Command{
 		Use:                   "remote <subcommand>",
@@ -147,7 +143,7 @@ func (s Shell) remoteConnect(contextName string, params remote.ConnectParams) er
 	api := &remote.Broker{
 		BaseURL:    product.Endpoint,
 		Token:      tokens.Token,
-		HTTPClient: trustedhttp.Client(&http.Client{Timeout: remoteCallTimeout}),
+		HTTPClient: trustedhttp.Client(&http.Client{Timeout: remote.CallTimeout}),
 	}
 
 	// Tunnels live for the session; Ctrl-C or SIGTERM tears everything down.

@@ -31,8 +31,8 @@ import (
 	"github.com/wso2/wso2-cli/internal/remoteconnect"
 )
 
-// callTimeout bounds one call to the broker.
-const callTimeout = 30 * time.Second
+// CallTimeout bounds one call to the broker; the shell builds its HTTP client with it too.
+const CallTimeout = 30 * time.Second
 
 // responseLimit bounds what is read of a broker answer.
 const responseLimit = 4 << 20
@@ -52,7 +52,7 @@ type Broker struct {
 	// Token returns the bearer for one call. A renewing session outlives any
 	// one token, so it is asked per call.
 	Token func(ctx context.Context) (string, error)
-	// HTTPClient is the transport; nil means a client with callTimeout.
+	// HTTPClient is the transport; nil means a client with CallTimeout.
 	HTTPClient *http.Client
 }
 
@@ -139,7 +139,7 @@ func (b *Broker) call(ctx context.Context, method, target string, payload []byte
 	}
 	client := b.HTTPClient
 	if client == nil {
-		client = &http.Client{Timeout: callTimeout}
+		client = &http.Client{Timeout: CallTimeout}
 	}
 	response, err := client.Do(request)
 	if err != nil {
