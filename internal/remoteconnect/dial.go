@@ -48,8 +48,8 @@ type DialOptions struct {
 	// UserAgent is sent on a WebSocket upgrade. Empty leaves the library default.
 	UserAgent string
 	// HTTPClient configures the WebSocket upgrade: its *http.Transport supplies the
-	// TLS settings, proxy and dialer. Nil means the system roots and proxy
-	// environment.
+	// TLS settings, proxy and dialer. Nil means http.DefaultTransport,
+	// which holds the CLI's configured trust and proxy.
 	HTTPClient *http.Client
 	// RetryInitial and RetryMax bound the WebSocket dial retry loop: the wait starts at
 	// RetryInitial and doubles up to RetryMax. Zero means 2 s and 30 s.
@@ -156,13 +156,17 @@ func dialWebSocket(ctx context.Context, endpoint string, opts DialOptions) (net.
 }
 
 // websocketDialer builds the upgrade dialer from the transport of client, so a caller
-// that pins roots or routes through a proxy for HTTP gets the same for the bridge.
+// that pins roots or routes through a proxy for HTTP gets the same for the bridge. A
+// nil client, or one without a transport, means the CLI's configured default,
+// http.DefaultTransport, which carries the trust from WSO2_CA_FILE; gorilla's dialer
+// never reads it on its own.
 func websocketDialer(client *http.Client) *websocket.Dialer {
 	d := &websocket.Dialer{Proxy: http.ProxyFromEnvironment, HandshakeTimeout: 45 * time.Second}
-	if client == nil {
-		return d
+	var rt http.RoundTripper = http.DefaultTransport
+	if client != nil && client.Transport != nil {
+		rt = client.Transport
 	}
-	if t, ok := client.Transport.(*http.Transport); ok {
+	if t, ok := rt.(*http.Transport); ok {
 		d.Proxy = t.Proxy
 		d.NetDialContext = t.DialContext
 		d.TLSClientConfig = t.TLSClientConfig
