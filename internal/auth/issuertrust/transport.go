@@ -17,9 +17,13 @@
 package issuertrust
 
 import (
+	"fmt"
+	"io"
 	"net"
 	"net/url"
+	"os"
 	"strings"
+	"sync"
 
 	"github.com/wso2/wso2-cli/sdk/problem"
 )
@@ -42,7 +46,40 @@ func Secure(target *url.URL) bool {
 	case "https":
 		return true
 	case "http":
-		return loopback(target.Hostname())
+		return loopback(target.Hostname()) || devPlaintext(target.Host)
+	}
+	return false
+}
+
+// DevPlaintextHostsEnv is a dev-only escape hatch for verifying against a
+// local identity provider served over plain http. It holds a comma-separated
+// list of exact host[:port] names (no wildcards, no suffixes; a name matches a
+// URL's host and port exactly as written, case-insensitively). Secure accepts
+// plain http for those hosts only, and warns on stderr the first time each is
+// used. Unset, Secure is the loopback-only rule. Never set it against a
+// network you do not control: tokens and secrets then cross it in the clear.
+const DevPlaintextHostsEnv = "WSO2_DEV_PLAINTEXT_HOSTS"
+
+var (
+	devPlaintextWarnings io.Writer = os.Stderr
+	warnedHosts          sync.Map
+)
+
+// devPlaintext reports whether hostport is listed in DevPlaintextHostsEnv,
+// warning once per host per process when it is.
+func devPlaintext(hostport string) bool {
+	hostport = strings.ToLower(hostport)
+	if hostport == "" {
+		return false
+	}
+	for _, entry := range strings.Split(os.Getenv(DevPlaintextHostsEnv), ",") {
+		if strings.ToLower(strings.TrimSpace(entry)) != hostport {
+			continue
+		}
+		if _, warned := warnedHosts.LoadOrStore(hostport, true); !warned {
+			fmt.Fprintf(devPlaintextWarnings, "warning: %s allows plain http to %s; credentials and tokens for it cross the network unencrypted. Development use only.\n", DevPlaintextHostsEnv, hostport)
+		}
+		return true
 	}
 	return false
 }
