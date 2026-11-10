@@ -36,7 +36,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coder/websocket"
+	"github.com/gorilla/websocket"
 )
 
 const testServerName = "agent.remote-connect.test"
@@ -130,11 +130,11 @@ func newBridge(t *testing.T) *bridge {
 				return
 			}
 		}
-		ws, err := websocket.Accept(w, r, nil)
+		ws, err := (&websocket.Upgrader{}).Upgrade(w, r, nil)
 		if err != nil {
 			return
 		}
-		conn := websocket.NetConn(r.Context(), ws, websocket.MessageBinary)
+		conn := newWebSocketConn(ws)
 		tlsConn := tls.Server(conn, &tls.Config{Certificates: []tls.Certificate{b.identity.cert}, MinVersion: tls.VersionTLS12})
 		echoAgent(t, tlsConn, b.seen)
 		<-r.Context().Done()
