@@ -169,9 +169,22 @@ func websocketDialer(client *http.Client) *websocket.Dialer {
 	if t, ok := rt.(*http.Transport); ok {
 		d.Proxy = t.Proxy
 		d.NetDialContext = t.DialContext
-		d.TLSClientConfig = t.TLSClientConfig
+		d.TLSClientConfig = httpOneTLSConfig(t.TLSClientConfig)
 	}
 	return d
+}
+
+// httpOneTLSConfig returns a copy of base, nil-safe, that offers only HTTP/1.1 in
+// ALPN. net/http adds "h2" to a transport's own config on first use, and gorilla
+// speaks only the HTTP/1.1 Upgrade, so a gateway that picked h2 would break the
+// handshake. The copy keeps the trust; the shared config is never modified.
+func httpOneTLSConfig(base *tls.Config) *tls.Config {
+	cfg := base.Clone()
+	if cfg == nil {
+		cfg = &tls.Config{MinVersion: tls.VersionTLS12}
+	}
+	cfg.NextProtos = []string{"http/1.1"}
+	return cfg
 }
 
 // retryableDial reports whether a failed upgrade may succeed on a later attempt. No

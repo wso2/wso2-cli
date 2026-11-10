@@ -116,10 +116,14 @@ type bridge struct {
 	seen   chan StreamOpen
 }
 
-func newBridge(t *testing.T) *bridge {
+func newBridge(t *testing.T) *bridge { return newBridgeALPN(t, false) }
+
+// newBridgeALPN is newBridge whose TLS listener, when http2 is set, also offers h2 in
+// ALPN, as an Envoy or kgateway HTTPS listener does.
+func newBridgeALPN(t *testing.T, http2 bool) *bridge {
 	t.Helper()
 	b := &bridge{identity: newAgentIdentity(t), seen: make(chan StreamOpen, 4)}
-	b.Server = httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	b.Server = httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		attempt := b.attempts.Add(1)
 		b.mu.Lock()
 		b.headers = append(b.headers, r.Header.Clone())
@@ -139,6 +143,8 @@ func newBridge(t *testing.T) *bridge {
 		echoAgent(t, tlsConn, b.seen)
 		<-r.Context().Done()
 	}))
+	b.Server.EnableHTTP2 = http2
+	b.Server.StartTLS()
 	t.Cleanup(b.Close)
 	return b
 }
