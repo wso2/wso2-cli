@@ -18,6 +18,7 @@ package remoteconnect
 
 import (
 	"net/http"
+	"slices"
 	"testing"
 	"time"
 )
@@ -59,5 +60,64 @@ func TestDialTunnelRefusesAnUntrustedBridgeCertificate(t *testing.T) {
 	if c, err := DialTunnel(ctx, b.endpoint(), b.identity.caPEM, testServerName, func() string { return "cap" }, opts); err == nil {
 		_ = c.Close()
 		t.Fatal("DialTunnel succeeded against a bridge whose CA is not trusted")
+	}
+}
+
+// warmTransport makes one HTTPS request so net/http's HTTP/2 setup has run, as it has
+// by the time the CLI dials the bridge (token and broker calls come first).
+func warmTransport(t *testing.T, b *bridge, tr *http.Transport) {
+	t.Helper()
+	resp, err := (&http.Client{Transport: tr}).Get(b.URL)
+	if err != nil {
+		t.Fatalf("warm-up request: %v", err)
+	}
+	_ = resp.Body.Close()
+	if !slices.Contains(tr.TLSClientConfig.NextProtos, "h2") {
+		t.Fatalf("precondition: transport NextProtos = %v, want h2 present", tr.TLSClientConfig.NextProtos)
+	}
+}
+
+func TestDialTunnelSucceedsWhenTheGatewayOffersH2AndTheDefaultTransportIsWarm(t *testing.T) {
+	b := newBridgeALPN(t, true)
+	tr := b.Client().Transport.(*http.Transport)
+	tr.ForceAttemptHTTP2 = true
+	installDefaultTransport(t, tr)
+	warmTransport(t, b, tr)
+	before := slices.Clone(tr.TLSClientConfig.NextProtos)
+	ctx, cancel := contextWithTestTimeout(t)
+	defer cancel()
+
+	opts := b.options("tok")
+	opts.HTTPClient = nil
+	c, err := DialTunnel(ctx, b.endpoint(), b.identity.caPEM, testServerName, func() string { return "cap" }, opts)
+	if err != nil {
+		t.Fatalf("DialTunnel against an h2-capable gateway: %v", err)
+	}
+	t.Cleanup(func() { _ = c.Close() })
+	assertEchoes(t, c, "ep/p/c/http")
+	if got := tr.TLSClientConfig.NextProtos; !slices.Equal(got, before) {
+		t.Errorf("shared transport NextProtos = %v, want unchanged %v", got, before)
+	}
+}
+
+func TestDialTunnelSucceedsWhenTheGatewayOffersH2AndTheExplicitClientIsWarm(t *testing.T) {
+	b := newBridgeALPN(t, true)
+	tr := b.Client().Transport.(*http.Transport)
+	tr.ForceAttemptHTTP2 = true
+	warmTransport(t, b, tr)
+	before := slices.Clone(tr.TLSClientConfig.NextProtos)
+	ctx, cancel := contextWithTestTimeout(t)
+	defer cancel()
+
+	opts := b.options("tok")
+	opts.HTTPClient = &http.Client{Transport: tr}
+	c, err := DialTunnel(ctx, b.endpoint(), b.identity.caPEM, testServerName, func() string { return "cap" }, opts)
+	if err != nil {
+		t.Fatalf("DialTunnel against an h2-capable gateway: %v", err)
+	}
+	t.Cleanup(func() { _ = c.Close() })
+	assertEchoes(t, c, "ep/p/c/http")
+	if got := tr.TLSClientConfig.NextProtos; !slices.Equal(got, before) {
+		t.Errorf("client transport NextProtos = %v, want unchanged %v", got, before)
 	}
 }
