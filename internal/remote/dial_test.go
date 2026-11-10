@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coder/websocket"
+	"github.com/gorilla/websocket"
 
 	"github.com/wso2/wso2-cli/internal/remoteconnect"
 )
@@ -36,8 +36,8 @@ func TestAgentDialerPresentsTheTokenToTheBridge(t *testing.T) {
 	headers := make(chan http.Header, 1)
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		headers <- r.Header.Clone()
-		if conn, err := websocket.Accept(w, r, nil); err == nil {
-			_ = conn.Close(websocket.StatusNormalClosure, "")
+		if conn, err := (&websocket.Upgrader{}).Upgrade(w, r, nil); err == nil {
+			_ = conn.Close()
 		}
 	}))
 	defer server.Close()

@@ -27,7 +27,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coder/websocket"
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -47,8 +47,9 @@ type DialOptions struct {
 	BearerToken string
 	// UserAgent is sent on a WebSocket upgrade. Empty leaves the library default.
 	UserAgent string
-	// HTTPClient performs the WebSocket upgrade; nil means a default client that
-	// verifies the bridge against the system roots.
+	// HTTPClient configures the WebSocket upgrade: its *http.Transport supplies the
+	// TLS settings, proxy and dialer. Nil means the system roots and proxy
+	// environment.
 	HTTPClient *http.Client
 	// RetryInitial and RetryMax bound the WebSocket dial retry loop: the wait starts at
 	// RetryInitial and doubles up to RetryMax. Zero means 2 s and 30 s.
@@ -131,14 +132,16 @@ func dialWebSocket(ctx context.Context, endpoint string, opts DialOptions) (net.
 		ceiling = defaultRetryMax
 	}
 
+	dialer := websocketDialer(opts.HTTPClient)
+
 	for {
-		ws, resp, err := websocket.Dial(ctx, endpoint, &websocket.DialOptions{
-			HTTPClient: opts.HTTPClient,
-			HTTPHeader: header,
-		})
+		ws, resp, err := dialer.DialContext(ctx, endpoint, header)
 		if err == nil {
 			// ctx bounds the dial, not the tunnel: the connection lives until Close.
-			return websocket.NetConn(context.WithoutCancel(ctx), ws, websocket.MessageBinary), nil
+			return newWebSocketConn(ws), nil
+		}
+		if resp != nil {
+			err = fmt.Errorf("%w (bridge answered %s)", err, resp.Status)
 		}
 		if !retryableDial(resp) {
 			return nil, fmt.Errorf("remoteconnect: dial remote-connect bridge %s: %w", endpoint, err)
@@ -150,6 +153,21 @@ func dialWebSocket(ctx context.Context, endpoint string, opts DialOptions) (net.
 		}
 		wait = min(wait*2, ceiling)
 	}
+}
+
+// websocketDialer builds the upgrade dialer from the transport of client, so a caller
+// that pins roots or routes through a proxy for HTTP gets the same for the bridge.
+func websocketDialer(client *http.Client) *websocket.Dialer {
+	d := &websocket.Dialer{Proxy: http.ProxyFromEnvironment, HandshakeTimeout: 45 * time.Second}
+	if client == nil {
+		return d
+	}
+	if t, ok := client.Transport.(*http.Transport); ok {
+		d.Proxy = t.Proxy
+		d.NetDialContext = t.DialContext
+		d.TLSClientConfig = t.TLSClientConfig
+	}
+	return d
 }
 
 // retryableDial reports whether a failed upgrade may succeed on a later attempt. No
