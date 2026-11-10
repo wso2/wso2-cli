@@ -98,15 +98,23 @@ func (s exchangeSource) mint(request Request, now time.Time) (Grant, error) {
 // exchange renews the login session and trades the access token it yields for
 // one bound to this product.
 //
-// The renewal asks for the login session's own scopes rather than the
-// module's. That is not a missed narrowing: the subject token is not what the
-// module receives, and asking for the module's permissions here would narrow
+// The renewal names no scope at all (RFC 6749 section 6: the original grant
+// is renewed). The login asked for every permission the context could need,
+// but the issuer grants a user only the ones their roles carry: a connect-only
+// role, or a viewer, holds fewer than were asked, and a renewal that named the
+// asked-for set would be refused invalid_scope, so such a user could never
+// exchange. Renewing the grant as it was made needs no such knowledge, and a
+// permission the user lacks is then refused where it is enforced, by the
+// product the exchanged token is presented to.
+//
+// Nor is the module's scope set asked for. That is not a missed narrowing:
+// the subject token is not what the module receives, and asking for the module's permissions here would narrow
 // the login session itself — on ThunderID and Identity Server permanently, so
 // the next product's command would be refused by a session the shell had
 // quietly shrunk. This is the failure ADR 0014 recorded against one shared
 // narrowed session, reached from a different direction.
 func (s exchangeSource) exchange(ctx context.Context, request Request, now time.Time) (Grant, error) {
-	renewed, err := s.login.renew(ctx, s.login.scopes, now)
+	renewed, err := s.login.renew(ctx, nil, now)
 	if err != nil {
 		return Grant{}, err
 	}
