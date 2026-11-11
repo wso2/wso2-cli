@@ -43,7 +43,7 @@ func upstreamEchoOnEOF(t *testing.T, reply string) net.Listener {
 		if aerr != nil {
 			return
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 		_, _ = io.ReadAll(conn)
 		_, _ = conn.Write([]byte(reply))
 	}()
@@ -76,7 +76,7 @@ func TestPipeDeliversReplyAfterHalfClose(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	if _, err := client.Write([]byte("ping")); err != nil {
 		t.Fatal(err)

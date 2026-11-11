@@ -145,7 +145,7 @@ func (b *Broker) call(ctx context.Context, method, target string, payload []byte
 	if err != nil {
 		return fmt.Errorf("call the remote-connect broker: %w", err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	body, err := io.ReadAll(io.LimitReader(response.Body, responseLimit))
 	if err != nil {
 		return fmt.Errorf("read the broker's answer: %w", err)

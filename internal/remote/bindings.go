@@ -53,7 +53,7 @@ func applyResourceBindings(
 			// Either the type declares nothing dialable, or the binding is still pinned
 			// to a ResourceRelease cut before it did. Either way the addresses below are
 			// the in-cluster ones as published, which this machine may not resolve.
-			fmt.Fprintf(out, "  %-28s (no address tunneled; %d binding(s) resolved as published in-cluster)\n",
+			_, _ = fmt.Fprintf(out, "  %-28s (no address tunneled; %d binding(s) resolved as published in-cluster)\n",
 				remoteconnect.ResourceRefKey(rb.Ref), len(rb.StaticEnv))
 		}
 		for _, om := range rb.OmittedSecretEnv {
@@ -61,7 +61,7 @@ func applyResourceBindings(
 			if om.File {
 				what = "file"
 			}
-			fmt.Fprintf(out, "  ! %s: %s %s not resolved (%s)\n",
+			_, _ = fmt.Fprintf(out, "  ! %s: %s %s not resolved (%s)\n",
 				remoteconnect.ResourceRefKey(rb.Ref), om.Target, what, om.Reason)
 		}
 	}

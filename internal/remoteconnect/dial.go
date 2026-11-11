@@ -162,7 +162,7 @@ func dialWebSocket(ctx context.Context, endpoint string, opts DialOptions) (net.
 // never reads it on its own.
 func websocketDialer(client *http.Client) *websocket.Dialer {
 	d := &websocket.Dialer{Proxy: http.ProxyFromEnvironment, HandshakeTimeout: 45 * time.Second}
-	var rt http.RoundTripper = http.DefaultTransport
+	rt := http.DefaultTransport
 	if client != nil && client.Transport != nil {
 		rt = client.Transport
 	}

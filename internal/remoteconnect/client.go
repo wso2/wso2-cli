@@ -122,7 +122,7 @@ func (c *TunnelClient) Fetch(key string) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("remoteconnect: open stream: %w", err)
 	}
-	defer stream.Close()
+	defer func() { _ = stream.Close() }()
 
 	if err := WriteMessage(stream, StreamOpen{Key: key, Capability: c.capability()}); err != nil {
 		return nil, err

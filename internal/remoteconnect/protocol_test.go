@@ -80,7 +80,7 @@ func TestOpenStreamPresentsKeyAndCapabilityThenPipes(t *testing.T) {
 	clientConn, agentConn := net.Pipe()
 	var opened StreamOpen
 	fakeAgent(t, agentConn, func(stream net.Conn) {
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 		if err := ReadMessage(stream, &opened); err != nil {
 			return
 		}
@@ -98,7 +98,7 @@ func TestOpenStreamPresentsKeyAndCapabilityThenPipes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer stream.Close()
+	defer func() { _ = stream.Close() }()
 	if _, err := stream.Write([]byte("ping")); err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestOpenStreamPresentsKeyAndCapabilityThenPipes(t *testing.T) {
 func TestOpenStreamReportsAgentRefusal(t *testing.T) {
 	clientConn, agentConn := net.Pipe()
 	fakeAgent(t, agentConn, func(stream net.Conn) {
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 		var so StreamOpen
 		_ = ReadMessage(stream, &so)
 		_ = WriteMessage(stream, StreamResult{OK: false, Error: "not authorized"})

@@ -297,7 +297,7 @@ func (u *remoteUnit) adopt(ctx context.Context, resp *remoteconnect.ResolveRespo
 			unreached++
 			// Leave the old tunnel in place: a failed re-dial must not take down a
 			// session that is otherwise working.
-			fmt.Fprintf(u.out, "  ! could not connect the remote-agent serving %s after renewal: %v\n", agentID, err)
+			_, _ = fmt.Fprintf(u.out, "  ! could not connect the remote-agent serving %s after renewal: %v\n", agentID, err)
 			continue
 		}
 		dialed[agentID] = tn
@@ -329,16 +329,16 @@ func (u *remoteUnit) adopt(ctx context.Context, resp *remoteconnect.ResolveRespo
 		_, isLive := newLive[key]
 		switch {
 		case wasLive && !isLive:
-			fmt.Fprintf(u.out, "  ! %s: %v; new connections will be refused\n", key, errRevoked)
+			_, _ = fmt.Fprintf(u.out, "  ! %s: %v; new connections will be refused\n", key, errRevoked)
 		case !wasLive && isLive:
-			fmt.Fprintf(u.out, "  %s: authorized again\n", key)
+			_, _ = fmt.Fprintf(u.out, "  %s: authorized again\n", key)
 		}
 	}
 	// A key the capability now carries that no listener stands for.
 	for key := range newLive {
 		if _, isBound := u.bound[key]; !isBound && !u.warnedUnbound[key] {
 			u.warnedUnbound[key] = true
-			fmt.Fprintf(u.out, "  ! %s is a new dependency; restart `wso2 remote connect` to open a local port for it\n", key)
+			_, _ = fmt.Fprintf(u.out, "  ! %s is a new dependency; restart `wso2 remote connect` to open a local port for it\n", key)
 		}
 	}
 
@@ -416,14 +416,14 @@ func (u *remoteUnit) renew(ctx context.Context, resolver Resolver) {
 			}
 			var refused Terminated
 			if errors.As(err, &refused) && refused.Terminal() {
-				fmt.Fprintf(u.out, "  ! session ended for %s/%s: %s\n",
+				_, _ = fmt.Fprintf(u.out, "  ! session ended for %s/%s: %s\n",
 					u.req.Project, u.req.Component, refused.Reason())
 				u.stopRenewing()
 				return
 			}
 			failures++
 			wait = u.retryInterval(failures)
-			fmt.Fprintf(u.out, "  ! could not renew the session for %s/%s: %v\n%s\n",
+			_, _ = fmt.Fprintf(u.out, "  ! could not renew the session for %s/%s: %v\n%s\n",
 				u.req.Project, u.req.Component, err, u.renewalDeadlineNote(wait))
 			continue
 		}
@@ -433,7 +433,7 @@ func (u *remoteUnit) renew(ctx context.Context, resolver Resolver) {
 			// the agent refuses. Keep the capability we have and retry.
 			failures++
 			wait = u.retryInterval(failures)
-			fmt.Fprintf(u.out, "  ! renewal for %s/%s returned no capability\n%s\n",
+			_, _ = fmt.Fprintf(u.out, "  ! renewal for %s/%s returned no capability\n%s\n",
 				u.req.Project, u.req.Component, u.renewalDeadlineNote(wait))
 			continue
 		}

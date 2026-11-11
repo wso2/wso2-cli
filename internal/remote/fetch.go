@@ -144,10 +144,10 @@ func fetchBindings(
 
 		if noSecrets {
 			for _, envVar := range slices.Sorted(maps.Keys(rb.FetchEnv)) {
-				fmt.Fprintf(out, "  ! %s: %s not resolved (--no-secrets)\n", refKey, envVar)
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not resolved (--no-secrets)\n", refKey, envVar)
 			}
 			for _, mountPath := range slices.Sorted(maps.Keys(rb.FetchFile)) {
-				fmt.Fprintf(out, "  ! %s: %s not provisioned (--no-secrets)\n", refKey, mountPath)
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not provisioned (--no-secrets)\n", refKey, mountPath)
 			}
 			continue
 		}
@@ -158,19 +158,19 @@ func fetchBindings(
 		for _, envVar := range slices.Sorted(maps.Keys(rb.FetchEnv)) {
 			value, err := fetchOne(agentTunnels, rb.FetchAgentID, rb.FetchEnv[envVar])
 			if err != nil {
-				fmt.Fprintf(out, "  ! %s: %s not resolved (%v)\n", refKey, envVar, err)
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not resolved (%v)\n", refKey, envVar, err)
 				continue
 			}
 			// An env var carries text. A value that is not valid UTF-8 (a keystore, a DER
 			// certificate) cannot round-trip through the environment, and silently
 			// passing mangled bytes would surface as an obscure failure inside the app.
 			if !isEnvSafe(value) {
-				fmt.Fprintf(out, "  ! %s: %s not resolved (value is binary; bind it as a file instead)\n",
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not resolved (value is binary; bind it as a file instead)\n",
 					refKey, envVar)
 				continue
 			}
 			fetched[envVar] = string(value)
-			fmt.Fprintf(out, "  %-28s %s resolved (value hidden)\n", refKey, envVar)
+			_, _ = fmt.Fprintf(out, "  %-28s %s resolved (value hidden)\n", refKey, envVar)
 		}
 
 		// rewriteAddrs reports by key name only and never prints a value, so it is safe
@@ -179,7 +179,7 @@ func fetchBindings(
 			// Not mergeOverrides: that reports a clash by printing both values, which
 			// would put a credential in the terminal. Report the clash by name only.
 			if existing, clash := overrides[envVar]; clash && existing != value {
-				fmt.Fprintf(out, "  ! warning: %s set by multiple workloads; using the fetched value\n", envVar)
+				_, _ = fmt.Fprintf(out, "  ! warning: %s set by multiple workloads; using the fetched value\n", envVar)
 			}
 			overrides[envVar] = value
 			sensitive[envVar] = true
@@ -192,16 +192,16 @@ func fetchBindings(
 		for _, mountPath := range slices.Sorted(maps.Keys(rb.FetchFile)) {
 			value, err := fetchOne(agentTunnels, rb.FetchAgentID, rb.FetchFile[mountPath])
 			if err != nil {
-				fmt.Fprintf(out, "  ! %s: %s not provisioned (%v)\n", refKey, mountPath, err)
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not provisioned (%v)\n", refKey, mountPath, err)
 				continue
 			}
 			local, werr := store.write(mountPath, value)
 			if werr != nil {
-				fmt.Fprintf(out, "  ! %s: %s not provisioned (%v)\n", refKey, mountPath, werr)
+				_, _ = fmt.Fprintf(out, "  ! %s: %s not provisioned (%v)\n", refKey, mountPath, werr)
 				continue
 			}
 			materialized = append(materialized, mountPath)
-			fmt.Fprintf(out, "  %-28s %s -> %s\n", refKey, mountPath, local)
+			_, _ = fmt.Fprintf(out, "  %-28s %s -> %s\n", refKey, mountPath, local)
 		}
 	}
 	return materialized
@@ -253,7 +253,7 @@ func repointFilePaths(overrides map[string]string, out io.Writer, store *fileSto
 		if !ok {
 			continue
 		}
-		fmt.Fprintf(out, "  %-28s -> %s\n", envVar, local)
+		_, _ = fmt.Fprintf(out, "  %-28s -> %s\n", envVar, local)
 		repointed[overrides[envVar]] = true
 		overrides[envVar] = local
 	}
@@ -263,7 +263,7 @@ func repointFilePaths(overrides map[string]string, out io.Writer, store *fileSto
 		if repointed[mountPath] {
 			continue
 		}
-		fmt.Fprintf(out, "  ! no env var names %s; point the app at %s yourself\n",
+		_, _ = fmt.Fprintf(out, "  ! no env var names %s; point the app at %s yourself\n",
 			mountPath, store.paths[mountPath])
 	}
 }

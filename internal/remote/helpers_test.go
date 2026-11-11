@@ -23,7 +23,6 @@ package remote
 
 import (
 	"bytes"
-	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -34,8 +33,6 @@ import (
 	"sync/atomic"
 	"testing"
 	"time"
-
-	"github.com/wso2/wso2-cli/internal/remoteconnect"
 )
 
 // fakeRenewable stands in for the remoteUnit a reporter consults.
@@ -50,14 +47,6 @@ func (f *fakeRenewable) expiresAt() time.Time { return f.expiry }
 func (f *fakeRenewable) renewing() bool { return !f.stopped }
 
 func (f *fakeRenewable) nudge() { f.nudges.Add(1) }
-
-type fakeResolver struct {
-	resp *remoteconnect.ResolveResponse
-}
-
-func (f *fakeResolver) Resolve(context.Context, remoteconnect.ResolveRequest) (*remoteconnect.ResolveResponse, error) {
-	return f.resp, nil
-}
 
 // fakeTunnel stands in for a yamux session to a remote-agent: each OpenStream dials a
 // local echo server, so Connect's local plumbing (listeners, env, per-connection
@@ -109,7 +98,7 @@ func startEchoServer(t *testing.T) net.Listener {
 			if err != nil {
 				return
 			}
-			go func(c net.Conn) { defer c.Close(); _, _ = io.Copy(c, c) }(c)
+			go func(c net.Conn) { defer func() { _ = c.Close() }(); _, _ = io.Copy(c, c) }(c)
 		}
 	}()
 	return ln
@@ -132,10 +121,6 @@ func (s *syncBuf) String() string {
 	defer s.mu.Unlock()
 	return s.b.String()
 }
-
-// httpEndpointName is the shared "http" literal used as both an endpoint name and a
-// URL scheme across these tests.
-const httpEndpointName = "http"
 
 // mintExpiredCapability builds a capability-shaped token that expired an hour
 // ago. Only the exp claim matters: the CLI reads it unverified, purely to explain
@@ -169,7 +154,7 @@ func tunnelRoundTrip(addr, msg string) error {
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	if _, err := conn.Write([]byte(msg)); err != nil {
 		return err
 	}

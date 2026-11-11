@@ -76,7 +76,7 @@ func newAgentIdentity(t *testing.T) agentIdentity {
 func echoAgent(t *testing.T, tlsConn net.Conn, seen chan<- StreamOpen) {
 	t.Helper()
 	fakeAgent(t, tlsConn, func(stream net.Conn) {
-		defer stream.Close()
+		defer func() { _ = stream.Close() }()
 		var so StreamOpen
 		if err := ReadMessage(stream, &so); err != nil {
 			return
@@ -95,7 +95,7 @@ func assertEchoes(t *testing.T, c *TunnelClient, key string) {
 	if err != nil {
 		t.Fatalf("open stream: %v", err)
 	}
-	defer stream.Close()
+	defer func() { _ = stream.Close() }()
 	_, _ = stream.Write([]byte("hi"))
 	buf := make([]byte, 2)
 	if _, err := io.ReadFull(stream, buf); err != nil || string(buf) != "hi" {
@@ -143,8 +143,8 @@ func newBridgeALPN(t *testing.T, http2 bool) *bridge {
 		echoAgent(t, tlsConn, b.seen)
 		<-r.Context().Done()
 	}))
-	b.Server.EnableHTTP2 = http2
-	b.Server.StartTLS()
+	b.EnableHTTP2 = http2
+	b.StartTLS()
 	t.Cleanup(b.Close)
 	return b
 }

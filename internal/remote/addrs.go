@@ -116,14 +116,14 @@ func rewriteAddrs(env map[string]string, swaps []addrSwap, ref string, out io.Wr
 			}
 			got = strings.ReplaceAll(got, sw.remoteHost, localHost)
 			got = replacePortToken(got, sw.remotePort, sw.localPort)
-			fmt.Fprintf(out, "  ~ %s: %s had its host and port re-pointed separately\n", ref, k)
+			_, _ = fmt.Fprintf(out, "  ~ %s: %s had its host and port re-pointed separately\n", ref, k)
 		}
 		if got == v {
 			// Unchanged, but mentions a tunneled host: the value embeds the host with
 			// some other port, so it still points into the cluster.
 			for _, sw := range swaps {
 				if sw.remoteHost != "" && strings.Contains(v, sw.remoteHost) {
-					fmt.Fprintf(out, "  ! %s: %s still points at %s and was not re-pointed at a tunnel\n", ref, k, sw.remoteHost)
+					_, _ = fmt.Fprintf(out, "  ! %s: %s still points at %s and was not re-pointed at a tunnel\n", ref, k, sw.remoteHost)
 					break
 				}
 			}

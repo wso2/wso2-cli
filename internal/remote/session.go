@@ -59,7 +59,7 @@ type tunnel interface {
 func mergeOverrides(dst map[string]string, out io.Writer, src map[string]string) {
 	for k, v := range src {
 		if existing, ok := dst[k]; ok && existing != v {
-			fmt.Fprintf(out, "  ! warning: %s set by multiple workloads (%q vs %q); using %q\n", k, existing, v, v)
+			_, _ = fmt.Fprintf(out, "  ! warning: %s set by multiple workloads (%q vs %q); using %q\n", k, existing, v, v)
 		}
 		dst[k] = v
 	}
@@ -122,21 +122,21 @@ func (r *streamErrorReporter) report(key string, err error) {
 	r.printed[key] = true
 	// The renewal that dropped the key already reported the reason.
 	if errors.Is(err, errRevoked) {
-		fmt.Fprintf(r.out, "  ! %s: %v\n", key, err)
+		_, _ = fmt.Fprintf(r.out, "  ! %s: %v\n", key, err)
 		return
 	}
 	if exp := r.unit.expiresAt(); !exp.IsZero() && time.Now().After(exp) {
 		// A lapsed capability with a renewal still pending needs no action.
 		if r.unit.renewing() {
-			fmt.Fprintf(r.out, "  ! %s: the session expired at %s and is being renewed now — "+
+			_, _ = fmt.Fprintf(r.out, "  ! %s: the session expired at %s and is being renewed now — "+
 				"retry in a moment\n", key, exp.Local().Format(time.Kitchen))
 			return
 		}
-		fmt.Fprintf(r.out, "  ! %s: the session expired at %s and is no longer being renewed — "+
+		_, _ = fmt.Fprintf(r.out, "  ! %s: the session expired at %s and is no longer being renewed — "+
 			"exit and re-run `wso2 remote connect` to reconnect\n", key, exp.Local().Format(time.Kitchen))
 		return
 	}
-	fmt.Fprintf(r.out, "  ! %s: %v\n", key, err)
+	_, _ = fmt.Fprintf(r.out, "  ! %s: %v\n", key, err)
 }
 
 func targetKind(t remoteconnect.ResolvedTarget) string {
@@ -169,13 +169,13 @@ func mergeEnv(base []string, overrides map[string]string) []string {
 // bug report. A redacted binding still shows its name, so the developer can see it
 // resolved.
 func printEnvBindings(out io.Writer, env map[string]string, sensitive map[string]bool, showSecrets bool) {
-	fmt.Fprintln(out, "\nEnvironment bindings:")
+	_, _ = fmt.Fprintln(out, "\nEnvironment bindings:")
 	for _, k := range sortedKeys(env) {
 		if sensitive[k] && !showSecrets {
-			fmt.Fprintf(out, "  export %s=<hidden; pass --show-secrets to print it>\n", k)
+			_, _ = fmt.Fprintf(out, "  export %s=<hidden; pass --show-secrets to print it>\n", k)
 			continue
 		}
-		fmt.Fprintf(out, "  export %s=%s\n", k, env[k])
+		_, _ = fmt.Fprintf(out, "  export %s=%s\n", k, env[k])
 	}
 }
 
@@ -186,8 +186,8 @@ func confirmShowSecrets(out io.Writer, names []string) bool {
 	if !term.IsTerminal(int(os.Stdin.Fd())) {
 		return false
 	}
-	fmt.Fprintf(out, "\nRead from a Secret or ConfigMap: %s\n", strings.Join(names, ", "))
-	fmt.Fprint(out, "Print these values in full? They stay in this terminal's scrollback. [y/N]: ")
+	_, _ = fmt.Fprintf(out, "\nRead from a Secret or ConfigMap: %s\n", strings.Join(names, ", "))
+	_, _ = fmt.Fprint(out, "Print these values in full? They stay in this terminal's scrollback. [y/N]: ")
 	line, err := bufio.NewReader(os.Stdin).ReadString('\n')
 	if err != nil {
 		return false

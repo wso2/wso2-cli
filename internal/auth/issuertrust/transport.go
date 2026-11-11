@@ -77,7 +77,7 @@ func devPlaintext(hostport string) bool {
 			continue
 		}
 		if _, warned := warnedHosts.LoadOrStore(hostport, true); !warned {
-			fmt.Fprintf(devPlaintextWarnings, "warning: %s allows plain http to %s; credentials and tokens for it cross the network unencrypted. Development use only.\n", DevPlaintextHostsEnv, hostport)
+			_, _ = fmt.Fprintf(devPlaintextWarnings, "warning: %s allows plain http to %s; credentials and tokens for it cross the network unencrypted. Development use only.\n", DevPlaintextHostsEnv, hostport)
 		}
 		return true
 	}

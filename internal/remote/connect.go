@@ -112,7 +112,7 @@ func (d *Remote) Connect(ctx context.Context, p ConnectParams, out io.Writer) er
 		return fmt.Errorf("read the deployed links of %s/%s: %w", workload.Project, workload.Component, err)
 	}
 	if !found {
-		fmt.Fprintf(out, "No deployed release of %s/%s in %s; using the dependencies in %s only.\n",
+		_, _ = fmt.Fprintf(out, "No deployed release of %s/%s in %s; using the dependencies in %s only.\n",
 			workload.Project, workload.Component, p.Environment, p.WorkloadPath)
 	}
 	req := remoteconnect.ResolveRequest{
@@ -154,7 +154,7 @@ func (d *Remote) Connect(ctx context.Context, p ConnectParams, out io.Writer) er
 		s.files.cleanup()
 	}()
 
-	fmt.Fprintf(out, "Connecting to %s/%s (%s)...\n", workload.Project, workload.Component, p.Environment)
+	_, _ = fmt.Fprintf(out, "Connecting to %s/%s (%s)...\n", workload.Project, workload.Component, p.Environment)
 	if err := d.connectRemote(ctx, req, s, out, p.NoSecrets); err != nil {
 		return err
 	}
@@ -178,12 +178,12 @@ func (d *Remote) Connect(ctx context.Context, p ConnectParams, out io.Writer) er
 			show = d.ConfirmSecrets(out, names)
 		}
 		printEnvBindings(out, s.overrides, s.sensitive, show)
-		fmt.Fprintln(out, "\nTunnels open. The session renews automatically; press Ctrl-C to disconnect.")
+		_, _ = fmt.Fprintln(out, "\nTunnels open. The session renews automatically; press Ctrl-C to disconnect.")
 		<-ctx.Done()
 		return nil
 	}
 
-	fmt.Fprintln(out, "\nTunnels open. The session renews automatically; exit the shell to disconnect.")
+	_, _ = fmt.Fprintln(out, "\nTunnels open. The session renews automatically; exit the shell to disconnect.")
 	return d.RunShell(ctx, mergeEnv(os.Environ(), s.overrides))
 }
 
@@ -252,7 +252,7 @@ func (d *Remote) connectRemote(ctx context.Context, req remoteconnect.ResolveReq
 				localAddrs[t.Resource.Ref] = append(localAddrs[t.Resource.Ref],
 					newAddrSwap(t.Resource.RemoteAddr, strconv.Itoa(port)))
 			}
-			fmt.Fprintf(out, "  %-28s -> %s:%d  (%s)\n", t.Key, localHost, port, targetKind(t))
+			_, _ = fmt.Fprintf(out, "  %-28s -> %s:%d  (%s)\n", t.Key, localHost, port, targetKind(t))
 		}
 	}
 	applyResourceBindings(staged, out, resp, localAddrs)
@@ -262,7 +262,7 @@ func (d *Remote) connectRemote(ctx context.Context, req remoteconnect.ResolveReq
 	// StaticEnv or from a fetch, so the repoint must see the finished map.
 	repointFilePaths(staged, out, s.files, materialized)
 	for _, u := range resp.Unconnectable {
-		fmt.Fprintf(out, "  ! %s: %s\n", u.Ref, u.Reason)
+		_, _ = fmt.Fprintf(out, "  ! %s: %s\n", u.Ref, u.Reason)
 	}
 
 	mergeOverrides(s.overrides, out, staged)
