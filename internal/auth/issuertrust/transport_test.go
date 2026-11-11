@@ -17,8 +17,10 @@
 package issuertrust_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/wso2/wso2-cli/internal/auth/issuertrust"
@@ -88,5 +90,101 @@ func TestSecureAllowsPlainHTTPOnlyOnLoopback(t *testing.T) {
 		if got := issuertrust.Secure(parsed); got != want {
 			t.Errorf("Secure(%q) = %v, want %v", raw, got, want)
 		}
+	}
+}
+
+func secureFor(t *testing.T, raw string) bool {
+	t.Helper()
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		t.Fatalf("parse %q: %v", raw, err)
+	}
+	return issuertrust.Secure(parsed)
+}
+
+func TestSecureRefusesPlainHTTPWhenNoDevPlaintextHostIsListed(t *testing.T) {
+	t.Setenv(issuertrust.DevPlaintextHostsEnv, "")
+	var warnings bytes.Buffer
+	defer issuertrust.CaptureDevPlaintextWarnings(&warnings)()
+
+	if secureFor(t, "http://idp.local:8090/oauth2/token") {
+		t.Error("Secure allowed plain http off loopback with the override unset")
+	}
+	if warnings.Len() != 0 {
+		t.Errorf("unexpected warning: %q", warnings.String())
+	}
+}
+
+func TestSecureAllowsAListedDevPlaintextHostAndWarnsOnce(t *testing.T) {
+	t.Setenv(issuertrust.DevPlaintextHostsEnv, " idp.local:8090 , Other.Local ")
+	var warnings bytes.Buffer
+	defer issuertrust.CaptureDevPlaintextWarnings(&warnings)()
+
+	for i := 0; i < 3; i++ {
+		if !secureFor(t, "http://idp.local:8090/.well-known/openid-configuration") {
+			t.Fatal("Secure refused a host listed in the override")
+		}
+	}
+	if !secureFor(t, "http://other.local/token") {
+		t.Error("Secure refused a listed host with no port")
+	}
+	got := warnings.String()
+	if strings.Count(got, "idp.local:8090") != 1 || strings.Count(got, "other.local") != 1 {
+		t.Errorf("want one warning per host, got %q", got)
+	}
+	if !strings.Contains(got, issuertrust.DevPlaintextHostsEnv) {
+		t.Errorf("warning does not name the variable: %q", got)
+	}
+}
+
+func TestSecureStillRefusesUnlistedHostsWithTheOverrideSet(t *testing.T) {
+	t.Setenv(issuertrust.DevPlaintextHostsEnv, "idp.local:8090")
+	var warnings bytes.Buffer
+	defer issuertrust.CaptureDevPlaintextWarnings(&warnings)()
+
+	for _, raw := range []string{
+		"http://idp.local:9999/token", // other port
+		"http://idp.local/token",      // no port
+		"http://evil.idp.local:8090",  // no wildcard or suffix match
+		"http://other.test:8090",
+		"ftp://idp.local:8090",
+	} {
+		if secureFor(t, raw) {
+			t.Errorf("Secure allowed %q, which is not listed", raw)
+		}
+	}
+	if warnings.Len() != 0 {
+		t.Errorf("unexpected warning: %q", warnings.String())
+	}
+}
+
+func TestSecureLoopbackIsUnchangedByTheOverrideAndNeverWarns(t *testing.T) {
+	t.Setenv(issuertrust.DevPlaintextHostsEnv, "idp.local:8090")
+	var warnings bytes.Buffer
+	defer issuertrust.CaptureDevPlaintextWarnings(&warnings)()
+
+	if !secureFor(t, "http://localhost:9443") || !secureFor(t, "http://127.0.0.1:8090") {
+		t.Error("loopback http was refused")
+	}
+	if !secureFor(t, "https://login.example.test") {
+		t.Error("https was refused")
+	}
+	if warnings.Len() != 0 {
+		t.Errorf("unexpected warning: %q", warnings.String())
+	}
+}
+
+func TestPlaintextAcceptsListedDevHostsInDiscoveryDocuments(t *testing.T) {
+	t.Setenv(issuertrust.DevPlaintextHostsEnv, "idp.local:8090")
+	defer issuertrust.CaptureDevPlaintextWarnings(&bytes.Buffer{})()
+	doc := `{"issuer": "http://idp.local:8090", "token_endpoint": "http://idp.local:8090/token"}`
+	claims := func(into any) error { return json.Unmarshal([]byte(doc), into) }
+	if issuertrust.Plaintext(claims) {
+		t.Error("Plaintext refused a document whose hosts are all listed")
+	}
+	other := `{"issuer": "http://idp.local:8090", "jwks_uri": "http://unlisted.local/jwks"}`
+	claims = func(into any) error { return json.Unmarshal([]byte(other), into) }
+	if !issuertrust.Plaintext(claims) {
+		t.Error("Plaintext accepted an unlisted endpoint host")
 	}
 }

@@ -315,3 +315,102 @@ func TestAnExchangedProductsGatewayIsExchangedToo(t *testing.T) {
 		}
 	}
 }
+
+// remoteConnectScopes are what the remote product's exchange needs the login
+// session to carry: an exchange keeps the login's scopes and cannot widen them.
+var remoteConnectScopes = []string{"cloud:remote-connect:connect", "cloud:remote-connect:read-secrets"}
+
+func withRemoteProduct(identity contexts.Account) contexts.Account {
+	identity.Products["remote"] = contexts.Product{
+		Endpoint: "https://api.example/admin/cloud/v1", Audience: contexts.RemoteConnectAudience,
+		Scopes: remoteConnectScopes, Grant: &contexts.Grant{Kind: contexts.GrantExchange}}
+	return identity
+}
+
+func TestTheLoginAsksForTheRemoteProductsScopesBesideItsOwn(t *testing.T) {
+	base := thunderIdentity().LoginAccess()
+	got := withRemoteProduct(thunderIdentity()).LoginAccess()
+
+	want := slices.Sorted(slices.Values(append(slices.Clone(base.Scopes), remoteConnectScopes...)))
+	if !slices.Equal(got.Scopes, want) {
+		t.Fatalf("login scopes = %v, want %v", got.Scopes, want)
+	}
+	// Only scopes are added: the resource the login is bound to is unchanged, so
+	// every other product's exchange from this session works as it did.
+	if got.Resource != base.Resource || got.Audience != base.Audience || got.Namespace != base.Namespace {
+		t.Fatalf("login access = %+v, was %+v", got, base)
+	}
+}
+
+func TestAnIdentityWithOnlyTheRemoteProductLogsInWithItsScopes(t *testing.T) {
+	identity := thunderIdentity()
+	identity.Products = map[string]contexts.Product{}
+	got := withRemoteProduct(identity).LoginAccess()
+	if !slices.Equal(got.Scopes, remoteConnectScopes) {
+		t.Fatalf("login scopes = %v, want %v", got.Scopes, remoteConnectScopes)
+	}
+}
+
+func TestAnotherExchangedProductAddsNothingToTheLogin(t *testing.T) {
+	identity := thunderIdentity()
+	identity.Products["other"] = contexts.Product{Endpoint: "https://o.example", Audience: "https://o.example",
+		Scopes: []string{"other:read"}, Grant: &contexts.Grant{Kind: contexts.GrantExchange}}
+	if got, want := identity.LoginAccess().Scopes, thunderIdentity().LoginAccess().Scopes; !slices.Equal(got, want) {
+		t.Fatalf("login scopes = %v, want %v", got, want)
+	}
+}
+
+func TestAProductOnTheLoginSessionReportsTheLoginsScopes(t *testing.T) {
+	identity := withRemoteProduct(thunderIdentity())
+	login := identity.LoginAccess()
+	direct, _ := identity.Access(login.Namespace)
+	if direct.Strategy != contexts.StrategyDirect || !slices.Equal(direct.Scopes, login.Scopes) {
+		t.Fatalf("%s = %+v, want direct with the login's scopes %v", login.Namespace, direct, login.Scopes)
+	}
+}
+
+// The permissions the broker checks belong to the code, not to the context
+// record, so the login asks for the same scopes the exchange does.
+func TestTheLoginAsksForTheRemoteScopesWhateverTheRecordLists(t *testing.T) {
+	identity := withRemoteProduct(thunderIdentity())
+	product := identity.Products["remote"]
+	product.Scopes = nil
+	identity.Products["remote"] = product
+
+	base := thunderIdentity().LoginAccess()
+	want := slices.Sorted(slices.Values(append(slices.Clone(base.Scopes), contexts.RemoteConnectScopes()...)))
+	if got := identity.LoginAccess().Scopes; !slices.Equal(got, want) {
+		t.Fatalf("login scopes = %v, want %v", got, want)
+	}
+	if !slices.Equal(contexts.RemoteConnectScopes(), remoteConnectScopes) {
+		t.Fatalf("remote scopes = %v, want %v", contexts.RemoteConnectScopes(), remoteConnectScopes)
+	}
+}
+
+func TestOnlyAnExchangeAtTheCloudAudienceIsTheRemoteProduct(t *testing.T) {
+	exchange := &contexts.Grant{Kind: contexts.GrantExchange}
+	cases := map[string]struct {
+		product contexts.Product
+		want    bool
+	}{
+		"the cloud exchange": {contexts.Product{Audience: contexts.RemoteConnectAudience, Grant: exchange}, true},
+		"another audience":   {contexts.Product{Audience: "https://elsewhere.example", Grant: exchange}, false},
+		"no grant":           {contexts.Product{Audience: contexts.RemoteConnectAudience}, false},
+		"a different grant":  {contexts.Product{Audience: contexts.RemoteConnectAudience, Grant: &contexts.Grant{Kind: contexts.GrantJWTBearer}}, false},
+	}
+	for name, c := range cases {
+		if got := c.product.IsRemoteExchange(); got != c.want {
+			t.Errorf("%s: IsRemoteExchange = %v, want %v", name, got, c.want)
+		}
+	}
+}
+
+func TestARemoteRecordAtAnotherAudienceAddsNothingToTheLogin(t *testing.T) {
+	identity := withRemoteProduct(thunderIdentity())
+	product := identity.Products["remote"]
+	product.Audience = "https://elsewhere.example"
+	identity.Products["remote"] = product
+	if got, want := identity.LoginAccess().Scopes, thunderIdentity().LoginAccess().Scopes; !slices.Equal(got, want) {
+		t.Fatalf("login scopes = %v, want %v", got, want)
+	}
+}

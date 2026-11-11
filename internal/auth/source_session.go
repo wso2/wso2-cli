@@ -478,15 +478,21 @@ func scopeSetsEqual(a, b []string) bool {
 	return slices.Equal(sortedA, sortedB)
 }
 
-// refresh exchanges the stored refresh token for access narrowed to scopes.
+// refresh exchanges the stored refresh token for access narrowed to scopes,
+// or for the original grant when scopes is empty.
 func (s sessionSource) refresh(
 	ctx context.Context, endpoint, refreshToken string, scopes []string,
 ) (tokenResponse, error) {
-	issued, err := requestToken(ctx, s.client, endpoint, url.Values{
+	form := url.Values{
 		"grant_type":    {"refresh_token"},
 		"refresh_token": {refreshToken},
-		"scope":         {strings.Join(scopes, " ")},
-	}, clientAuth{id: s.clientID})
+	}
+	// RFC 6749 section 6: with no scope the renewal carries the original
+	// grant. A caller that wants the session as it was granted names none.
+	if len(scopes) > 0 {
+		form.Set("scope", strings.Join(scopes, " "))
+	}
+	issued, err := requestToken(ctx, s.client, endpoint, form, clientAuth{id: s.clientID})
 	if err != nil {
 		return tokenResponse{}, err
 	}

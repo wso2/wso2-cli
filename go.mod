@@ -8,6 +8,8 @@ require (
 	charm.land/lipgloss/v2 v2.0.1
 	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/go-jose/go-jose/v4 v4.1.4
+	github.com/gorilla/websocket v1.5.3
+	github.com/hashicorp/yamux v0.1.2
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/pflag v1.0.9
 	github.com/wso2/wso2-cli/sdk v0.4.0

@@ -144,3 +144,38 @@ func TestAnIssuerThatDoesNotRegisterTheExchangeGrantIsNamedAsSuch(t *testing.T) 
 		t.Fatalf("the recovery does not name the grant to register: %q", denial.Problem.Recovery)
 	}
 }
+
+func TestAnExchangeProceedsWhenTheLoginWasGrantedLessThanItAskedFor(t *testing.T) {
+	// A user whose roles carry only some of the permissions the login asked
+	// for (a connect-only role, a viewer) is signed in with the subset the
+	// issuer granted. Renewing that session for the requested set is refused
+	// as invalid_scope, so the renewal must not name scopes: RFC 6749 section
+	// 6 renews the original grant when none are stated.
+	deployment := seedExchangeDeployment(t, fakeissuer.Options{RefreshScopeMode: "honor"})
+	narrow := deployment.issuer.SeedSession([]string{"openid"})
+	if err := (session.Store{StateRoot: deployment.stateRoot}).Save(sessionRef,
+		session.Session{Issuer: deployment.issuer.URL, RefreshToken: narrow}); err != nil {
+		t.Fatalf("seeding the narrower login session: %v", err)
+	}
+	broker := deployment.broker(t)
+	// The remote product is what makes the login ask for the remote scopes.
+	broker.Namespace = contexts.RemoteProduct
+	delete(broker.Selection.Identity.Products, "example")
+	broker.Selection.Identity.Products[contexts.RemoteProduct] = contexts.Product{
+		Endpoint: "https://remote.example.test",
+		Audience: contexts.RemoteConnectAudience,
+		Scopes:   contexts.RemoteConnectScopes(),
+		Grant:    &contexts.Grant{Kind: contexts.GrantExchange},
+	}
+	broker.Capabilities.AuthAudiences = []string{contexts.RemoteConnectAudience}
+	broker.Capabilities.AuthScopes = contexts.RemoteConnectScopes()
+	grant, err := broker.Acquire(auth.Request{
+		Audience: contexts.RemoteConnectAudience, Scopes: contexts.RemoteConnectScopes(),
+	})
+	if err != nil {
+		t.Fatalf("an exchange from a login granted a subset of what it requested failed: %v", err)
+	}
+	if grant.Token == "" {
+		t.Fatal("the exchange granted no token")
+	}
+}
