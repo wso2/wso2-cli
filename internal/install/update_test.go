@@ -27,6 +27,7 @@ import (
 
 	"github.com/wso2/wso2-cli/internal/catalog"
 	"github.com/wso2/wso2-cli/internal/modules"
+	"github.com/wso2/wso2-cli/internal/semver"
 )
 
 // TestUpdateReportsAModuleTheCatalogDoesNotPublish pins that an absent module
@@ -127,6 +128,47 @@ func TestStatusesCarriesThePolicysUnresolvedChannelForAPin(t *testing.T) {
 		t.Errorf("PolicyChannel = %q, want empty: the policy recorded no "+
 			"channel, and a report must be able to tell that apart from "+
 			"Channel's resolution", status.PolicyChannel)
+	}
+}
+
+func TestStatusesIdentifiesIncompatibleInstalledModule(t *testing.T) {
+	shellVer, err := semver.Parse("0.0.1")
+	if err != nil {
+		t.Fatalf("Parse returned %v", err)
+	}
+	platform := modules.Platform{OS: "linux", Arch: "amd64"}
+	installer := Installer{
+		Store: modules.NewStore(t.TempDir()),
+		Shell: modules.ShellIdentity{
+			Version:          shellVer,
+			ProtocolVersions: []int{1},
+			Platform:         platform,
+		},
+	}
+	installed := []modules.Installed{{
+		Namespace: "reference",
+		Version:   "0.1.0",
+		Platform:  platform,
+		Receipt: modules.Receipt{
+			Namespace:     "reference",
+			ModuleVersion: "0.1.0",
+			Platform:      platform,
+			Compatibility: modules.Compatibility{
+				Shell:            ">=0.1.0 <2.0.0",
+				ProtocolVersions: []int{1},
+			},
+		},
+	}}
+
+	statuses, err := installer.statuses(catalog.Index{}, installed)
+	if err != nil {
+		t.Fatalf("statuses returned %v", err)
+	}
+	if len(statuses) != 1 {
+		t.Fatalf("statuses returned %d entries, want 1", len(statuses))
+	}
+	if !statuses[0].Incompatible {
+		t.Errorf("status.Incompatible = false, want true for a module outside this shell's range")
 	}
 }
 

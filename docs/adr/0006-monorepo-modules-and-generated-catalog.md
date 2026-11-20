@@ -39,11 +39,10 @@ a protocol window of the current version and its predecessor, which
 without new code, giving users a protocol generation of slack in which to
 update. A release gate refuses to publish a module whose minimum protocol
 exceeds what the current shell release speaks, which enforces the ordering
-that the shell ships first. Alongside them, the shell must never compare a
-module's version against its own: the launch gate is protocol range
-intersected with platform, and nothing else. That is already how resolution
-behaves, and this decision is what makes it load-bearing rather than
-incidental.
+that the shell ships first. Alongside them, the shell must never compare a module's version against its
+own: the gate is protocol range intersected with shell range and platform, and
+nothing else. That is already how resolution behaves, and this decision is what
+makes it load-bearing rather than incidental.
 
 The workspace rule that modules require the SDK by version, and never through
 a committed `replace` directive, becomes load-bearing for the same reason. It

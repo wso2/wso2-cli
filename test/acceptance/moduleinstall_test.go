@@ -181,11 +181,56 @@ func TestAShellNoVersionSupportsIsRefusedNamingTheProtocols(t *testing.T) {
 	requireCleanStore(t, stateRoot, catalogNamespace)
 }
 
+// A shell whose version falls outside a module's declared shell compatibility
+// range is refused naming the range and the shell version, with exit class
+// ModuleTrust (69) and a clean store, before anything is written.
+func TestAShellOutsideDeclaredRangeIsRefusedNamingTheRangeAndShellVersion(t *testing.T) {
+	shell := buildShellVersioned(t, "0.0.1")
+	origin := newCatalogOrigin(t, hostPlatformOptions(), catalogStable)
+	stateRoot := isolatedStateRoot(t)
+
+	stdout, stderr, err := installModuleFrom(shell, stateRoot, origin.server.URL, catalogNamespace)
+
+	requireProblem(t, stdout, stderr, err, 69, "modules.incompatible_shell")
+	if !strings.Contains(stderr, ">=0.1.0 <2.0.0") {
+		t.Errorf("the refusal does not name the declared range:\n%s", stderr)
+	}
+	if !strings.Contains(stderr, "0.0.1") {
+		t.Errorf("the refusal does not name the shell version:\n%s", stderr)
+	}
+	if !strings.Contains(stderr, "Update the module or the WSO2 CLI so the shell version is supported.") {
+		t.Errorf("the refusal does not carry the shell update recovery:\n%s", stderr)
+	}
+	requireCleanStore(t, stateRoot, catalogNamespace)
+}
+
+// When the catalog publishes an older version this shell satisfies, selection
+// picks it rather than refusing outright — matching the protocol path.
+func TestOlderShellInstallsNewestVersionMatchingItsShellRange(t *testing.T) {
+	shell := buildShell(t) // 0.4.2
+	options := hostPlatformOptions()
+	options.shellRanges = map[string]string{
+		catalogAddedStable: ">=0.5.0 <2.0.0", // 0.4.2 cannot launch this
+		catalogStable:      ">=0.1.0 <2.0.0", // 0.4.2 can launch this
+	}
+	origin := newCatalogOrigin(t, options, catalogOlderStable, catalogStable, catalogAddedStable)
+	stateRoot := isolatedStateRoot(t)
+
+	stdout, stderr, err := installModuleFrom(shell, stateRoot, origin.server.URL, catalogNamespace)
+	if err != nil {
+		t.Fatalf("installing returned %v\nstdout:\n%s\nstderr:\n%s", err, stdout, stderr)
+	}
+
+	if got := installedVersion(t, stateRoot, catalogNamespace); got != "4.5.0" {
+		t.Errorf("the active version is %s, want the newest launchable 4.5.0", got)
+	}
+}
+
 // A module whose version number is far ahead of or behind the shell's installs
 // normally. The shell never compares a module's version against its own: the
-// gate is the protocol versions intersected with the platform, and nothing
-// else, so a product free to use its own version scheme cannot produce a
-// spurious incompatibility.
+// gate is the protocol versions intersected with the shell range and the
+// platform, and nothing else, so a product free to use its own version scheme
+// cannot produce a spurious incompatibility.
 func TestAModuleVersionFarFromTheShellsInstallsNormally(t *testing.T) {
 	shell := buildShell(t)
 	origin := newCatalogOrigin(t, hostPlatformOptions(), catalogAncientStable, catalogAddedStable)
