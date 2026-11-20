@@ -81,6 +81,14 @@ type loginFlags struct {
 	// the context already installed and recorded its products.
 	cloudEnv      string
 	cloudPrepared bool
+	// serviceAccount is --service-account: sign in to the WSO2 Cloud
+	// environment as the service account the environment holds.
+	serviceAccount bool
+	// clientIDVariable and clientSecretVariable are --client-id-variable and
+	// --client-secret-variable: the variables a service account is read
+	// from, when not WSO2_CLIENT_ID and WSO2_CLIENT_SECRET.
+	clientIDVariable     string
+	clientSecretVariable string
 	// only is --only <namespace>: authorize this one product's access instead
 	// of every access the identity records.
 	only string
@@ -111,6 +119,16 @@ func (s Shell) login(flags loginFlags) error {
 			"--only and --no-products both narrow which sessions this login establishes").
 			WithRecovery("Pass --only <namespace> to authorize one product, " +
 				"or --no-products to authorize the login session alone, not both.")
+	}
+	if flags.serviceAccount {
+		return s.loginServiceAccount(flags)
+	}
+	if flags.clientIDVariable != "" || flags.clientSecretVariable != "" {
+		return problem.New(problem.CategoryUsage, "shell.conflicting_arguments",
+			"--client-id-variable and --client-secret-variable name a service account's variables, and "+
+				"take --service-account").
+			WithRecovery("Run wso2 login --service-account --client-id-variable <VARIABLE> " +
+				"--client-secret-variable <VARIABLE>.")
 	}
 	if flags.issuer == "" && flags.clientID == "" {
 		// Which context this login is about, asked when the flags leave it
@@ -143,6 +161,9 @@ func (s Shell) login(flags loginFlags) error {
 	}
 	selected, err := s.selection(flags.contextName)
 	if err != nil {
+		return err
+	}
+	if err := s.ignoredServiceAccountVariables(selected); err != nil {
 		return err
 	}
 	outcome, err := s.establishAndStore(selected, flags)
@@ -204,12 +225,18 @@ func (s Shell) establishAndStore(selected contexts.Selection, flags loginFlags) 
 		// wso2 login writes interactive contexts only, so the recovery names
 		// the command that creates the kind automation needs rather than
 		// leaving a reader to find the context document's schema.
+		recovery := "Automation uses a client-credentials context, which acquires access " +
+			"inline without a login step. Create one with wso2 context create <name> " +
+			"--login-product <product> --url <url> --client-id <id> " +
+			"--client-secret-variable <VARIABLE>, where the variable holds the client secret."
+		if selected.Context.WSO2Cloud() {
+			recovery = "Automation on WSO2 Cloud signs in as a service account: run wso2 login " +
+				"--service-account with " + ServiceAccountIDVariable + " and " + ServiceAccountSecretVariable +
+				" set."
+		}
 		return loginOutcome{}, problem.New(problem.CategoryAuthPolicy, "auth.non_interactive",
 			mode+" cannot run in non-interactive mode, which "+control+" asked for").
-			WithRecovery("Automation uses a client-credentials context, which acquires access " +
-				"inline without a login step. Create one with wso2 context create <name> " +
-				"--login-product <product> --url <url> --client-id <id> " +
-				"--client-secret-variable <VARIABLE>, where the variable holds the client secret.")
+			WithRecovery(recovery)
 	}
 
 	accesses, err := s.loginAccesses(selected, flags)

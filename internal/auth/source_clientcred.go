@@ -25,6 +25,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/wso2/wso2-cli/internal/auth/oidcdiscovery"
 	"github.com/wso2/wso2-cli/sdk/problem"
 )
 
@@ -71,6 +72,10 @@ type clientCredentialsSource struct {
 	// secretVariable is where the secret came from. It reaches the user and
 	// never the module: the name is the answer to "where is the credential?".
 	secretVariable string
+	// organization is the ThunderID organization unit the grant is presented
+	// in, at its own token endpoint, so the token is issued there and nowhere
+	// else. It is empty for the issuer's root endpoint.
+	organization string
 	// client serves the issuer traffic.
 	client *http.Client
 }
@@ -79,18 +84,43 @@ type clientCredentialsSource struct {
 func (s clientCredentialsSource) mint(request Request, now time.Time) (Grant, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), grantDeadline)
 	defer cancel()
-	endpoint, err := tokenEndpoint(ctx, s.client, s.issuer, s.issuerID)
-	if err != nil {
-		return Grant{}, err
-	}
-
 	// The scopes carried are the module's own request. A CI client is commonly
 	// registered for every permission the deployment will ever need from
 	// automation, and asking for that whole set would hand one module the
 	// authority of all of them.
+	issued, err := s.grant(ctx, request.Scopes)
+	if err != nil {
+		return Grant{}, err
+	}
+	facts, err := issued.verify(request, s.namespace, s.audience)
+	if err != nil {
+		return Grant{}, err
+	}
+	return Grant{Token: issued.AccessToken, ExpiresAt: issued.expiry(facts, now)}, nil
+}
+
+// grant presents the client credential at the issuer's token endpoint for
+// scopes, refusing in the shell's terms when the issuer does.
+func (s clientCredentialsSource) grant(ctx context.Context, scopes []string) (tokenResponse, error) {
+	endpoint, err := tokenEndpoint(ctx, s.client, s.issuer, s.issuerID)
+	if err != nil {
+		return tokenResponse{}, err
+	}
+	if s.organization != "" {
+		organizationEndpoint, ok := oidcdiscovery.OrganizationEndpoint(endpoint, s.organization)
+		if !ok {
+			// The root endpoint would issue the token in whichever
+			// organization the client is registered in.
+			return tokenResponse{}, Denial{Problem: oidcdiscovery.Failed(
+				"the identity provider's token endpoint is not an absolute URL, so the organization's own "+
+					"endpoint cannot be derived from it",
+				"Check the provider's OpenID configuration, then retry.")}
+		}
+		endpoint = organizationEndpoint
+	}
 	form := url.Values{
 		"grant_type": {"client_credentials"},
-		"scope":      {strings.Join(request.Scopes, " ")},
+		"scope":      {strings.Join(scopes, " ")},
 	}
 	// The access plan has already decided whether a resource indicator is
 	// owed and, when it is, which resource it names — the product's own
@@ -100,16 +130,11 @@ func (s clientCredentialsSource) mint(request Request, now time.Time) (Grant, er
 	if s.resource != "" {
 		form.Set("resource", s.resource)
 	}
-	issued, err := requestToken(ctx, s.client, endpoint, form,
-		clientAuth{id: s.clientID, secret: s.secret})
+	issued, err := requestToken(ctx, s.client, endpoint, form, clientAuth{id: s.clientID, secret: s.secret})
 	if err != nil {
-		return Grant{}, s.refusedGrant(err, form.Get("resource"))
+		return tokenResponse{}, s.refusedGrant(err, s.resource)
 	}
-	facts, err := issued.verify(request, s.namespace, s.audience)
-	if err != nil {
-		return Grant{}, err
-	}
-	return Grant{Token: issued.AccessToken, ExpiresAt: issued.expiry(facts, now)}, nil
+	return issued, nil
 }
 
 // refusedGrant reads why the deployment refused, and says so in the shell's own
@@ -154,6 +179,19 @@ func (s clientCredentialsSource) refusedGrant(err error, sent string) error {
 			Guidance: fmt.Sprintf("The identity provider rejected the client secret in %s. Set it "+
 				"to a current secret for this context's OAuth client, then retry the command.",
 				s.secretVariable),
+		}
+	case errors.As(err, &refusal) && refusal.unauthorizedGrant() && s.organization != "":
+		// ThunderID's answer for an organization the client is not shared
+		// to, which is more likely here than a client registered without
+		// the grant, since the same client is issued tokens elsewhere.
+		return Denial{
+			Problem: problem.New(problem.CategoryAuthPolicy, "auth.credential_unavailable",
+				fmt.Sprintf("the identity provider will not issue the client the %q context names access "+
+					"in the %q organization", s.contextName, s.organization)).
+				WithRecovery("Share the client with that organization, or select a context in one it is " +
+					"shared with, then retry the command."),
+			Guidance: fmt.Sprintf("The identity provider will not issue this context's OAuth client access "+
+				"in the %q organization. Share the client with it, then retry the command.", s.organization),
 		}
 	case errors.Is(err, errNoAccessToken):
 		return denial("auth.discovery_failed",

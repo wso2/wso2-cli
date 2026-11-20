@@ -93,6 +93,81 @@ A name that is not lowercase letters, digits and hyphens is refused with
 unknown one with `shell.input_malformed`, as is a `baseDomain` that is not a
 lowercase domain name or an `environment` that is not one host name label.
 
+### A service account on WSO2 Cloud
+
+CI and other automation sign in to WSO2 Cloud as a service account, a
+client-credentials application created in the WSO2 Cloud console, with
+`ws login --service-account` (ADR 0027). It reads three variables:
+`WSO2_CLOUD_ENV`, the environment; `WSO2_CLIENT_ID`, the service account's
+client id; and `WSO2_CLIENT_SECRET`, its secret. `--client-id-variable` and
+`--client-secret-variable` name other variables; without `--service-account`
+they are refused with `shell.conflicting_arguments`. The secret is never taken
+on the command line.
+
+The login installs the WSO2 Cloud products that are not installed, then asks
+the environment's identity provider for one token per installed product, each
+for that product's resource server and its own scopes, exactly as every later
+command will. It then writes the context `cloud-<environment>-ci`, or the one
+`--context` names, and selects it; it replaces only a WSO2 Cloud
+client-credentials context, and refuses any other of that name with
+`contexts.context_exists`. The context is a `client-credentials` context: it
+records the client id and the name of the secret's variable, never the secret,
+which is sent exactly as its variable holds it. Its organization is the one
+the service account's tokens name, or the one `WSO2_ORGANIZATION` names, and
+each product records the scopes the service account was granted. Nothing is
+stored beyond the context: every command gets its own tokens, and there is
+nothing for `ws logout` to end. Each run of the login writes the context
+again.
+
+A product whose module does not declare `machine: ["inline"]` is left out,
+said in one line on standard error, `Left out <product>: its module does not
+accept a service account.` A product the service account was granted only
+some of its scopes for, and one it was granted none for or that the identity
+provider will not issue for, are each said in one line on standard error;
+which scopes were left out is in the `-o json` report and under `--verbose`.
+Commands that need what is missing are refused. The login fails with
+`auth.narrowing_unavailable` when the service account was granted nothing
+for any product, and with `auth.organization_not_selected` when its tokens
+name no organization or more than one; nothing is written either way. A
+rejected secret is `auth.credential_unavailable`, naming the variable, and an
+identity provider that gives no answer exits 68. `--url`, `--client-id`,
+`--only` and `--no-products` are refused beside it with
+`shell.conflicting_arguments`.
+
+`WSO2_ORGANIZATION`, when set, names by id another organization the service
+account belongs to (ADR 0027). The login then asks for every token at that
+organization's own token endpoint, `/ou/<id>/oauth2/token`, and records it as
+the context's organization; a value that is not an organization id is refused
+with `shell.invalid_argument` (exit 64) before anything is sent. A token
+issued in another organization is refused with `auth.organization_mismatch`,
+and an organization the service account is not shared with is
+`auth.credential_unavailable`, naming `WSO2_ORGANIZATION`; nothing is written
+either way. On a terminal, the variables printed for CI include it. Every
+later command on the context asks for its tokens at the endpoint of the
+organization the context records, named or not.
+
+Under `--no-input`, `WSO2_NO_INPUT` or a standard input that is not a
+terminal, nothing is asked, and an unset variable is refused with
+`shell.non_interactive` (exit 64), naming it. On a terminal the same command
+says where the service account is created and which products it needs roles
+for, asks for what is not set, the secret without echo, gets the tokens, and
+prints what CI needs: the variables, with the secret's as a name only, the
+command CI runs, `ws login --service-account --no-input` with the
+variable flags this run was given, which `next` carries too, and that CI needs
+the environment file. A login that asked for the client id or the secret
+writes nothing, and says so on standard error, since a context naming
+variables this machine does not set could serve no command here. `-o json`
+reports `context` (absent when nothing was written), `environment`,
+`organization`, `products`, each with `namespace`, `scopes` (empty when
+nothing was granted) and, when some were left out, `withheld`, and `next`.
+
+A plain `ws login` never signs in as a service account. When it logs in to a
+WSO2 Cloud context other than a service account's own with `WSO2_CLIENT_ID` or
+`WSO2_CLIENT_SECRET` set, terminal or not, it says on standard error that the
+variables set were ignored and that `ws login --service-account` uses them. A
+browser login refused under `--no-input` on a WSO2 Cloud context names
+`ws login --service-account` as the way to sign in from automation.
+
 ### Products on a WSO2 Cloud context
 
 Each login to the environment records, on its context, every installed WSO2
@@ -192,7 +267,7 @@ Every refusal `ws login` and a brokered command make carries a typed code.
 | `auth.scope_not_granted` | A module asked for a scope the product's sign-in asked for and the identity provider left out, because the user's roles do not carry it (ThunderID answers that with a 200). The sign-in records what it was granted; a request that names no scope is given that instead of being refused. | An administrator gives the user a role carrying the scope named; signing in again before that cannot add it. Afterwards, `ws login --only <product>`, or a logout and login for the login product. |
 | `auth.audience_not_declared` / `auth.scope_not_declared` | The module asked for more than its own installation declares. | Reinstall the module; this is not a context problem. |
 | `auth.login_not_required` | `ws login` was run against a context that carries its own credential. | Just run the command; there is no session to establish. |
-| `auth.non_interactive` | A browser or device login was attempted under `--no-input` or `WSO2_NO_INPUT`. | Use a `client-credentials` context for automation, or drop the flag/variable to run interactively. |
+| `auth.non_interactive` | A browser or device login was attempted under `--no-input` or `WSO2_NO_INPUT`. | Use a `client-credentials` context for automation (on WSO2 Cloud, `ws login --service-account`), or drop the flag/variable to run interactively. |
 | `auth.kind_not_implemented` | The context's `login.kind` is `pat`, which the schema names but this release does not implement. | Use `oauth-browser`, `oauth-device`, or `client-credentials`. |
 | `auth.session_issuer_mismatch` | The stored session was established against a different issuer than the context now names. | Run `ws login` again. |
 | `auth.session_required` | Nothing is stored for a product and `--no-input`/`WSO2_NO_INPUT` forbids the browser that would authorize it. | `ws login --only <namespace>` where a browser can open. |

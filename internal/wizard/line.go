@@ -19,8 +19,12 @@ package wizard
 import (
 	"fmt"
 	"io"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+
+	"golang.org/x/term"
 )
 
 // linePrompter asks with numbered, line-oriented prompts.
@@ -96,6 +100,74 @@ func (p linePrompter) Input(title, fallback string, validate func(string) error)
 		if _, err := fmt.Fprintln(p.out, refusal.Error()); err != nil {
 			return "", err
 		}
+	}
+}
+
+// Secret reads without echo when the input is a terminal. Any other reader
+// was handed in on purpose and is read as a line.
+func (p linePrompter) Secret(title string) (string, error) {
+	if file, ok := p.in.(*os.File); ok && term.IsTerminal(int(file.Fd())) {
+		return p.readHidden(int(file.Fd()), title)
+	}
+	if _, err := fmt.Fprint(p.out, title+": "); err != nil {
+		return "", err
+	}
+	answer, _, err := p.readLine()
+	if err != nil {
+		return "", err
+	}
+	if answer == "" {
+		return "", ErrNoAnswer
+	}
+	return answer, nil
+}
+
+// readHidden asks title and reads one line with echo off. Ctrl+C arrives as
+// an interrupt, not as input, while echo is off; the terminal is put back as
+// it was before the cancellation is returned, or the person's shell would be
+// left with echo off.
+func (p linePrompter) readHidden(fd int, title string) (string, error) {
+	saved, err := term.GetState(fd)
+	if err != nil {
+		return "", err
+	}
+	// Off before the prompt shows: term.ReadPassword turns echo off only once
+	// it starts reading, and a secret pasted the moment the prompt appears
+	// would be echoed in between.
+	if err := echoOff(fd); err != nil {
+		return "", err
+	}
+	defer func() { _ = term.Restore(fd, saved) }()
+	if _, err := fmt.Fprint(p.out, title+": "); err != nil {
+		return "", err
+	}
+	interrupts := make(chan os.Signal, 1)
+	signal.Notify(interrupts, os.Interrupt)
+	defer signal.Stop(interrupts)
+	type read struct {
+		typed []byte
+		err   error
+	}
+	done := make(chan read, 1)
+	go func() {
+		typed, err := term.ReadPassword(fd)
+		done <- read{typed: typed, err: err}
+	}()
+	select {
+	case <-interrupts:
+		_, _ = fmt.Fprintln(p.out)
+		return "", ErrAborted
+	case answer := <-done:
+		if _, err := fmt.Fprintln(p.out); err != nil && answer.err == nil {
+			answer.err = err
+		}
+		if answer.err != nil {
+			return "", answer.err
+		}
+		if typed := strings.TrimSpace(string(answer.typed)); typed != "" {
+			return typed, nil
+		}
+		return "", ErrNoAnswer
 	}
 }
 
